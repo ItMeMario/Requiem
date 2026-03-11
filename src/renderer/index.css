@@ -87,3 +87,14 @@
   @apply bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm font-mono border border-gray-800 my-4 text-gray-300;
 }
 
+/* Entity Mentions Rules */
+.entity-mention {
+  @apply font-bold cursor-pointer underline decoration-2 underline-offset-2 transition-colors px-1 rounded-sm;
+}
+.character-mention {
+  @apply text-purple-400 decoration-purple-500 hover:text-white hover:bg-purple-600/20;
+}
+.location-mention {
+  @apply text-blue-400 decoration-blue-500 hover:text-white hover:bg-blue-600/20;
+}
+

@@ -43,6 +43,7 @@ function App() {
   const [showCharModal, setShowCharModal] = useState(false);
   const [showLocModal, setShowLocModal] = useState(false);
   const [showEntryModal, setShowEntryModal] = useState(false);
+  const [isViewingEntry, setIsViewingEntry] = useState(false);
 
   // Editing state
   const [editingCharId, setEditingCharId] = useState<number | null>(null);
@@ -205,6 +206,14 @@ function App() {
   const handleEditEntry = (entry: any) => {
     setEditingEntryId(entry.id);
     setNewEntry({ title: entry.title, content: entry.content });
+    setIsViewingEntry(false);
+    setShowEntryModal(true);
+  };
+  
+  const handleViewEntry = (entry: any) => {
+    setEditingEntryId(entry.id);
+    setNewEntry({ title: entry.title, content: entry.content });
+    setIsViewingEntry(true);
     setShowEntryModal(true);
   };
 
@@ -213,11 +222,59 @@ function App() {
       try {
         await (window as any).api.deleteEntry(id);
         setEntries(entries.filter(e => e.id !== id));
+        if (editingEntryId === id) {
+          setShowEntryModal(false);
+        }
       } catch (error) {
         console.error('Error deleting entry:', error);
       }
     }
   };
+
+  // --- MENTION PARSER ---
+  const parseMentions = (html: string) => {
+    if (!html) return html;
+    // Match {Something}
+    return html.replace(/\{([^}]+)\}/g, (match, name) => {
+      const lowerName = name.trim().toLowerCase();
+      // Check characters
+      const foundChar = characters.find(c => c.name.toLowerCase() === lowerName);
+      if (foundChar) {
+        return `<span class="entity-mention character-mention" data-id="${foundChar.id}" data-type="character">${name}</span>`;
+      }
+      // Check locations
+      const foundLoc = locations.find(l => l.name.toLowerCase() === lowerName);
+      if (foundLoc) {
+        return `<span class="entity-mention location-mention" data-id="${foundLoc.id}" data-type="location">${name}</span>`;
+      }
+      return match; // If not found, return {Name}
+    });
+  };
+
+  const handleMentionClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('entity-mention')) {
+      const type = target.getAttribute('data-type');
+      const id = Number(target.getAttribute('data-id'));
+      
+      if (type === 'character') {
+        const char = characters.find(c => c.id === id);
+        if (char) {
+          setShowEntryModal(false);
+          setActiveTab('characters');
+          handleEditChar(char);
+        }
+      } else if (type === 'location') {
+        const loc = locations.find(l => l.id === id);
+        if (loc) {
+          setShowEntryModal(false);
+          setActiveTab('locations');
+          handleEditLoc(loc);
+        }
+      }
+    }
+  };
+
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-950 text-gray-100 font-sans">
@@ -453,6 +510,7 @@ function App() {
                       onClick={() => {
                         setEditingEntryId(null);
                         setNewEntry(initEntryState);
+                        setIsViewingEntry(false);
                         setShowEntryModal(true);
                       }}
                       className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-white transition-colors border border-gray-700"
@@ -469,20 +527,20 @@ function App() {
                   ) : (
                     <div className="flex flex-col space-y-4">
                       {entries.map(entry => (
-                        <div key={entry.id} className="bg-gray-900 border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-colors group relative">
+                        <div key={entry.id} onClick={() => handleViewEntry(entry)} className="bg-gray-900 border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-colors group relative cursor-pointer">
                           <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                            <button onClick={() => handleEditEntry(entry)} className="p-1.5 bg-gray-800 hover:bg-purple-600 rounded text-gray-300 hover:text-white transition-colors">
+                            <button onClick={(e) => { e.stopPropagation(); handleEditEntry(entry); }} className="p-1.5 bg-gray-800 hover:bg-purple-600 rounded text-gray-300 hover:text-white transition-colors">
                               <Edit2 size={16} />
                             </button>
-                            <button onClick={() => handleDeleteEntry(entry.id)} className="p-1.5 bg-gray-800 hover:bg-red-600 rounded text-gray-300 hover:text-white transition-colors">
+                            <button onClick={(e) => { e.stopPropagation(); handleDeleteEntry(entry.id); }} className="p-1.5 bg-gray-800 hover:bg-red-600 rounded text-gray-300 hover:text-white transition-colors">
                               <Trash2 size={16} />
                             </button>
                           </div>
                           <h4 className="text-xl font-bold text-gray-100 mb-1">{entry.title}</h4>
                           <div className="text-xs text-purple-400 mb-4">{new Date(entry.creation_date).toLocaleString()}</div>
                           <div 
-                            className="text-gray-300 quill-content line-clamp-3 overflow-hidden"
-                            dangerouslySetInnerHTML={{ __html: entry.content }}
+                            className="text-gray-300 quill-content line-clamp-3 overflow-hidden pointer-events-none"
+                            dangerouslySetInnerHTML={{ __html: parseMentions(entry.content) }}
                           />
                         </div>
                       ))}
@@ -567,35 +625,60 @@ function App() {
         </div>
       )}
 
-      {/* CREATE ENTRY MODAL */}
+      {/* CREATE / VIEW ENTRY MODAL */}
       {showEntryModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-xl w-full max-w-6xl shadow-2xl relative h-[90vh] flex flex-col overflow-hidden">
             <button onClick={() => setShowEntryModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white z-20"><X size={20} /></button>
-            <div className="p-6 border-b border-gray-800 flex-shrink-0">
+            <div className="p-6 border-b border-gray-800 flex-shrink-0 flex items-center justify-between pr-12">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Book className="text-purple-400"/> {editingEntryId ? 'Edit Journal Entry' : 'New Journal Entry'}
+                <Book className="text-purple-400"/> 
+                {isViewingEntry ? 'View Journal Entry' : (editingEntryId ? 'Edit Journal Entry' : 'New Journal Entry')}
               </h3>
+              {isViewingEntry && (
+                <div className="flex space-x-2">
+                  <button onClick={() => setIsViewingEntry(false)} className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded text-white text-sm font-medium transition-colors flex items-center gap-2">
+                    <Edit2 size={16} /> Edit Entry
+                  </button>
+                  <button onClick={() => handleDeleteEntry(editingEntryId!)} className="px-4 py-2 bg-red-600/20 hover:bg-red-600/40 text-red-500 hover:text-red-400 border border-red-900/50 rounded text-sm font-medium transition-colors">
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
             
             <div className="flex-1 flex overflow-hidden">
-              {/* Left Column: Editor */}
+              {/* Left Column: Editor / Viewer */}
               <div className="flex-1 flex flex-col p-6 overflow-y-auto custom-scrollbar border-r border-gray-800 bg-[#0a0a0c]">
-                <form id="entry-form" onSubmit={handleCreateEntry} className="flex-1 flex flex-col space-y-4">
-                  <InputField label="Title *" value={newEntry.title} onChange={(e:any) => setNewEntry({...newEntry, title: e.target.value})} placeholder="Day 1: The Journey Begins..." />
-                  
-                  <div className="flex-1 flex flex-col min-h-[400px]">
-                    <label className="block text-sm text-gray-400 mb-1">Content</label>
-                    <div className="flex-1 bg-white text-black rounded-lg overflow-hidden flex flex-col">
-                      <ReactQuill 
-                        theme="snow"
-                        value={newEntry.content}
-                        onChange={(val) => setNewEntry({...newEntry, content: val})}
-                        className="flex-1 h-full flex flex-col [&_.ql-container]:flex-1 [&_.ql-editor]:h-full"
-                      />
+                {isViewingEntry ? (
+                  <div className="flex-1 flex flex-col space-y-6 max-w-4xl mx-auto w-full">
+                    <div className="border-b border-gray-800 pb-6">
+                      <h1 className="text-4xl font-bold text-gray-100">{newEntry.title}</h1>
+                      <div className="text-purple-400 mt-2 text-sm">{entries.find(e => e.id === editingEntryId)?.creation_date ? new Date(entries.find(e => e.id === editingEntryId).creation_date).toLocaleString() : ''}</div>
                     </div>
+                    <div 
+                      className="quill-content text-lg text-gray-300"
+                      onClick={handleMentionClick}
+                      dangerouslySetInnerHTML={{ __html: parseMentions(newEntry.content) }}
+                    />
                   </div>
-                </form>
+                ) : (
+                  <form id="entry-form" onSubmit={handleCreateEntry} className="flex-1 flex flex-col space-y-4">
+                    <InputField label="Title *" value={newEntry.title} onChange={(e:any) => setNewEntry({...newEntry, title: e.target.value})} placeholder="Day 1: The Journey Begins..." />
+                    
+                    <div className="flex-1 flex flex-col min-h-[400px]">
+                      <label className="block text-sm text-gray-400 mb-1">Content <span className="text-xs text-gray-500 ml-2">(Tip: Use {'{Character Name}'} to link them!)</span></label>
+                      <div className="flex-1 bg-white text-black rounded-lg overflow-hidden flex flex-col">
+                        <ReactQuill 
+                          theme="snow"
+                          value={newEntry.content}
+                          onChange={(val) => setNewEntry({...newEntry, content: val})}
+                          className="flex-1 h-full flex flex-col [&_.ql-container]:flex-1 [&_.ql-editor]:h-full"
+                        />
+                      </div>
+                    </div>
+                  </form>
+                )}
               </div>
 
               {/* Right Column: References Sidebar */}
@@ -644,10 +727,12 @@ function App() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-800 flex justify-end bg-gray-900 flex-shrink-0">
-              <button type="button" onClick={() => setShowEntryModal(false)} className="px-4 py-2 text-gray-400 hover:text-white transition-colors mr-2">Cancel</button>
-              <button type="submit" form="entry-form" disabled={!newEntry.title.trim()} className="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded transition-colors disabled:opacity-50">Save Entry</button>
-            </div>
+            {!isViewingEntry && (
+              <div className="p-4 border-t border-gray-800 flex justify-end bg-gray-900 flex-shrink-0">
+                <button type="button" onClick={() => setShowEntryModal(false)} className="px-4 py-2 text-gray-400 hover:text-white transition-colors mr-2">Cancel</button>
+                <button type="submit" form="entry-form" disabled={!newEntry.title.trim()} className="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded transition-colors disabled:opacity-50">Save Entry</button>
+              </div>
+            )}
           </div>
         </div>
       )}
