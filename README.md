@@ -50,12 +50,10 @@ Requiem is a desktop application designed to be the ultimate companion for Game 
 
 To package the application for distribution:
 
-\\\ash
+\\\bash
 npm run build
 \\\
 *(Check your package.json for specific packaging scripts depending on your target OS).*
 
-##  Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
 
