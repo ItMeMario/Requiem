@@ -30,7 +30,7 @@ Requiem is a desktop application designed to be the ultimate companion for Game 
 ### Installation
 
 1.  Clone the repository:
-    \\\ash
+    \\\bash
     git clone https://github.com/yourusername/requiem.git
     cd requiem
     \\\
@@ -41,7 +41,7 @@ Requiem is a desktop application designed to be the ultimate companion for Game 
     \\\
 
 3.  Run the application in development mode:
-    \\\ash
+    \\\bash
     npm run dev
     \\\
     *(This will start both the Vite frontend server and the Electron desktop app concurrently).*
