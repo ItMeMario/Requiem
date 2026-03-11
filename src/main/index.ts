@@ -32,13 +32,13 @@ function setupIpc() {
     return db.prepare('SELECT * FROM campaigns WHERE id = ?').get(id);
   });
   ipcMain.handle('create-campaign', (_, data: any) => {
-    const stmt = db.prepare('INSERT INTO campaigns (nome, genero, sistema) VALUES (?, ?, ?)');
-    const info = stmt.run(data.nome, data.genero, data.sistema);
+    const stmt = db.prepare('INSERT INTO campaigns (name, genre, system) VALUES (?, ?, ?)');
+    const info = stmt.run(data.name, data.genre, data.system);
     return info.lastInsertRowid;
   });
   ipcMain.handle('update-campaign', (_, id: number, data: any) => {
-    const stmt = db.prepare('UPDATE campaigns SET nome = ?, genero = ?, sistema = ? WHERE id = ?');
-    stmt.run(data.nome, data.genero, data.sistema, id);
+    const stmt = db.prepare('UPDATE campaigns SET name = ?, genre = ?, system = ? WHERE id = ?');
+    stmt.run(data.name, data.genre, data.system, id);
     return true;
   });
   ipcMain.handle('delete-campaign', (_, id: number) => {
@@ -49,19 +49,19 @@ function setupIpc() {
 
   // Entries
   ipcMain.handle('get-entries', (_, campaignId: number) => {
-    return db.prepare('SELECT * FROM entries WHERE campaign_id = ? ORDER BY data_criacao DESC').all(campaignId);
+    return db.prepare('SELECT * FROM entries WHERE campaign_id = ? ORDER BY creation_date DESC').all(campaignId);
   });
   ipcMain.handle('get-entry', (_, id: number) => {
     return db.prepare('SELECT * FROM entries WHERE id = ?').get(id);
   });
   ipcMain.handle('create-entry', (_, data: any) => {
-    const stmt = db.prepare('INSERT INTO entries (campaign_id, titulo, conteudo, data_criacao) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(data.campaign_id, data.titulo, data.conteudo, data.data_criacao);
+    const stmt = db.prepare('INSERT INTO entries (campaign_id, title, content, creation_date) VALUES (?, ?, ?, ?)');
+    const info = stmt.run(data.campaign_id, data.title, data.content, data.creation_date);
     return info.lastInsertRowid;
   });
   ipcMain.handle('update-entry', (_, id: number, data: any) => {
-    const stmt = db.prepare('UPDATE entries SET titulo = ?, conteudo = ? WHERE id = ?');
-    stmt.run(data.titulo, data.conteudo, id);
+    const stmt = db.prepare('UPDATE entries SET title = ?, content = ? WHERE id = ?');
+    stmt.run(data.title, data.content, id);
     return true;
   });
   ipcMain.handle('delete-entry', (_, id: number) => {
@@ -73,7 +73,7 @@ function setupIpc() {
   // Entities
   ipcMain.handle('get-entities', (_, campaignId: number, type?: string) => {
     if (type) {
-      return db.prepare('SELECT * FROM entities WHERE campaign_id = ? AND tipo = ?').all(campaignId, type);
+      return db.prepare('SELECT * FROM entities WHERE campaign_id = ? AND type = ?').all(campaignId, type);
     }
     return db.prepare('SELECT * FROM entities WHERE campaign_id = ?').all(campaignId);
   });
@@ -83,26 +83,26 @@ function setupIpc() {
   ipcMain.handle('create-entity', (_, data: any) => {
     const stmt = db.prepare(`
       INSERT INTO entities (
-        campaign_id, tipo, nome, subtitulo, status_ou_tipo, idade_ou_clima, 
-        faccao, lore, ambientacao, notas_pessoais, tags
+        campaign_id, type, name, subtitle, status_or_type, age_or_climate, 
+        faction, lore, setting, personal_notes, tags
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
-      data.campaign_id, data.tipo, data.nome, data.subtitulo, data.status_ou_tipo,
-      data.idade_ou_clima, data.faccao, data.lore, data.ambientacao, data.notas_pessoais, data.tags
+      data.campaign_id, data.type, data.name, data.subtitle, data.status_or_type,
+      data.age_or_climate, data.faction, data.lore, data.setting, data.personal_notes, data.tags
     );
     return info.lastInsertRowid;
   });
   ipcMain.handle('update-entity', (_, id: number, data: any) => {
     const stmt = db.prepare(`
       UPDATE entities SET 
-        nome = ?, subtitulo = ?, status_ou_tipo = ?, idade_ou_clima = ?, 
-        faccao = ?, lore = ?, ambientacao = ?, notas_pessoais = ?, tags = ?
+        name = ?, subtitle = ?, status_or_type = ?, age_or_climate = ?, 
+        faction = ?, lore = ?, setting = ?, personal_notes = ?, tags = ?
       WHERE id = ?
     `);
     stmt.run(
-      data.nome, data.subtitulo, data.status_ou_tipo, data.idade_ou_clima,
-      data.faccao, data.lore, data.ambientacao, data.notas_pessoais, data.tags, id
+      data.name, data.subtitle, data.status_or_type, data.age_or_climate,
+      data.faction, data.lore, data.setting, data.personal_notes, data.tags, id
     );
     return true;
   });

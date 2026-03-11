@@ -36,7 +36,7 @@ function App() {
             campaigns.map(camp => (
               <button key={camp.id} className="w-full text-left flex items-center space-x-2 p-2 rounded hover:bg-gray-800 transition-colors">
                 <Folder size={18} className="text-blue-400" />
-                <span className="truncate">{camp.nome}</span>
+                <span className="truncate">{camp.name}</span>
               </button>
             ))
           )}

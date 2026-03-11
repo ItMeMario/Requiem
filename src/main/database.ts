@@ -13,9 +13,9 @@ export function initDb() {
   const createCampaignsTable = `
     CREATE TABLE IF NOT EXISTS campaigns (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome TEXT NOT NULL,
-      genero TEXT,
-      sistema TEXT
+      name TEXT NOT NULL,
+      genre TEXT,
+      system TEXT
     );
   `;
 
@@ -23,9 +23,9 @@ export function initDb() {
     CREATE TABLE IF NOT EXISTS entries (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       campaign_id INTEGER NOT NULL,
-      titulo TEXT NOT NULL,
-      conteudo TEXT,
-      data_criacao TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT,
+      creation_date TEXT NOT NULL,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
     );
   `;
@@ -34,15 +34,15 @@ export function initDb() {
     CREATE TABLE IF NOT EXISTS entities (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       campaign_id INTEGER NOT NULL,
-      tipo TEXT NOT NULL CHECK(tipo IN ('character', 'location')),
-      nome TEXT NOT NULL,
-      subtitulo TEXT,
-      status_ou_tipo TEXT,
-      idade_ou_clima TEXT,
-      faccao TEXT,
+      type TEXT NOT NULL CHECK(type IN ('character', 'location')),
+      name TEXT NOT NULL,
+      subtitle TEXT,
+      status_or_type TEXT,
+      age_or_climate TEXT,
+      faction TEXT,
       lore TEXT,
-      ambientacao TEXT,
-      notas_pessoais TEXT,
+      setting TEXT,
+      personal_notes TEXT,
       tags TEXT,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
     );
