@@ -15,12 +15,19 @@ export const api = {
   updateEntry: (id: number, data: any) => ipcRenderer.invoke('update-entry', id, data),
   deleteEntry: (id: number) => ipcRenderer.invoke('delete-entry', id),
 
-  // Entities
-  getEntities: (campaignId: number, type?: string) => ipcRenderer.invoke('get-entities', campaignId, type),
-  getEntity: (id: number) => ipcRenderer.invoke('get-entity', id),
-  createEntity: (data: any) => ipcRenderer.invoke('create-entity', data),
-  updateEntity: (id: number, data: any) => ipcRenderer.invoke('update-entity', id, data),
-  deleteEntity: (id: number) => ipcRenderer.invoke('delete-entity', id),
+  // Characters
+  getCharacters: (campaignId: number) => ipcRenderer.invoke('get-characters', campaignId),
+  getCharacter: (id: number) => ipcRenderer.invoke('get-character', id),
+  createCharacter: (data: any) => ipcRenderer.invoke('create-character', data),
+  updateCharacter: (id: number, data: any) => ipcRenderer.invoke('update-character', id, data),
+  deleteCharacter: (id: number) => ipcRenderer.invoke('delete-character', id),
+
+  // Locations
+  getLocations: (campaignId: number) => ipcRenderer.invoke('get-locations', campaignId),
+  getLocation: (id: number) => ipcRenderer.invoke('get-location', id),
+  createLocation: (data: any) => ipcRenderer.invoke('create-location', data),
+  updateLocation: (id: number, data: any) => ipcRenderer.invoke('update-location', id, data),
+  deleteLocation: (id: number) => ipcRenderer.invoke('delete-location', id),
 };
 
 contextBridge.exposeInMainWorld('api', api);

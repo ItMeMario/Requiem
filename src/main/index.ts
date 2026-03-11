@@ -70,44 +70,78 @@ function setupIpc() {
     return true;
   });
 
-  // Entities
-  ipcMain.handle('get-entities', (_, campaignId: number, type?: string) => {
-    if (type) {
-      return db.prepare('SELECT * FROM entities WHERE campaign_id = ? AND type = ?').all(campaignId, type);
-    }
-    return db.prepare('SELECT * FROM entities WHERE campaign_id = ?').all(campaignId);
+  // Characters
+  ipcMain.handle('get-characters', (_, campaignId: number) => {
+    return db.prepare('SELECT * FROM characters WHERE campaign_id = ?').all(campaignId);
   });
-  ipcMain.handle('get-entity', (_, id: number) => {
-    return db.prepare('SELECT * FROM entities WHERE id = ?').get(id);
+  ipcMain.handle('get-character', (_, id: number) => {
+    return db.prepare('SELECT * FROM characters WHERE id = ?').get(id);
   });
-  ipcMain.handle('create-entity', (_, data: any) => {
+  ipcMain.handle('create-character', (_, data: any) => {
     const stmt = db.prepare(`
-      INSERT INTO entities (
-        campaign_id, type, name, subtitle, status_or_type, age_or_climate, 
-        faction, lore, setting, personal_notes, tags
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO characters (
+        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
-      data.campaign_id, data.type, data.name, data.subtitle, data.status_or_type,
-      data.age_or_climate, data.faction, data.lore, data.setting, data.personal_notes, data.tags
+      data.campaign_id, data.name, data.race, data.status, data.age,
+      data.faction, data.lore, data.bonds, data.personal_notes, data.image_url
     );
     return info.lastInsertRowid;
   });
-  ipcMain.handle('update-entity', (_, id: number, data: any) => {
+  ipcMain.handle('update-character', (_, id: number, data: any) => {
     const stmt = db.prepare(`
-      UPDATE entities SET 
-        name = ?, subtitle = ?, status_or_type = ?, age_or_climate = ?, 
-        faction = ?, lore = ?, setting = ?, personal_notes = ?, tags = ?
+      UPDATE characters SET 
+        name = ?, race = ?, status = ?, age = ?, 
+        faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?
       WHERE id = ?
     `);
     stmt.run(
-      data.name, data.subtitle, data.status_or_type, data.age_or_climate,
-      data.faction, data.lore, data.setting, data.personal_notes, data.tags, id
+      data.name, data.race, data.status, data.age,
+      data.faction, data.lore, data.bonds, data.personal_notes, data.image_url, id
     );
     return true;
   });
-  ipcMain.handle('delete-entity', (_, id: number) => {
-    const stmt = db.prepare('DELETE FROM entities WHERE id = ?');
+  ipcMain.handle('delete-character', (_, id: number) => {
+    const stmt = db.prepare('DELETE FROM characters WHERE id = ?');
+    stmt.run(id);
+    return true;
+  });
+
+  // Locations
+  ipcMain.handle('get-locations', (_, campaignId: number) => {
+    return db.prepare('SELECT * FROM locations WHERE campaign_id = ?').all(campaignId);
+  });
+  ipcMain.handle('get-location', (_, id: number) => {
+    return db.prepare('SELECT * FROM locations WHERE id = ?').get(id);
+  });
+  ipcMain.handle('create-location', (_, data: any) => {
+    const stmt = db.prepare(`
+      INSERT INTO locations (
+        campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const info = stmt.run(
+      data.campaign_id, data.name, data.region, data.type, data.description,
+      data.lore, data.present_npcs, data.atmosphere, data.image_url
+    );
+    return info.lastInsertRowid;
+  });
+  ipcMain.handle('update-location', (_, id: number, data: any) => {
+    const stmt = db.prepare(`
+      UPDATE locations SET 
+        name = ?, region = ?, type = ?, description = ?, 
+        lore = ?, present_npcs = ?, atmosphere = ?, image_url = ?
+      WHERE id = ?
+    `);
+    stmt.run(
+      data.name, data.region, data.type, data.description,
+      data.lore, data.present_npcs, data.atmosphere, data.image_url, id
+    );
+    return true;
+  });
+  ipcMain.handle('delete-location', (_, id: number) => {
+    const stmt = db.prepare('DELETE FROM locations WHERE id = ?');
     stmt.run(id);
     return true;
   });

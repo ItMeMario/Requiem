@@ -18,7 +18,22 @@
 
 ::-webkit-scrollbar-thumb {
   background: theme('colors.purple.600');
-  border-radius: 4px;
+  border-radius: 8px;
+}
+
+/* Custom Hide Scrollbar but allow scroll */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {

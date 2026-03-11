@@ -30,25 +30,41 @@ export function initDb() {
     );
   `;
 
-  const createEntitiesTable = `
-    CREATE TABLE IF NOT EXISTS entities (
+  const createCharactersTable = `
+    CREATE TABLE IF NOT EXISTS characters (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       campaign_id INTEGER NOT NULL,
-      type TEXT NOT NULL CHECK(type IN ('character', 'location')),
       name TEXT NOT NULL,
-      subtitle TEXT,
-      status_or_type TEXT,
-      age_or_climate TEXT,
+      race TEXT,
+      status TEXT,
+      age TEXT,
       faction TEXT,
       lore TEXT,
-      setting TEXT,
+      bonds TEXT,
       personal_notes TEXT,
-      tags TEXT,
+      image_url TEXT,
+      FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
+    );
+  `;
+
+  const createLocationsTable = `
+    CREATE TABLE IF NOT EXISTS locations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      campaign_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      region TEXT,
+      type TEXT,
+      description TEXT,
+      lore TEXT,
+      present_npcs TEXT,
+      atmosphere TEXT,
+      image_url TEXT,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
     );
   `;
 
   db.exec(createCampaignsTable);
   db.exec(createEntriesTable);
-  db.exec(createEntitiesTable);
+  db.exec(createCharactersTable);
+  db.exec(createLocationsTable);
 }
