@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Database, Folder, Users, Map as MapIcon, Plus, X, User, Image as ImageIcon } from 'lucide-react';
+import { Database, Folder, Users, Map as MapIcon, Plus, X, User, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
 
 const InputField = ({ label, value, onChange, placeholder = '' }: any) => (
   <div>
@@ -40,9 +40,16 @@ function App() {
   const [showCharModal, setShowCharModal] = useState(false);
   const [showLocModal, setShowLocModal] = useState(false);
 
+  // Editing state
+  const [editingCharId, setEditingCharId] = useState<number | null>(null);
+  const [editingLocId, setEditingLocId] = useState<number | null>(null);
+
   // Forms
-  const [newChar, setNewChar] = useState({ name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' });
-  const [newLoc, setNewLoc] = useState({ name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' });
+  const initCharState = { name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' };
+  const initLocState = { name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' };
+
+  const [newChar, setNewChar] = useState(initCharState);
+  const [newLoc, setNewLoc] = useState(initLocState);
 
   useEffect(() => {
     if ((window as any).api) {
@@ -90,12 +97,35 @@ function App() {
     if (!newChar.name.trim() || !selectedCampaign) return;
     try {
       const data = { ...newChar, campaign_id: selectedCampaign.id };
-      const id = await (window as any).api.createCharacter(data);
-      setCharacters([...characters, { id, ...data }]);
+      if (editingCharId !== null) {
+        await (window as any).api.updateCharacter(editingCharId, data);
+        setCharacters(characters.map(c => c.id === editingCharId ? { ...data, id: editingCharId } : c));
+      } else {
+        const id = await (window as any).api.createCharacter(data);
+        setCharacters([...characters, { id, ...data }]);
+      }
       setShowCharModal(false);
-      setNewChar({ name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' });
+      setEditingCharId(null);
+      setNewChar(initCharState);
     } catch (error) {
-      console.error('Error creating character:', error);
+      console.error('Error saving character:', error);
+    }
+  };
+
+  const handleEditChar = (char: any) => {
+    setEditingCharId(char.id);
+    setNewChar(char);
+    setShowCharModal(true);
+  };
+
+  const handleDeleteChar = async (id: number) => {
+    if (confirm('Are you sure you want to delete this character?')) {
+      try {
+        await (window as any).api.deleteCharacter(id);
+        setCharacters(characters.filter(c => c.id !== id));
+      } catch (error) {
+        console.error('Error deleting character:', error);
+      }
     }
   };
 
@@ -104,12 +134,35 @@ function App() {
     if (!newLoc.name.trim() || !selectedCampaign) return;
     try {
       const data = { ...newLoc, campaign_id: selectedCampaign.id };
-      const id = await (window as any).api.createLocation(data);
-      setLocations([...locations, { id, ...data }]);
+      if (editingLocId !== null) {
+        await (window as any).api.updateLocation(editingLocId, data);
+        setLocations(locations.map(l => l.id === editingLocId ? { ...data, id: editingLocId } : l));
+      } else {
+        const id = await (window as any).api.createLocation(data);
+        setLocations([...locations, { id, ...data }]);
+      }
       setShowLocModal(false);
-      setNewLoc({ name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' });
+      setEditingLocId(null);
+      setNewLoc(initLocState);
     } catch (error) {
-      console.error('Error creating location:', error);
+      console.error('Error saving location:', error);
+    }
+  };
+
+  const handleEditLoc = (loc: any) => {
+    setEditingLocId(loc.id);
+    setNewLoc(loc);
+    setShowLocModal(true);
+  };
+
+  const handleDeleteLoc = async (id: number) => {
+    if (confirm('Are you sure you want to delete this location?')) {
+      try {
+        await (window as any).api.deleteLocation(id);
+        setLocations(locations.filter(l => l.id !== id));
+      } catch (error) {
+        console.error('Error deleting location:', error);
+      }
     }
   };
 
@@ -213,7 +266,11 @@ function App() {
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-semibold text-gray-200">Characters</h3>
                     <button 
-                      onClick={() => setShowCharModal(true)}
+                      onClick={() => {
+                        setEditingCharId(null);
+                        setNewChar(initCharState);
+                        setShowCharModal(true);
+                      }}
                       className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-white transition-colors border border-gray-700"
                     >
                       <Plus size={16} />
@@ -228,7 +285,15 @@ function App() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {characters.map(char => (
-                        <div key={char.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors group">
+                        <div key={char.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors group relative">
+                          <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onClick={() => handleEditChar(char)} className="p-1.5 bg-gray-900/80 hover:bg-purple-600 rounded text-gray-300 hover:text-white backdrop-blur-sm transition-colors">
+                              <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => handleDeleteChar(char.id)} className="p-1.5 bg-gray-900/80 hover:bg-red-600 rounded text-gray-300 hover:text-white backdrop-blur-sm transition-colors">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                           {char.image_url ? (
                             <div className="h-48 w-full bg-gray-800 overflow-hidden relative">
                               <img src={char.image_url} alt={char.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -265,7 +330,11 @@ function App() {
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-semibold text-gray-200">Locations</h3>
                     <button 
-                      onClick={() => setShowLocModal(true)}
+                      onClick={() => {
+                        setEditingLocId(null);
+                        setNewLoc(initLocState);
+                        setShowLocModal(true);
+                      }}
                       className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-white transition-colors border border-gray-700"
                     >
                       <Plus size={16} />
@@ -280,8 +349,16 @@ function App() {
                   ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {locations.map(loc => (
-                        <div key={loc.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden flex flex-col sm:flex-row hover:border-gray-700 transition-colors">
-                          <div className="sm:w-1/3 h-48 sm:h-auto bg-gray-800/50">
+                        <div key={loc.id} className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden flex flex-col sm:flex-row hover:border-gray-700 transition-colors group relative">
+                          <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onClick={() => handleEditLoc(loc)} className="p-1.5 bg-gray-900/80 hover:bg-blue-600 rounded text-gray-300 hover:text-white backdrop-blur-sm transition-colors">
+                              <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => handleDeleteLoc(loc.id)} className="p-1.5 bg-gray-900/80 hover:bg-red-600 rounded text-gray-300 hover:text-white backdrop-blur-sm transition-colors">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                          <div className="sm:w-1/3 h-48 sm:h-auto bg-gray-800/50 relative">
                             {loc.image_url ? (
                               <img src={loc.image_url} alt={loc.name} className="w-full h-full object-cover" />
                             ) : (
@@ -338,7 +415,7 @@ function App() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button onClick={() => setShowCharModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><User className="text-purple-400"/> New Character</h3>
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><User className="text-purple-400"/> {editingCharId ? 'Edit Character' : 'New Character'}</h3>
             <form onSubmit={handleCreateChar} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="Name *" value={newChar.name} onChange={(e:any) => setNewChar({...newChar, name: e.target.value})} />
@@ -365,7 +442,7 @@ function App() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button onClick={() => setShowLocModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><MapIcon className="text-blue-400"/> New Location</h3>
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><MapIcon className="text-blue-400"/> {editingLocId ? 'Edit Location' : 'New Location'}</h3>
             <form onSubmit={handleCreateLoc} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <InputField label="Name *" value={newLoc.name} onChange={(e:any) => setNewLoc({...newLoc, name: e.target.value})} />
