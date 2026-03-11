@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Database, Folder, Users, Map as MapIcon, Plus, X, User, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
+import { Database, Folder, Users, Map as MapIcon, Plus, X, User, Image as ImageIcon, Edit2, Trash2, Book } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const InputField = ({ label, value, onChange, placeholder = '' }: any) => (
   <div>
@@ -32,24 +34,29 @@ function App() {
   const [newCampaign, setNewCampaign] = useState({ name: '', genre: '', system: '' });
 
   const [selectedCampaign, setSelectedCampaign] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<'characters' | 'locations'>('characters');
+  const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal'>('characters');
 
   const [characters, setCharacters] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
+  const [entries, setEntries] = useState<any[]>([]);
 
   const [showCharModal, setShowCharModal] = useState(false);
   const [showLocModal, setShowLocModal] = useState(false);
+  const [showEntryModal, setShowEntryModal] = useState(false);
 
   // Editing state
   const [editingCharId, setEditingCharId] = useState<number | null>(null);
   const [editingLocId, setEditingLocId] = useState<number | null>(null);
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
 
   // Forms
   const initCharState = { name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' };
   const initLocState = { name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' };
+  const initEntryState = { title: '', content: '' };
 
   const [newChar, setNewChar] = useState(initCharState);
   const [newLoc, setNewLoc] = useState(initLocState);
+  const [newEntry, setNewEntry] = useState(initEntryState);
 
   useEffect(() => {
     if ((window as any).api) {
@@ -89,6 +96,8 @@ function App() {
       setCharacters(chars);
       const locs = await (window as any).api.getLocations(camp.id);
       setLocations(locs);
+      const ents = await (window as any).api.getEntries(camp.id);
+      setEntries(ents);
     }
   };
 
@@ -166,7 +175,49 @@ function App() {
     }
   };
 
+  const handleCreateEntry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEntry.title.trim() || !selectedCampaign) return;
+    try {
+      const isEditing = editingEntryId !== null;
+      const data = {
+        campaign_id: selectedCampaign.id,
+        title: newEntry.title,
+        content: newEntry.content,
+        creation_date: isEditing ? entries.find(e => e.id === editingEntryId)?.creation_date : new Date().toISOString()
+      };
+      
+      if (isEditing) {
+        await (window as any).api.updateEntry(editingEntryId, data);
+        setEntries(entries.map(e => e.id === editingEntryId ? { ...data, id: editingEntryId } : e));
+      } else {
+        const id = await (window as any).api.createEntry(data);
+        setEntries([{ id, ...data }, ...entries]);
+      }
+      setShowEntryModal(false);
+      setEditingEntryId(null);
+      setNewEntry(initEntryState);
+    } catch (error) {
+      console.error('Error saving entry:', error);
+    }
+  };
 
+  const handleEditEntry = (entry: any) => {
+    setEditingEntryId(entry.id);
+    setNewEntry({ title: entry.title, content: entry.content });
+    setShowEntryModal(true);
+  };
+
+  const handleDeleteEntry = async (id: number) => {
+    if (confirm('Are you sure you want to delete this entry?')) {
+      try {
+        await (window as any).api.deleteEntry(id);
+        setEntries(entries.filter(e => e.id !== id));
+      } catch (error) {
+        console.error('Error deleting entry:', error);
+      }
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-950 text-gray-100 font-sans">
@@ -256,6 +307,13 @@ function App() {
               >
                 <MapIcon size={18} />
                 <span>Locations</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('journal')}
+                className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'journal' ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-400 hover:text-white'}`}
+              >
+                <Book size={18} />
+                <span>Journal</span>
               </button>
             </div>
 
@@ -386,6 +444,52 @@ function App() {
                   )}
                 </div>
               )}
+
+              {activeTab === 'journal' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-semibold text-gray-200">Journal Entries</h3>
+                    <button 
+                      onClick={() => {
+                        setEditingEntryId(null);
+                        setNewEntry(initEntryState);
+                        setShowEntryModal(true);
+                      }}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-white transition-colors border border-gray-700"
+                    >
+                      <Plus size={16} />
+                      <span>New Entry</span>
+                    </button>
+                  </div>
+                  
+                  {entries.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500 italic bg-gray-900/20 rounded-lg border border-gray-800/50">
+                      No diary entries written yet. Begin your adventure.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col space-y-4">
+                      {entries.map(entry => (
+                        <div key={entry.id} className="bg-gray-900 border border-gray-800 rounded-lg p-5 hover:border-gray-700 transition-colors group relative">
+                          <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button onClick={() => handleEditEntry(entry)} className="p-1.5 bg-gray-800 hover:bg-purple-600 rounded text-gray-300 hover:text-white transition-colors">
+                              <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => handleDeleteEntry(entry.id)} className="p-1.5 bg-gray-800 hover:bg-red-600 rounded text-gray-300 hover:text-white transition-colors">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                          <h4 className="text-xl font-bold text-gray-100 mb-1">{entry.title}</h4>
+                          <div className="text-xs text-purple-400 mb-4">{new Date(entry.creation_date).toLocaleString()}</div>
+                          <div 
+                            className="text-gray-300 quill-content line-clamp-3 overflow-hidden"
+                            dangerouslySetInnerHTML={{ __html: entry.content }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -459,6 +563,91 @@ function App() {
                 <button type="submit" disabled={!newLoc.name.trim()} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition-colors disabled:opacity-50">Save Location</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE ENTRY MODAL */}
+      {showEntryModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl w-full max-w-6xl shadow-2xl relative h-[90vh] flex flex-col overflow-hidden">
+            <button onClick={() => setShowEntryModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white z-20"><X size={20} /></button>
+            <div className="p-6 border-b border-gray-800 flex-shrink-0">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Book className="text-purple-400"/> {editingEntryId ? 'Edit Journal Entry' : 'New Journal Entry'}
+              </h3>
+            </div>
+            
+            <div className="flex-1 flex overflow-hidden">
+              {/* Left Column: Editor */}
+              <div className="flex-1 flex flex-col p-6 overflow-y-auto custom-scrollbar border-r border-gray-800 bg-[#0a0a0c]">
+                <form id="entry-form" onSubmit={handleCreateEntry} className="flex-1 flex flex-col space-y-4">
+                  <InputField label="Title *" value={newEntry.title} onChange={(e:any) => setNewEntry({...newEntry, title: e.target.value})} placeholder="Day 1: The Journey Begins..." />
+                  
+                  <div className="flex-1 flex flex-col min-h-[400px]">
+                    <label className="block text-sm text-gray-400 mb-1">Content</label>
+                    <div className="flex-1 bg-white text-black rounded-lg overflow-hidden flex flex-col">
+                      <ReactQuill 
+                        theme="snow"
+                        value={newEntry.content}
+                        onChange={(val) => setNewEntry({...newEntry, content: val})}
+                        className="flex-1 h-full flex flex-col [&_.ql-container]:flex-1 [&_.ql-editor]:h-full"
+                      />
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              {/* Right Column: References Sidebar */}
+              <div className="w-80 bg-gray-900 flex flex-col overflow-hidden">
+                <div className="p-4 border-b border-gray-800 bg-gray-900/80 sticky top-0 z-10 backdrop-blur">
+                  <h4 className="font-semibold text-gray-200">References</h4>
+                  <p className="text-xs text-gray-400 mt-1">Check characters and locations while writing.</p>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
+                  <div>
+                    <h5 className="text-sm font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2 border-b border-gray-800 pb-2 mb-3">
+                      <Users size={14} /> Characters
+                    </h5>
+                    {characters.length === 0 ? (
+                      <div className="text-xs text-gray-500 italic">No characters yet.</div>
+                    ) : (
+                      <ul className="space-y-2">
+                        {characters.map(c => (
+                          <li key={c.id} className="text-sm">
+                            <span className="font-medium text-gray-300">{c.name}</span>
+                            {c.race && <span className="text-xs text-gray-500 ml-1"> ({c.race})</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h5 className="text-sm font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2 border-b border-gray-800 pb-2 mb-3">
+                      <MapIcon size={14} /> Locations
+                    </h5>
+                    {locations.length === 0 ? (
+                      <div className="text-xs text-gray-500 italic">No locations yet.</div>
+                    ) : (
+                      <ul className="space-y-2">
+                        {locations.map(l => (
+                          <li key={l.id} className="text-sm">
+                            <span className="font-medium text-gray-300">{l.name}</span>
+                            {l.type && <span className="text-xs text-gray-500 ml-1"> ({l.type})</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-800 flex justify-end bg-gray-900 flex-shrink-0">
+              <button type="button" onClick={() => setShowEntryModal(false)} className="px-4 py-2 text-gray-400 hover:text-white transition-colors mr-2">Cancel</button>
+              <button type="submit" form="entry-form" disabled={!newEntry.title.trim()} className="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded transition-colors disabled:opacity-50">Save Entry</button>
+            </div>
           </div>
         </div>
       )}

@@ -39,3 +39,51 @@
 ::-webkit-scrollbar-thumb:hover {
   background: theme('colors.purple.500');
 }
+
+/* ReactQuill Content Styles (Tailwind Reset overrides) */
+.quill-content {
+  @apply text-base leading-relaxed;
+}
+.quill-content h1 {
+  @apply text-3xl font-bold mt-6 mb-4 text-white;
+}
+.quill-content h2 {
+  @apply text-2xl font-bold mt-5 mb-3 text-white;
+}
+.quill-content h3 {
+  @apply text-xl font-bold mt-4 mb-2 text-gray-100;
+}
+.quill-content p {
+  @apply mb-4;
+}
+.quill-content ul {
+  @apply list-disc list-inside mb-4 pl-2 space-y-1;
+}
+.quill-content ol {
+  @apply list-decimal list-inside mb-4 pl-2 space-y-1;
+}
+.quill-content ul li p, .quill-content ol li p {
+  @apply inline;
+}
+.quill-content blockquote {
+  @apply border-l-4 border-purple-500 pl-4 py-1 italic text-gray-400 bg-gray-800/30 rounded-r my-4;
+}
+.quill-content a {
+  @apply text-purple-400 hover:text-purple-300 underline;
+}
+.quill-content strong, .quill-content b {
+  @apply font-bold text-gray-100;
+}
+.quill-content em, .quill-content i {
+  @apply italic;
+}
+.quill-content strike, .quill-content s {
+  @apply line-through text-gray-500;
+}
+.quill-content u {
+  @apply underline;
+}
+.quill-content pre {
+  @apply bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm font-mono border border-gray-800 my-4 text-gray-300;
+}
+
