@@ -49,6 +49,7 @@ function App() {
   const [editingCharId, setEditingCharId] = useState<number | null>(null);
   const [editingLocId, setEditingLocId] = useState<number | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
+  const [returnToJournalEntryId, setReturnToJournalEntryId] = useState<number | null>(null);
 
   // Forms
   const initCharState = { name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' };
@@ -114,7 +115,7 @@ function App() {
         const id = await (window as any).api.createCharacter(data);
         setCharacters([...characters, { id, ...data }]);
       }
-      setShowCharModal(false);
+      handleCloseCharModal();
       setEditingCharId(null);
       setNewChar(initCharState);
     } catch (error) {
@@ -151,7 +152,7 @@ function App() {
         const id = await (window as any).api.createLocation(data);
         setLocations([...locations, { id, ...data }]);
       }
-      setShowLocModal(false);
+      handleCloseLocModal();
       setEditingLocId(null);
       setNewLoc(initLocState);
     } catch (error) {
@@ -277,6 +278,7 @@ function App() {
       if (type === 'character') {
         const char = characters.find(c => c.id === id);
         if (char) {
+          setReturnToJournalEntryId(editingEntryId);
           setShowEntryModal(false);
           setActiveTab('characters');
           handleEditChar(char);
@@ -284,11 +286,30 @@ function App() {
       } else if (type === 'location') {
         const loc = locations.find(l => l.id === id);
         if (loc) {
+          setReturnToJournalEntryId(editingEntryId);
           setShowEntryModal(false);
           setActiveTab('locations');
           handleEditLoc(loc);
         }
       }
+    }
+  };
+
+  const handleCloseCharModal = () => {
+    setShowCharModal(false);
+    if (returnToJournalEntryId !== null) {
+      setActiveTab('journal');
+      setShowEntryModal(true);
+      setReturnToJournalEntryId(null);
+    }
+  };
+
+  const handleCloseLocModal = () => {
+    setShowLocModal(false);
+    if (returnToJournalEntryId !== null) {
+      setActiveTab('journal');
+      setShowEntryModal(true);
+      setReturnToJournalEntryId(null);
     }
   };
 
@@ -593,7 +614,7 @@ function App() {
       {showCharModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button onClick={() => setShowCharModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
+            <button onClick={handleCloseCharModal} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><User className="text-purple-400"/> {editingCharId ? 'Edit Character' : 'New Character'}</h3>
             <form onSubmit={handleCreateChar} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -608,7 +629,7 @@ function App() {
               <TextAreaField label="Bonds (Vínculos)" value={newChar.bonds} onChange={(e:any) => setNewChar({...newChar, bonds: e.target.value})} />
               <TextAreaField label="Personal Notes (Notas pessoais)" value={newChar.personal_notes} onChange={(e:any) => setNewChar({...newChar, personal_notes: e.target.value})} />
               <div className="pt-4 flex justify-end sticky bottom-0 bg-gray-900 py-2 border-t border-gray-800 mt-4">
-                <button type="button" onClick={() => setShowCharModal(false)} className="px-4 py-2 text-gray-400 hover:text-white transition-colors mr-2">Cancel</button>
+                <button type="button" onClick={handleCloseCharModal} className="px-4 py-2 text-gray-400 hover:text-white transition-colors mr-2">Cancel</button>
                 <button type="submit" disabled={!newChar.name.trim()} className="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded transition-colors disabled:opacity-50">Save Character</button>
               </div>
             </form>
@@ -620,7 +641,7 @@ function App() {
       {showLocModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button onClick={() => setShowLocModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
+            <button onClick={handleCloseLocModal} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={20} /></button>
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><MapIcon className="text-blue-400"/> {editingLocId ? 'Edit Location' : 'New Location'}</h3>
             <form onSubmit={handleCreateLoc} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -634,7 +655,7 @@ function App() {
               <TextAreaField label="Present NPCs (NPCs Presentes)" value={newLoc.present_npcs} onChange={(e:any) => setNewLoc({...newLoc, present_npcs: e.target.value})} />
               <TextAreaField label="Atmosphere (Ambientação)" value={newLoc.atmosphere} onChange={(e:any) => setNewLoc({...newLoc, atmosphere: e.target.value})} />
               <div className="pt-4 flex justify-end sticky bottom-0 bg-gray-900 py-2 border-t border-gray-800 mt-4">
-                <button type="button" onClick={() => setShowLocModal(false)} className="px-4 py-2 text-gray-400 hover:text-white transition-colors mr-2">Cancel</button>
+                <button type="button" onClick={handleCloseLocModal} className="px-4 py-2 text-gray-400 hover:text-white transition-colors mr-2">Cancel</button>
                 <button type="submit" disabled={!newLoc.name.trim()} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded transition-colors disabled:opacity-50">Save Location</button>
               </div>
             </form>
