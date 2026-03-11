@@ -234,20 +234,23 @@ function App() {
   // --- MENTION PARSER ---
   const parseMentions = (html: string) => {
     if (!html) return html;
-    // Match {Something}
-    return html.replace(/\{([^}]+)\}/g, (match, name) => {
-      const lowerName = name.trim().toLowerCase();
+    // Match {Something} where something might include HTML tags like {<strong>Azog</strong>}
+    return html.replace(/\{([^}]+)\}/g, (match, innerHtml) => {
+      // Strip HTML tags and normalize spaces to find the actual text name
+      const rawText = innerHtml.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ');
+      const lowerName = rawText.trim().toLowerCase();
+      
       // Check characters
       const foundChar = characters.find(c => c.name.toLowerCase() === lowerName);
       if (foundChar) {
-        return `<span class="entity-mention character-mention" data-id="${foundChar.id}" data-type="character">${name}</span>`;
+        return `<span class="entity-mention character-mention" data-id="${foundChar.id}" data-type="character">${innerHtml}</span>`;
       }
       // Check locations
       const foundLoc = locations.find(l => l.name.toLowerCase() === lowerName);
       if (foundLoc) {
-        return `<span class="entity-mention location-mention" data-id="${foundLoc.id}" data-type="location">${name}</span>`;
+        return `<span class="entity-mention location-mention" data-id="${foundLoc.id}" data-type="location">${innerHtml}</span>`;
       }
-      return match; // If not found, return {Name}
+      return match; // If not found, return {Original}
     });
   };
 
