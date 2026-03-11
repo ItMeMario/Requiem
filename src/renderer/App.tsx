@@ -236,21 +236,35 @@ function App() {
     if (!html) return html;
     // Match {Something} where something might include HTML tags like {<strong>Azog</strong>}
     return html.replace(/\{([^}]+)\}/g, (match, innerHtml) => {
-      // Strip HTML tags and normalize spaces to find the actual text name
-      const rawText = innerHtml.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ');
-      const lowerName = rawText.trim().toLowerCase();
+      // Strip HTML tags, non-breaking spaces, and hidden unicode characters (like Zero Width Space often added by rich editors)
+      const rawText = innerHtml
+        .replace(/<[^>]*>?/gm, '')
+        .replace(/&nbsp;|\u00A0/g, ' ')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')
+        .trim();
+        
+      const lowerName = rawText.toLowerCase();
+      if (!lowerName) return match;
       
-      // Check characters
-      const foundChar = characters.find(c => c.name.toLowerCase() === lowerName);
+      // Look for a Character (exact match first, then partial)
+      const foundChar = 
+        characters.find(c => c.name.trim().toLowerCase() === lowerName) ||
+        characters.find(c => lowerName.length > 2 && c.name.trim().toLowerCase().includes(lowerName));
+        
       if (foundChar) {
-        return `<span class="entity-mention character-mention" data-id="${foundChar.id}" data-type="character">${innerHtml}</span>`;
+        return `<span class="entity-mention character-mention" data-id="${foundChar.id}" data-type="character">${rawText}</span>`;
       }
-      // Check locations
-      const foundLoc = locations.find(l => l.name.toLowerCase() === lowerName);
+      
+      // Look for a Location (exact match first, then partial)
+      const foundLoc = 
+        locations.find(l => l.name.trim().toLowerCase() === lowerName) ||
+        locations.find(l => lowerName.length > 2 && l.name.trim().toLowerCase().includes(lowerName));
+        
       if (foundLoc) {
-        return `<span class="entity-mention location-mention" data-id="${foundLoc.id}" data-type="location">${innerHtml}</span>`;
+        return `<span class="entity-mention location-mention" data-id="${foundLoc.id}" data-type="location">${rawText}</span>`;
       }
-      return match; // If not found, return {Original}
+      
+      return match; // If not found, return original {Name}
     });
   };
 
