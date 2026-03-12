@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Database, Folder, Users, Map as MapIcon, Plus, X, User, Image as ImageIcon, Edit2, Trash2, Book } from 'lucide-react';
+import { Database, Folder, Users, Map as MapIcon, Plus, X, User, Image as ImageIcon, Edit2, Trash2, Book, Moon, Sun, Sword } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { useTheme } from './context/ThemeContext';
 
 const InputField = ({ label, value, onChange, placeholder = '' }: any) => (
   <div>
@@ -29,6 +30,7 @@ const TextAreaField = ({ label, value, onChange, placeholder = '' }: any) => (
 );
 
 function App() {
+  const { theme, setTheme } = useTheme();
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCampaign, setNewCampaign] = useState({ name: '', genre: '', system: '' });
@@ -341,7 +343,24 @@ function App() {
           )}
         </nav>
 
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-gray-800 space-y-4">
+          <div className="flex p-1 bg-gray-950/50 rounded border border-gray-800/50">
+            <button
+              onClick={() => setTheme('light')}
+              className={`flex-1 flex justify-center py-1.5 rounded transition-colors ${theme === 'light' ? 'bg-gray-800 text-yellow-500 shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+              title="Light Mode"
+            ><Sun size={16} /></button>
+            <button
+              onClick={() => setTheme('dark')}
+              className={`flex-1 flex justify-center py-1.5 rounded transition-colors ${theme === 'dark' ? 'bg-gray-800 text-purple-400 shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+              title="Dark Mode"
+            ><Moon size={16} /></button>
+            <button
+              onClick={() => setTheme('medieval')}
+              className={`flex-1 flex justify-center py-1.5 rounded transition-colors ${theme === 'medieval' ? 'bg-gray-800 text-amber-500 shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
+              title="Medieval Mode"
+            ><Sword size={16} /></button>
+          </div>
           <button 
             onClick={() => setShowCreateModal(true)}
             className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded p-2 transition-all shadow-lg"
