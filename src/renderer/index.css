@@ -1,27 +1,151 @@
 @import "tailwindcss";
 
+/* ============================================================
+   SEMANTIC COLOR SYSTEM (CSS Custom Properties)
+   Each theme overrides these variables.
+   Default = Dark theme.
+   ============================================================ */
+:root,
+.theme-dark {
+  /* ---- Surfaces / Backgrounds ---- */
+  --surface-app:       #0a0a0c;
+  --surface-sidebar:   #111827;
+  --surface-card:      #111827;
+  --surface-input:     #030712;
+  --surface-hover:     #1f2937;
+  --surface-active:    rgba(88, 28, 135, 0.5);
+  --surface-elevated:  rgba(17, 24, 39, 0.3);
+  --surface-elevated2: rgba(17, 24, 39, 0.2);
+  --surface-overlay:   rgba(0, 0, 0, 0.6);
+  --surface-deep:      rgba(3, 7, 18, 0.5);
+
+  /* ---- Text ---- */
+  --text-heading:   #ffffff;
+  --text-primary:   #f3f4f6;
+  --text-secondary: #d1d5db;
+  --text-muted:     #9ca3af;
+  --text-faint:     #6b7280;
+  --text-icon:      #374151;
+
+  /* ---- Borders ---- */
+  --border-default:  #1f2937;
+  --border-subtle:   rgba(31, 41, 55, 0.5);
+  --border-hover:    #374151;
+
+  /* ---- Accent (Purple in dark) ---- */
+  --accent:          #9333ea;
+  --accent-hover:    #a855f7;
+  --accent-text:     #c084fc;
+  --accent-glow:     rgba(147, 51, 234, 0.5);
+  --accent-muted-bg: rgba(147, 51, 234, 0.2);
+  --accent-grad-from:#9333ea;
+  --accent-grad-to:  #4f46e5;
+
+  /* ---- Accent 2 (Blue in dark) ---- */
+  --accent2:         #2563eb;
+  --accent2-hover:   #3b82f6;
+  --accent2-text:    #60a5fa;
+  --accent2-heading: #dbeafe;
+  --accent2-muted-bg:rgba(37, 99, 235, 0.2);
+
+  /* ---- Danger ---- */
+  --danger:            #dc2626;
+  --danger-hover:      #ef4444;
+  --danger-text:       #ef4444;
+  --danger-muted-bg:   rgba(220, 38, 38, 0.2);
+  --danger-muted-hover:rgba(220, 38, 38, 0.4);
+  --danger-border:     rgba(127, 29, 29, 0.5);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-track: #111827;
+  --scrollbar-thumb: #9333ea;
+  --scrollbar-thumb-hover: #a855f7;
+
+  /* ---- Misc ---- */
+  --font-family-base: ui-sans-serif, system-ui, sans-serif;
+  --quill-editor-bg: #ffffff;
+  --quill-editor-text: #000000;
+}
+
+/* ============================================================
+   Register semantic colors as Tailwind v4 theme tokens
+   so we can use bg-surface-app, text-heading, border-default, etc.
+   ============================================================ */
+@theme {
+  --color-surface-app:       var(--surface-app);
+  --color-surface-sidebar:   var(--surface-sidebar);
+  --color-surface-card:      var(--surface-card);
+  --color-surface-input:     var(--surface-input);
+  --color-surface-hover:     var(--surface-hover);
+  --color-surface-active:    var(--surface-active);
+  --color-surface-elevated:  var(--surface-elevated);
+  --color-surface-elevated2: var(--surface-elevated2);
+  --color-surface-overlay:   var(--surface-overlay);
+  --color-surface-deep:      var(--surface-deep);
+
+  --color-heading:    var(--text-heading);
+  --color-primary:    var(--text-primary);
+  --color-secondary:  var(--text-secondary);
+  --color-muted:      var(--text-muted);
+  --color-faint:      var(--text-faint);
+  --color-icon:       var(--text-icon);
+
+  --color-border-default:  var(--border-default);
+  --color-border-subtle:   var(--border-subtle);
+  --color-border-hover:    var(--border-hover);
+
+  --color-accent:          var(--accent);
+  --color-accent-hover:    var(--accent-hover);
+  --color-accent-text:     var(--accent-text);
+  --color-accent-glow:     var(--accent-glow);
+  --color-accent-muted-bg: var(--accent-muted-bg);
+  --color-accent-grad-from:var(--accent-grad-from);
+  --color-accent-grad-to:  var(--accent-grad-to);
+
+  --color-accent2:          var(--accent2);
+  --color-accent2-hover:    var(--accent2-hover);
+  --color-accent2-text:     var(--accent2-text);
+  --color-accent2-heading:  var(--accent2-heading);
+  --color-accent2-muted-bg: var(--accent2-muted-bg);
+
+  --color-danger:            var(--danger);
+  --color-danger-hover:      var(--danger-hover);
+  --color-danger-text:       var(--danger-text);
+  --color-danger-muted-bg:   var(--danger-muted-bg);
+  --color-danger-muted-hover:var(--danger-muted-hover);
+  --color-danger-border:     var(--danger-border);
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 @layer base {
   body {
-    @apply antialiased text-gray-100 bg-gray-950;
+    @apply antialiased;
+    background-color: var(--surface-app);
+    color: var(--text-primary);
+    font-family: var(--font-family-base);
   }
 }
 
-/* Custom scrollbar for webkit */
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: theme('colors.gray.900');
+  background: var(--scrollbar-track);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: theme('colors.purple.600');
+  background: var(--scrollbar-thumb);
   border-radius: 8px;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
 
-/* Custom Hide Scrollbar but allow scroll */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -36,22 +160,23 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.purple.500');
-}
-
-/* ReactQuill Content Styles (Tailwind Reset overrides) */
+/* ============================================================
+   QUILL CONTENT STYLES
+   ============================================================ */
 .quill-content {
   @apply text-base leading-relaxed;
 }
 .quill-content h1 {
-  @apply text-3xl font-bold mt-6 mb-4 text-white;
+  @apply text-3xl font-bold mt-6 mb-4;
+  color: var(--text-heading);
 }
 .quill-content h2 {
-  @apply text-2xl font-bold mt-5 mb-3 text-white;
+  @apply text-2xl font-bold mt-5 mb-3;
+  color: var(--text-heading);
 }
 .quill-content h3 {
-  @apply text-xl font-bold mt-4 mb-2 text-gray-100;
+  @apply text-xl font-bold mt-4 mb-2;
+  color: var(--text-primary);
 }
 .quill-content p {
   @apply mb-4;
@@ -66,35 +191,58 @@
   @apply inline;
 }
 .quill-content blockquote {
-  @apply border-l-4 border-purple-500 pl-4 py-1 italic text-gray-400 bg-gray-800/30 rounded-r my-4;
+  @apply pl-4 py-1 italic rounded-r my-4;
+  border-left: 4px solid var(--accent);
+  color: var(--text-muted);
+  background: var(--surface-elevated2);
 }
 .quill-content a {
-  @apply text-purple-400 hover:text-purple-300 underline;
+  @apply underline;
+  color: var(--accent-text);
+}
+.quill-content a:hover {
+  color: var(--accent-hover);
 }
 .quill-content strong, .quill-content b {
-  @apply font-bold text-gray-100;
+  @apply font-bold;
+  color: var(--text-primary);
 }
 .quill-content em, .quill-content i {
   @apply italic;
 }
 .quill-content strike, .quill-content s {
-  @apply line-through text-gray-500;
+  @apply line-through;
+  color: var(--text-faint);
 }
 .quill-content u {
   @apply underline;
 }
 .quill-content pre {
-  @apply bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm font-mono border border-gray-800 my-4 text-gray-300;
+  @apply p-4 rounded-lg overflow-x-auto text-sm font-mono my-4;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
 }
 
-/* Entity Mentions Rules */
+/* ============================================================
+   ENTITY MENTIONS
+   ============================================================ */
 .entity-mention {
   @apply font-bold cursor-pointer underline decoration-2 underline-offset-2 transition-colors px-1 rounded-sm;
 }
 .character-mention {
-  @apply text-purple-400 decoration-purple-500 hover:text-white hover:bg-purple-600/20;
+  color: var(--accent-text);
+  text-decoration-color: var(--accent);
+}
+.character-mention:hover {
+  color: var(--text-heading);
+  background: var(--accent-muted-bg);
 }
 .location-mention {
-  @apply text-blue-400 decoration-blue-500 hover:text-white hover:bg-blue-600/20;
+  color: var(--accent2-text);
+  text-decoration-color: var(--accent2);
 }
-
+.location-mention:hover {
+  color: var(--text-heading);
+  background: var(--accent2-muted-bg);
+}
