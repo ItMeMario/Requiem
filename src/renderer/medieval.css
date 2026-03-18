@@ -1,0 +1,63 @@
+/* ============================================================
+   MEDIEVAL THEME
+   ============================================================ */
+.theme-medieval {
+  /* ---- Surfaces / Backgrounds ---- */
+  --surface-app:       #f4eacc;
+  --surface-sidebar:   #e8d8b0;
+  --surface-card:      #fdf5db;
+  --surface-input:     #e8d8b0;
+  --surface-hover:     #d9c596;
+  --surface-active:    rgba(139, 69, 19, 0.2);
+  --surface-elevated:  rgba(0, 0, 0, 0.1);
+  --surface-elevated2: rgba(0, 0, 0, 0.05);
+  --surface-overlay:   rgba(62, 39, 35, 0.5);
+  --surface-deep:      rgba(139, 69, 19, 0.1);
+
+  /* ---- Text ---- */
+  --text-heading:   #3e2723;
+  --text-primary:   #4e342e;
+  --text-secondary: #5d4037;
+  --text-muted:     #8d6e63;
+  --text-faint:     #a1887f;
+  --text-icon:      #4e342e;
+
+  /* ---- Borders ---- */
+  --border-default:  #8b4513;
+  --border-subtle:   rgba(139, 69, 19, 0.3);
+  --border-hover:    #5c2e0b;
+
+  /* ---- Accent (Wax Seal Red) ---- */
+  --accent:          #b71c1c;
+  --accent-hover:    #d32f2f;
+  --accent-text:     #b71c1c;
+  --accent-glow:     rgba(183, 28, 28, 0.3);
+  --accent-muted-bg: rgba(183, 28, 28, 0.1);
+  --accent-grad-from:#b71c1c;
+  --accent-grad-to:  #7f0000;
+
+  /* ---- Accent 2 (Old Gold) ---- */
+  --accent2:         #b8860b;
+  --accent2-hover:   #daa520;
+  --accent2-text:    #b8860b;
+  --accent2-heading: #8b6508;
+  --accent2-muted-bg:rgba(184, 134, 11, 0.1);
+
+  /* ---- Danger ---- */
+  --danger:            #d32f2f;
+  --danger-hover:      #b71c1c;
+  --danger-text:       #d32f2f;
+  --danger-muted-bg:   rgba(211, 47, 47, 0.1);
+  --danger-muted-hover:rgba(211, 47, 47, 0.2);
+  --danger-border:     rgba(211, 47, 47, 0.5);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-track: #e8d8b0;
+  --scrollbar-thumb: #8b4513;
+  --scrollbar-thumb-hover: #5c2e0b;
+
+  /* ---- Misc ---- */
+  --font-family-base: "Georgia", "Times New Roman", serif;
+  --quill-editor-bg: #fdf5db;
+  --quill-editor-text: #4e342e;
+}

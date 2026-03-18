@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Book, X, Edit2, Users, Map as MapIcon } from 'lucide-react';
 import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { InputField } from '../InputField';
 import { parseMentions } from '../../utils/mentionParser';
 
