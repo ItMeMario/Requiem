@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Map as MapIcon, Folder, Book, Sun, Moon, Sword, Plus, Database, ArrowLeft } from 'lucide-react';
+import { Users, Map as MapIcon, Folder, Book, Sun, Moon, Sword, Plus, ArrowLeft } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
@@ -264,7 +264,7 @@ function App() {
         <main className="flex-1 flex flex-col bg-surface-app overflow-y-auto w-full">
           <header className="px-8 py-6 border-b border-border-default flex items-center justify-between bg-surface-app z-10 sticky top-0">
             <div className="flex items-center space-x-3">
-              <Database className="text-accent-text" size={28} />
+              <span className="text-accent-text text-3xl tracking-widest select-none flex items-center justify-center">☽☉☾</span>
               <h1 className="text-2xl font-bold tracking-wider">REQUIEM</h1>
             </div>
             
