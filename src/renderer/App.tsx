@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Users, Map as MapIcon, Folder, Book } from 'lucide-react';
+import { Users, Map as MapIcon, Folder, Book, Sun, Moon, Sword, Plus, Database, ArrowLeft } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
+import { useTheme } from './context/ThemeContext';
 
-import { Sidebar } from './components/Sidebar';
 import { CharacterList } from './components/characters/CharacterList';
 import { LocationList } from './components/locations/LocationList';
 import { JournalList } from './components/journal/JournalList';
@@ -22,6 +22,7 @@ const initEntryState = { title: '', content: '' };
 function App() {
   const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign } = useCampaigns();
   const { characters, locations, entries, loadEntities, crud } = useEntities();
+  const { theme, setTheme } = useTheme();
 
   const [hasOpenedDiary, setHasOpenedDiary] = useState(false);
   const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal'>('characters');
@@ -258,106 +259,171 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-app text-primary font-sans">
-      <Sidebar 
-        campaigns={campaigns} 
-        handleSelectCampaign={handleSelectCampaign} 
-        selectedCampaign={selectedCampaign} 
-        setShowCreateModal={setShowCreateModal} 
-      />
+    <div className="flex h-screen overflow-hidden bg-surface-app text-primary font-sans relative">
+      {!selectedCampaign ? (
+        <main className="flex-1 flex flex-col bg-surface-app overflow-y-auto w-full">
+          <header className="px-8 py-6 border-b border-border-default flex items-center justify-between bg-surface-app z-10 sticky top-0">
+            <div className="flex items-center space-x-3">
+              <Database className="text-accent-text" size={28} />
+              <h1 className="text-2xl font-bold tracking-wider">REQUIEM</h1>
+            </div>
+            
+            <div className="flex p-1 bg-surface-deep rounded border border-border-subtle">
+              <button
+                onClick={() => setTheme('light')}
+                className={`w-10 h-8 flex items-center justify-center rounded transition-colors ${theme === 'light' ? 'bg-surface-hover text-yellow-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
+                title="Light Mode"
+              ><Sun size={16} /></button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`w-10 h-8 flex items-center justify-center rounded transition-colors ${theme === 'dark' ? 'bg-surface-hover text-accent-text shadow-sm' : 'text-faint hover:text-secondary'}`}
+                title="Dark Mode"
+              ><Moon size={16} /></button>
+              <button
+                onClick={() => setTheme('medieval')}
+                className={`w-10 h-8 flex items-center justify-center rounded transition-colors ${theme === 'medieval' ? 'bg-surface-hover text-amber-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
+                title="Medieval Mode"
+              ><Sword size={16} /></button>
+            </div>
+          </header>
 
-      <main className="flex-1 flex flex-col bg-surface-app overflow-hidden relative">
-        {!selectedCampaign ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
-            <div className="text-center space-y-6 max-w-lg">
-              <div className="flex justify-center space-x-4 text-accent-text mb-8 animate-pulse">
-                <Users size={48} />
-                <MapIcon size={48} />
-                <Folder size={48} />
-              </div>
-              <h2 className="text-4xl font-bold tracking-tight text-heading mb-4 drop-shadow-lg">Welcome to Requiem</h2>
-              <p className="text-muted text-lg leading-relaxed">
-                Your ultimate desktop tool for managing tabletop RPG campaigns, characters, locations, and lore entries.
-              </p>
-              <div className="pt-8">
-                <button 
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-8 py-3 bg-accent hover:bg-accent-hover text-heading font-semibold rounded-lg shadow-[0_0_15px_var(--accent-glow)] transition-all transform hover:scale-105 active:scale-95"
+          <div className="p-8 max-w-7xl mx-auto w-full">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-heading">Campaign Dashboard</h2>
+              <p className="text-muted mt-2">Select a campaign or create a new one to begin your journey.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Cards Grid */}
+              <button 
+                onClick={() => setShowCreateModal(true)}
+                className="h-48 rounded-xl border-2 border-dashed border-border-default flex flex-col items-center justify-center text-muted hover:text-accent-text hover:border-accent hover:bg-surface-hover transition-all group"
+              >
+                <Plus size={36} className="mb-4 text-accent2-text group-hover:text-accent-text transition-colors" />
+                <span className="text-lg font-semibold border-b border-transparent group-hover:border-accent-text transition-colors">Start New Campaign</span>
+              </button>
+
+              {campaigns.map(camp => (
+                <button
+                  key={camp.id}
+                  onClick={() => handleSelectCampaign(camp)}
+                  className="h-48 text-left rounded-xl bg-surface-elevated border border-border-subtle p-6 flex flex-col justify-between hover:shadow-lg hover:border-accent transition-all hover:-translate-y-1 relative overflow-hidden group"
                 >
-                  Create Your First Campaign
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Folder className="text-accent-text" size={24} />
+                      <h3 className="text-xl font-bold text-heading truncate">{camp.name}</h3>
+                    </div>
+                    {camp.genre && <span className="inline-block mt-2 px-2 py-1 bg-surface-deep text-xs text-secondary rounded uppercase tracking-wide">{camp.genre}</span>}
+                  </div>
+                  
+                  <div className="relative flex justify-between items-end text-sm text-faint border-t border-border-subtle pt-4 mt-auto">
+                    <span>{camp.system || 'Unknown System'}</span>
+                    <span className="group-hover:text-accent-text transition-colors font-semibold">Enter &rarr;</span>
+                  </div>
                 </button>
-              </div>
+              ))}
             </div>
           </div>
-        ) : (
-          <div className="flex-1 flex flex-col h-full z-0">
-            {/* Header */}
-            <header className="px-8 py-6 border-b border-border-subtle bg-surface-elevated backdrop-blur-sm">
-              <h2 className="text-3xl font-bold text-heading tracking-wide">{selectedCampaign.name}</h2>
-              <div className="flex space-x-4 text-sm text-muted mt-2">
-                {selectedCampaign.genre && <span>Genre: <span className="text-secondary">{selectedCampaign.genre}</span></span>}
-                {selectedCampaign.system && <span>System: <span className="text-secondary">{selectedCampaign.system}</span></span>}
+        </main>
+      ) : (
+        <main className="flex-1 flex flex-col h-full z-0 w-full overflow-hidden bg-surface-app">
+          {/* Header */}
+          <header className="px-8 py-4 border-b border-border-subtle bg-surface-elevated flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <button 
+                onClick={() => setSelectedCampaign(null)}
+                className="text-muted hover:text-heading flex items-center space-x-2 transition-colors pr-6 border-r border-border-subtle"
+              >
+                <ArrowLeft size={20} />
+                <span>Dashboard</span>
+              </button>
+              <div>
+                <h2 className="text-2xl font-bold text-heading tracking-wide flex items-center space-x-2"><Folder size={20} className="text-accent-text mr-2" /> {selectedCampaign.name}</h2>
+                <div className="flex space-x-4 text-xs text-muted mt-1">
+                  {selectedCampaign.genre && <span>Genre: <span className="text-secondary">{selectedCampaign.genre}</span></span>}
+                  {selectedCampaign.system && <span>System: <span className="text-secondary">{selectedCampaign.system}</span></span>}
+                </div>
               </div>
-            </header>
-
-            {/* Tabs */}
-            <div className="flex px-8 border-b border-border-subtle bg-surface-elevated2">
-              <button 
-                onClick={() => setActiveTab('characters')}
-                className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'characters' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
-              >
-                <Users size={18} />
-                <span>Characters</span>
-              </button>
-              <button 
-                onClick={() => setActiveTab('locations')}
-                className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'locations' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
-              >
-                <MapIcon size={18} />
-                <span>Locations</span>
-              </button>
-              <button 
-                onClick={() => setActiveTab('journal')}
-                className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'journal' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
-              >
-                <Book size={18} />
-                <span>Journal</span>
-              </button>
             </div>
-
-            {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto p-8">
-              {activeTab === 'characters' && (
-                <CharacterList 
-                  characters={characters} 
-                  handleDeleteChar={handleDeleteChar} 
-                  handleEditChar={handleEditChar} 
-                  openNewCharModal={openNewCharModal} 
-                />
-              )}
-              {activeTab === 'locations' && (
-                <LocationList 
-                  locations={locations} 
-                  handleDeleteLoc={handleDeleteLoc} 
-                  handleEditLoc={handleEditLoc} 
-                  openNewLocModal={openNewLocModal} 
-                />
-              )}
-              {activeTab === 'journal' && (
-                <JournalList 
-                  entries={entries} 
-                  characters={characters} 
-                  locations={locations} 
-                  handleDeleteEntry={handleDeleteEntry} 
-                  handleEditEntry={handleEditEntry} 
-                  handleViewEntry={handleViewEntry} 
-                  openNewEntryModal={openNewEntryModal} 
-                />
-              )}
+            
+            <div className="flex p-0.5 bg-surface-deep rounded border border-border-subtle scale-90 origin-right">
+              <button
+                onClick={() => setTheme('light')}
+                className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${theme === 'light' ? 'bg-surface-hover text-yellow-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
+                title="Light Mode"
+              ><Sun size={14} /></button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${theme === 'dark' ? 'bg-surface-hover text-accent-text shadow-sm' : 'text-faint hover:text-secondary'}`}
+                title="Dark Mode"
+              ><Moon size={14} /></button>
+              <button
+                onClick={() => setTheme('medieval')}
+                className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${theme === 'medieval' ? 'bg-surface-hover text-amber-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
+                title="Medieval Mode"
+              ><Sword size={14} /></button>
             </div>
+          </header>
+
+          {/* Tabs */}
+          <div className="flex px-8 border-b border-border-subtle bg-surface-elevated2">
+            <button 
+              onClick={() => setActiveTab('characters')}
+              className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'characters' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+            >
+              <Users size={18} />
+              <span>Characters</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('locations')}
+              className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'locations' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+            >
+              <MapIcon size={18} />
+              <span>Locations</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab('journal')}
+              className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'journal' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+            >
+              <Book size={18} />
+              <span>Journal</span>
+            </button>
           </div>
-        )}
-      </main>
+
+          {/* Tab Content */}
+          <div className="flex-1 overflow-y-auto p-8">
+            {activeTab === 'characters' && (
+              <CharacterList 
+                characters={characters} 
+                handleDeleteChar={handleDeleteChar} 
+                handleEditChar={handleEditChar} 
+                openNewCharModal={openNewCharModal} 
+              />
+            )}
+            {activeTab === 'locations' && (
+              <LocationList 
+                locations={locations} 
+                handleDeleteLoc={handleDeleteLoc} 
+                handleEditLoc={handleEditLoc} 
+                openNewLocModal={openNewLocModal} 
+              />
+            )}
+            {activeTab === 'journal' && (
+              <JournalList 
+                entries={entries} 
+                characters={characters} 
+                locations={locations} 
+                handleDeleteEntry={handleDeleteEntry} 
+                handleEditEntry={handleEditEntry} 
+                handleViewEntry={handleViewEntry} 
+                openNewEntryModal={openNewEntryModal} 
+              />
+            )}
+          </div>
+        </main>
+      )}
 
       <CreateCampaignModal 
         showCreateModal={showCreateModal} 
