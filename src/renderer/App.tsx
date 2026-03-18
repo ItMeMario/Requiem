@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Map as MapIcon, Folder, Book, Sun, Moon, Sword, Plus, ArrowLeft } from 'lucide-react';
+import { Users, Map as MapIcon, Book, Sun, Moon, Sword, Plus, ArrowLeft } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
@@ -312,7 +312,7 @@ function App() {
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="relative">
                     <div className="flex items-center space-x-3 mb-2">
-                      <Folder className="text-accent-text" size={24} />
+                      <span className="text-accent-text text-2xl select-none flex items-center justify-center">☽☉☾</span>
                       <h3 className="text-xl font-bold text-heading truncate">{camp.name}</h3>
                     </div>
                     {camp.genre && <span className="inline-block mt-2 px-2 py-1 bg-surface-deep text-xs text-secondary rounded uppercase tracking-wide">{camp.genre}</span>}
@@ -340,7 +340,7 @@ function App() {
                 <span>Dashboard</span>
               </button>
               <div>
-                <h2 className="text-2xl font-bold text-heading tracking-wide flex items-center space-x-2"><Folder size={20} className="text-accent-text mr-2" /> {selectedCampaign.name}</h2>
+                <h2 className="text-2xl font-bold text-heading tracking-wide flex items-center space-x-2"><span className="text-accent-text text-xl mr-2 select-none">☽☉☾</span> {selectedCampaign.name}</h2>
                 <div className="flex space-x-4 text-xs text-muted mt-1">
                   {selectedCampaign.genre && <span>Genre: <span className="text-secondary">{selectedCampaign.genre}</span></span>}
                   {selectedCampaign.system && <span>System: <span className="text-secondary">{selectedCampaign.system}</span></span>}
