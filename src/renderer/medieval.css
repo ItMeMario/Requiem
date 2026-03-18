@@ -61,3 +61,63 @@
   --quill-editor-bg: #fdf5db;
   --quill-editor-text: #4e342e;
 }
+
+/* ============================================================
+   DIARY ENTRANCE ANIMATION (3D CSS)
+   ============================================================ */
+.perspective-diary {
+  perspective: 2000px;
+}
+
+.diary-book {
+  position: relative;
+  width: 400px;
+  height: 550px;
+  transform-style: preserve-3d;
+  transition: transform 1.5s ease-in-out;
+  transform: rotateX(10deg) rotateY(-5deg); /* Slight angle for 3D realism */
+}
+
+/* Cover textures, using gradients to fake old worn leather */
+.diary-front-cover, .diary-back-cover {
+  background: radial-gradient(circle at center, var(--surface-sidebar) 70%, #b39b71 100%);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.diary-front-cover {
+  transform: rotateY(0deg);
+}
+
+.diary-back-cover {
+  transform: rotateY(0deg) translateZ(-40px); /* the thickness behind the front cover */
+}
+
+/* The pages thickness */
+.diary-pages {
+  width: calc(100% - 16px);
+  transform: translateZ(-20px);
+}
+
+/* Inner page elements opacity reveal after cover is open slightly */
+.diary-book.is-open .diary-inner-page {
+  opacity: 1;
+}
+
+/* When the diary is clicked and opens */
+.diary-book.is-open .diary-front-cover {
+  transform: rotateY(-165deg);
+  box-shadow: -10px 5px 20px rgba(0, 0, 0, 0.5); /* shadow casts to the left */
+}
+
+.diary-book.is-open {
+  transform: rotateX(5deg) scale(1.4) translateX(150px);
+  opacity: 0;
+  transition: transform 1.5s ease-in-out, opacity 0.5s ease-in-out 1s; /* fades out at the end */
+}
+
+.diary-book.is-open .diary-seal {
+  opacity: 0;
+  transform: scale(1.5) rotate(10deg);
+  transition: opacity 0.5s ease-in-out, transform 0.5s;
+}

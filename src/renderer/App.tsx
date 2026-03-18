@@ -13,6 +13,7 @@ import { CreateCampaignModal } from './components/modals/CreateCampaignModal';
 import { CharacterModal } from './components/modals/CharacterModal';
 import { LocationModal } from './components/modals/LocationModal';
 import { EntryModal } from './components/modals/EntryModal';
+import { DiaryEntry } from './components/DiaryEntry';
 
 const initCharState = { name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' };
 const initLocState = { name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' };
@@ -22,6 +23,7 @@ function App() {
   const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign } = useCampaigns();
   const { characters, locations, entries, loadEntities, crud } = useEntities();
 
+  const [hasOpenedDiary, setHasOpenedDiary] = useState(false);
   const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal'>('characters');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -250,6 +252,10 @@ function App() {
       }
     }
   };
+
+  if (!hasOpenedDiary) {
+    return <DiaryEntry onOpen={() => setHasOpenedDiary(true)} />;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface-app text-primary font-sans">
