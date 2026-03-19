@@ -299,7 +299,9 @@ function App() {
 
           <div className="p-8 max-w-7xl mx-auto w-full">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-heading">Campaign Dashboard</h2>
+              <h2 className="text-3xl font-bold text-heading">
+                {theme === 'medieval' ? 'Your Lore' : 'Campaign Dashboard'}
+              </h2>
               <p className="text-muted mt-2">Select a campaign or create a new one to begin your journey.</p>
             </div>
             
