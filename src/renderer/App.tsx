@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Map as MapIcon, Book, Sun, Moon, Sword, Plus, ArrowLeft, Trash2 } from 'lucide-react';
+import { Users, Map as MapIcon, Book, Sun, Moon, Sword, Plus, ArrowLeft, Trash2, Play } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
@@ -44,7 +44,12 @@ function App() {
   const [newLoc, setNewLoc] = useState(initLocState);
   const [newEntry, setNewEntry] = useState(initEntryState);
 
+  const lastOpenedIdStr = localStorage.getItem('lastOpenedCampaignId');
+  const lastOpenedId = lastOpenedIdStr ? parseInt(lastOpenedIdStr, 10) : null;
+  const lastOpenedCampaign = campaigns.find(c => c.id === lastOpenedId) || (campaigns.length > 0 ? campaigns[campaigns.length - 1] : null);
+
   const handleSelectCampaign = async (camp: any) => {
+    localStorage.setItem('lastOpenedCampaignId', camp.id.toString());
     setSelectedCampaign(camp);
     await loadEntities(camp.id);
   };
@@ -298,11 +303,23 @@ function App() {
           </header>
 
           <div className="p-8 max-w-7xl mx-auto w-full">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-heading">
-                {theme === 'medieval' ? 'Your Lore' : 'Campaign Dashboard'}
-              </h2>
-              <p className="text-muted mt-2">Select a campaign or create a new one to begin your journey.</p>
+            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-bold text-heading">
+                  {theme === 'medieval' ? 'Your Lore' : 'Campaign Dashboard'}
+                </h2>
+                <p className="text-muted mt-2">Select a campaign or create a new one to begin your journey.</p>
+              </div>
+              {lastOpenedCampaign && (
+                <button
+                  onClick={() => handleSelectCampaign(lastOpenedCampaign)}
+                  className="flex items-center space-x-2 px-5 py-2.5 rounded-lg bg-surface-elevated border border-border-subtle hover:border-accent text-muted hover:text-accent-text transition-all shadow-sm"
+                  title="Resume Last Campaign"
+                >
+                  <Play size={18} className="text-accent2-text" />
+                  <span className="font-semibold whitespace-nowrap">Resume: {lastOpenedCampaign.name}</span>
+                </button>
+              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
