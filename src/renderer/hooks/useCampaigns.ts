@@ -31,11 +31,27 @@ export const useCampaigns = () => {
       throw error;
     }
   };
+  const deleteCampaign = async (id: number) => {
+    try {
+      if ((window as any).api) {
+        await (window as any).api.deleteCampaign(id);
+        const newCampaigns = campaigns.filter(c => c.id !== id);
+        setCampaigns(newCampaigns);
+        if (selectedCampaign?.id === id) {
+          setSelectedCampaign(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      throw error;
+    }
+  };
 
   return { 
     campaigns, 
     selectedCampaign, 
     setSelectedCampaign, 
-    createCampaign 
+    createCampaign,
+    deleteCampaign
   };
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Map as MapIcon, Book, Sun, Moon, Sword, Plus, ArrowLeft } from 'lucide-react';
+import { Users, Map as MapIcon, Book, Sun, Moon, Sword, Plus, ArrowLeft, Trash2 } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
@@ -20,7 +20,7 @@ const initLocState = { name: '', region: '', type: '', description: '', lore: ''
 const initEntryState = { title: '', content: '' };
 
 function App() {
-  const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign } = useCampaigns();
+  const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign, deleteCampaign } = useCampaigns();
   const { characters, locations, entries, loadEntities, crud } = useEntities();
   const { theme, setTheme } = useTheme();
 
@@ -47,6 +47,16 @@ function App() {
   const handleSelectCampaign = async (camp: any) => {
     setSelectedCampaign(camp);
     await loadEntities(camp.id);
+  };
+
+  const handleDeleteCampaign = async (id: number, name: string) => {
+    if (window.confirm(`Você tem certeza que deseja excluir a campanha "${name}"? Esta ação é irreversível e excluirá todo o conteúdo associado.`)) {
+      try {
+        await deleteCampaign(id);
+      } catch (error) {
+        console.error('Error deleting campaign:', error);
+      }
+    }
   };
 
   const handleCreateCampaignWrapper = async (e: React.FormEvent) => {
@@ -304,25 +314,47 @@ function App() {
               </button>
 
               {campaigns.map(camp => (
-                <button
+                <div
                   key={camp.id}
                   onClick={() => handleSelectCampaign(camp)}
-                  className="h-48 text-left rounded-xl bg-surface-elevated border border-border-subtle p-6 flex flex-col justify-between hover:shadow-lg hover:border-accent transition-all hover:-translate-y-1 relative overflow-hidden group"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleSelectCampaign(camp);
+                    }
+                  }}
+                  className="h-48 text-left rounded-xl bg-surface-elevated border border-border-subtle p-6 flex flex-col justify-between hover:shadow-lg hover:border-accent transition-all hover:-translate-y-1 relative overflow-hidden group cursor-pointer"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  
+                  {/* Delete Button */}
+                  <div className="absolute top-4 right-4 z-10 transition-opacity opacity-0 group-hover:opacity-100">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCampaign(camp.id, camp.name);
+                      }}
+                      className="p-1.5 text-muted hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+                      title="Excluir Campanha"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <div className="relative pointer-events-none">
                     <div className="flex items-center space-x-3 mb-2">
                       <span className="text-accent-text text-2xl select-none flex items-center justify-center">☽☉☾</span>
-                      <h3 className="text-xl font-bold text-heading truncate">{camp.name}</h3>
+                      <h3 className="text-xl font-bold text-heading truncate pr-8">{camp.name}</h3>
                     </div>
                     {camp.genre && <span className="inline-block mt-2 px-2 py-1 bg-surface-deep text-xs text-secondary rounded uppercase tracking-wide">{camp.genre}</span>}
                   </div>
                   
-                  <div className="relative flex justify-between items-end text-sm text-faint border-t border-border-subtle pt-4 mt-auto">
+                  <div className="relative flex justify-between items-end text-sm text-faint border-t border-border-subtle pt-4 mt-auto pointer-events-none">
                     <span>{camp.system || 'Unknown System'}</span>
                     <span className="group-hover:text-accent-text transition-colors font-semibold">Enter &rarr;</span>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           </div>
