@@ -47,7 +47,7 @@ export function DiaryEntry({ onOpen }: DiaryEntryProps) {
           </h1>
           
           <p className="text-accent2-muted text-sm uppercase tracking-[0.3em] mt-4 font-semibold opacity-80">
-            Game Master's Journal
+            Your own journal
           </p>
           
           <div className="flex-1"></div>
