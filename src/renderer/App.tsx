@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { Users, Map as MapIcon, Book, Sun, Moon, Sword, Plus, ArrowLeft, Trash2, Play } from 'lucide-react';
+import { Users, Map as MapIcon, Book, Plus, ArrowLeft, Trash2, Play } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
 import { useTheme } from './context/ThemeContext';
+
+import { ThemeSwitcher } from './components/ThemeSwitcher';
+import { MedievalLayout } from './components/medieval/MedievalLayout';
+import { useDiaryGate } from './hooks/useDiaryGate';
+import { getThemeLabels } from './utils/themeLabels';
 
 import { CharacterList } from './components/characters/CharacterList';
 import { LocationList } from './components/locations/LocationList';
@@ -24,7 +29,7 @@ function App() {
   const { characters, locations, entries, loadEntities, crud } = useEntities();
   const { theme, setTheme } = useTheme();
 
-  const [hasOpenedDiary, setHasOpenedDiary] = useState(false);
+  const { showDiaryGate, openDiary } = useDiaryGate();
   const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal'>('characters');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -269,26 +274,12 @@ function App() {
     }
   };
 
-  if (!hasOpenedDiary) {
-    return <DiaryEntry onOpen={() => setHasOpenedDiary(true)} />;
+  if (showDiaryGate) {
+    return <DiaryEntry onOpen={openDiary} />;
   }
 
   return (
-    <div 
-      className="flex h-screen w-full p-1 sm:p-3 md:p-6 lg:p-10 overflow-hidden relative" 
-      style={{ background: 'linear-gradient(to bottom right, #3b2314, #1a0e08)' }}
-    >
-      {/* Background ambient corner shadow */}
-      <div className="absolute inset-0 shadow-[inset_0_0_120px_rgba(0,0,0,0.9)] pointer-events-none" />
-      {/* Decorative Leather Stitching */}
-      <div className="absolute inset-[3px] sm:inset-2 md:inset-4 lg:inset-8 border-2 border-[#a87a41] border-dashed rounded-lg opacity-30 pointer-events-none shadow-[0_0_2px_#000]" />
-      
-      {/* Open Journal "Pages" Container */}
-      <div className="flex w-full h-full bg-surface-app text-primary font-sans overflow-hidden relative rounded-r-xl rounded-l-md shadow-[10px_10px_40px_rgba(0,0,0,0.8)] border border-[#8c6b3e]/30 z-10">
-        {/* Spine/Binding shadow on the left edge */}
-        <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black/60 via-black/20 to-transparent pointer-events-none z-[60]" />
-        
-        <div className="flex-1 flex flex-col w-full h-full relative">
+    <MedievalLayout>
           {!selectedCampaign ? (
         <main className="flex-1 flex flex-col bg-surface-app overflow-y-auto w-full">
           <header className="px-8 py-6 border-b border-border-default flex items-center justify-between bg-surface-app z-10 sticky top-0">
@@ -297,30 +288,14 @@ function App() {
               <h1 className="text-2xl font-bold tracking-wider">REQUIEM</h1>
             </div>
             
-            <div className="flex p-1 bg-surface-deep rounded border border-border-subtle">
-              <button
-                onClick={() => setTheme('light')}
-                className={`w-10 h-8 flex items-center justify-center rounded transition-colors ${theme === 'light' ? 'bg-surface-hover text-yellow-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
-                title="Light Mode"
-              ><Sun size={16} /></button>
-              <button
-                onClick={() => setTheme('dark')}
-                className={`w-10 h-8 flex items-center justify-center rounded transition-colors ${theme === 'dark' ? 'bg-surface-hover text-accent-text shadow-sm' : 'text-faint hover:text-secondary'}`}
-                title="Dark Mode"
-              ><Moon size={16} /></button>
-              <button
-                onClick={() => setTheme('medieval')}
-                className={`w-10 h-8 flex items-center justify-center rounded transition-colors ${theme === 'medieval' ? 'bg-surface-hover text-amber-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
-                title="Medieval Mode"
-              ><Sword size={16} /></button>
-            </div>
+            <ThemeSwitcher size="md" />
           </header>
 
           <div className="p-8 max-w-7xl mx-auto w-full">
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-bold text-heading">
-                  {theme === 'medieval' ? 'Your Lore' : 'Campaign Dashboard'}
+                  {getThemeLabels(theme).dashboardTitle}
                 </h2>
                 <p className="text-muted mt-2">Select a campaign or create a new one to begin your journey.</p>
               </div>
@@ -413,23 +388,7 @@ function App() {
               </div>
             </div>
             
-            <div className="flex p-0.5 bg-surface-deep rounded border border-border-subtle scale-90 origin-right">
-              <button
-                onClick={() => setTheme('light')}
-                className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${theme === 'light' ? 'bg-surface-hover text-yellow-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
-                title="Light Mode"
-              ><Sun size={14} /></button>
-              <button
-                onClick={() => setTheme('dark')}
-                className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${theme === 'dark' ? 'bg-surface-hover text-accent-text shadow-sm' : 'text-faint hover:text-secondary'}`}
-                title="Dark Mode"
-              ><Moon size={14} /></button>
-              <button
-                onClick={() => setTheme('medieval')}
-                className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${theme === 'medieval' ? 'bg-surface-hover text-amber-500 shadow-sm' : 'text-faint hover:text-secondary'}`}
-                title="Medieval Mode"
-              ><Sword size={14} /></button>
-            </div>
+            <ThemeSwitcher size="sm" />
           </header>
 
           {/* Tabs */}
@@ -532,9 +491,7 @@ function App() {
         locations={locations} 
       />
 
-        </div>
-      </div>
-    </div>
+    </MedievalLayout>
   );
 }
 
