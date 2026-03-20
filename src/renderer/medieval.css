@@ -3,14 +3,14 @@
    ============================================================ */
 .theme-medieval {
   /* ---- Surfaces / Backgrounds ---- */
-  --surface-app:       #f4eacc;
-  --surface-sidebar:   #e8d8b0;
-  --surface-card:      #fdf5db;
-  --surface-input:     #e8d8b0;
-  --surface-hover:     #d9c596;
+  --surface-app:       transparent;
+  --surface-sidebar:   rgba(232, 216, 176, 0.4);
+  --surface-card:      transparent;
+  --surface-input:     rgba(232, 216, 176, 0.5);
+  --surface-hover:     rgba(217, 197, 150, 0.3);
   --surface-active:    rgba(139, 69, 19, 0.2);
-  --surface-elevated:  rgba(0, 0, 0, 0.1);
-  --surface-elevated2: rgba(0, 0, 0, 0.05);
+  --surface-elevated:  rgba(0, 0, 0, 0.05);
+  --surface-elevated2: rgba(0, 0, 0, 0.02);
   --surface-overlay:   rgba(62, 39, 35, 0.5);
   --surface-deep:      rgba(139, 69, 19, 0.1);
 
@@ -23,8 +23,8 @@
   --text-icon:      #4e342e;
 
   /* ---- Borders ---- */
-  --border-default:  #8b4513;
-  --border-subtle:   rgba(139, 69, 19, 0.3);
+  --border-default:  rgba(139, 69, 19, 0.3);
+  --border-subtle:   rgba(139, 69, 19, 0.2);
   --border-hover:    #5c2e0b;
 
   /* ---- Accent (Wax Seal Red) ---- */
@@ -60,6 +60,29 @@
   --font-family-base: "Georgia", "Times New Roman", serif;
   --quill-editor-bg: #fdf5db;
   --quill-editor-text: #4e342e;
+}
+
+/* Helper class for wood plank texture */
+.wood-plank {
+  background-color: #cca474;
+  background-image: 
+    radial-gradient(ellipse at 10% 20%, rgba(0,0,0,0.05) 10%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(0,0,0,0.05) 10%, transparent 50%);
+  background-size: 100% 100%;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(139, 69, 19, 0.3);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(139, 69, 19, 0.5);
 }
 
 /* ============================================================

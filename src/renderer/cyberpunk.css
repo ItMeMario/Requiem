@@ -17,9 +17,9 @@
   /* ---- Text ---- */
   --text-heading:   #00ffff; /* Glowing cyan */
   --text-primary:   #d0f0ff; /* Bright readable ice blue */
-  --text-secondary: #7090b0; /* Steel blue */
-  --text-muted:     #405060;
-  --text-faint:     #203040;
+  --text-secondary: #88c0d0; /* Brighter steel cyan */
+  --text-muted:     #6787a4; /* Brighter muted blue */
+  --text-faint:     #4a6782; /* Much brighter faint blue */
   --text-icon:      #00ffff;
 
   /* ---- Borders ---- */

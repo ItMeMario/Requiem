@@ -8,6 +8,7 @@ import { useTheme } from './context/ThemeContext';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { MedievalLayout } from './components/medieval/MedievalLayout';
 import { CyberpunkLayout } from './components/cyberpunk/CyberpunkLayout';
+import { MedievalDashboard } from './components/medieval/MedievalDashboard';
 import { useDiaryGate } from './hooks/useDiaryGate';
 import { useCyberpunkGate } from './hooks/useCyberpunkGate';
 import { getThemeLabels } from './utils/themeLabels';
@@ -300,6 +301,15 @@ function App() {
   return renderLayout(
     <>
           {!selectedCampaign ? (
+            theme === 'medieval' ? (
+              <MedievalDashboard 
+                campaigns={campaigns}
+                lastOpenedCampaign={lastOpenedCampaign}
+                handleSelectCampaign={handleSelectCampaign}
+                handleDeleteCampaign={handleDeleteCampaign}
+                setShowCreateModal={setShowCreateModal}
+              />
+            ) : (
         <main className="flex-1 flex flex-col bg-surface-app overflow-y-auto w-full">
           <header className={`px-8 py-6 border-b flex items-center justify-between z-10 sticky top-0 ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : 'bg-surface-app border-border-default'}`}>
             <div className="flex items-center space-x-3">
@@ -407,6 +417,7 @@ function App() {
             </div>
           </div>
         </main>
+            )
       ) : (
         <main className="flex-1 flex flex-col h-full z-0 w-full overflow-hidden bg-surface-app">
           {/* Header */}
