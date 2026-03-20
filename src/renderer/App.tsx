@@ -7,7 +7,9 @@ import { useTheme } from './context/ThemeContext';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { MedievalLayout } from './components/medieval/MedievalLayout';
+import { CyberpunkLayout } from './components/cyberpunk/CyberpunkLayout';
 import { useDiaryGate } from './hooks/useDiaryGate';
+import { useCyberpunkGate } from './hooks/useCyberpunkGate';
 import { getThemeLabels } from './utils/themeLabels';
 
 import { CharacterList } from './components/characters/CharacterList';
@@ -19,6 +21,7 @@ import { CharacterModal } from './components/modals/CharacterModal';
 import { LocationModal } from './components/modals/LocationModal';
 import { EntryModal } from './components/modals/EntryModal';
 import { DiaryEntry } from './components/DiaryEntry';
+import { TerminalEntry } from './components/cyberpunk/TerminalEntry';
 
 const initCharState = { name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' };
 const initLocState = { name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' };
@@ -30,6 +33,8 @@ function App() {
   const { theme, setTheme } = useTheme();
 
   const { showDiaryGate, openDiary } = useDiaryGate();
+  const { showTerminalGate, openTerminal } = useCyberpunkGate();
+  
   const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal'>('characters');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -278,14 +283,28 @@ function App() {
     return <DiaryEntry onOpen={openDiary} />;
   }
 
-  return (
-    <MedievalLayout>
+  if (showTerminalGate) {
+    return <TerminalEntry onOpen={openTerminal} />;
+  }
+
+  const renderLayout = (children: React.ReactNode) => {
+    if (theme === 'medieval') return <MedievalLayout>{children}</MedievalLayout>;
+    if (theme === 'cyberpunk') return <CyberpunkLayout>{children}</CyberpunkLayout>;
+    return (
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-surface-app text-primary font-sans relative">
+        {children}
+      </div>
+    );
+  };
+
+  return renderLayout(
+    <>
           {!selectedCampaign ? (
         <main className="flex-1 flex flex-col bg-surface-app overflow-y-auto w-full">
-          <header className="px-8 py-6 border-b border-border-default flex items-center justify-between bg-surface-app z-10 sticky top-0">
+          <header className={`px-8 py-6 border-b flex items-center justify-between z-10 sticky top-0 ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : 'bg-surface-app border-border-default'}`}>
             <div className="flex items-center space-x-3">
-              <span className="text-accent-text text-3xl tracking-widest select-none flex items-center justify-center">☽☉☾</span>
-              <h1 className="text-2xl font-bold tracking-wider">REQUIEM</h1>
+              <span className={`text-3xl tracking-widest select-none flex items-center justify-center ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : 'text-accent-text'}`} data-text="☽☉☾">☽☉☾</span>
+              <h1 className={`text-2xl font-bold tracking-wider ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : ''}`} data-text="REQUIEM">REQUIEM</h1>
             </div>
             
             <ThemeSwitcher size="md" />
@@ -313,57 +332,78 @@ function App() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Cards Grid */}
-              <button 
-                onClick={() => setShowCreateModal(true)}
-                className="h-48 rounded-xl border-2 border-dashed border-border-default flex flex-col items-center justify-center text-muted hover:text-accent-text hover:border-accent hover:bg-surface-hover transition-all group"
-              >
-                <Plus size={36} className="mb-4 text-accent2-text group-hover:text-accent-text transition-colors" />
-                <span className="text-lg font-semibold border-b border-transparent group-hover:border-accent-text transition-colors">Start New Campaign</span>
-              </button>
-
-              {campaigns.map(camp => (
-                <div
-                  key={camp.id}
-                  onClick={() => handleSelectCampaign(camp)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      handleSelectCampaign(camp);
-                    }
-                  }}
-                  className="h-48 text-left rounded-xl bg-surface-elevated border border-border-subtle p-6 flex flex-col justify-between hover:shadow-lg hover:border-accent transition-all hover:-translate-y-1 relative overflow-hidden group cursor-pointer"
+              {theme === 'cyberpunk' ? (
+                <button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="h-48 rounded-xl cyber-metallic-panel flex flex-col items-center justify-center text-[#0ff] hover:text-white hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-all group overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  
-                  {/* Delete Button */}
-                  <div className="absolute top-4 right-4 z-10 transition-opacity opacity-0 group-hover:opacity-100">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCampaign(camp.id, camp.name);
-                      }}
-                      className="p-1.5 text-muted hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
-                      title="Excluir Campanha"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <div className="absolute inset-5 border border-[#0ff]/30 rounded-full flex items-center justify-center">
+                    <div className="absolute inset-4 border-[3px] border-dashed border-[#0ff]/40 rounded-full animate-[spin_30s_linear_infinite]" />
+                    <div className="absolute inset-0 border border-[#0ff]/10 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+                    <Plus size={54} strokeWidth={3} className="text-[#0ff] group-hover:scale-110 transition-transform drop-shadow-[0_0_12px_rgba(0,255,255,1)]" />
                   </div>
+                  <span className="mt-28 text-sm font-bold tracking-widest z-10 bg-[#02050a] px-6 py-1.5 rounded-sm border border-[#0ff]/50 shadow-[0_0_10px_rgba(0,255,255,0.3)]">START NEW CAMPAIGN</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="h-48 rounded-xl border-2 border-dashed border-border-default flex flex-col items-center justify-center text-muted hover:text-accent-text hover:border-accent hover:bg-surface-hover transition-all group"
+                >
+                  <Plus size={36} className="mb-4 text-accent2-text group-hover:text-accent-text transition-colors" />
+                  <span className="text-lg font-semibold border-b border-transparent group-hover:border-accent-text transition-colors">Start New Campaign</span>
+                </button>
+              )}
 
-                  <div className="relative pointer-events-none">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <span className="text-accent-text text-2xl select-none flex items-center justify-center">☽☉☾</span>
-                      <h3 className="text-xl font-bold text-heading truncate pr-8">{camp.name}</h3>
+              {campaigns.map(camp => {
+                const isCyber = theme === 'cyberpunk';
+                return (
+                  <div
+                    key={camp.id}
+                    onClick={() => handleSelectCampaign(camp)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') handleSelectCampaign(camp);
+                    }}
+                    className={`h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer ${
+                      isCyber 
+                        ? 'cyber-carbon-card hover:border-[#0ff]/80 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]' 
+                        : 'bg-surface-elevated border border-border-subtle hover:shadow-lg hover:border-accent hover:-translate-y-1 relative overflow-hidden'
+                    }`}
+                  >
+                    {!isCyber && <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />}
+                    
+                    {/* Delete Button */}
+                    <div className="absolute top-4 right-4 z-10 transition-opacity opacity-0 group-hover:opacity-100">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCampaign(camp.id, camp.name);
+                        }}
+                        className={`p-1.5 rounded-md transition-colors ${isCyber ? 'text-[#ff003c] hover:bg-[#ff003c]/20' : 'text-muted hover:text-red-500 hover:bg-red-500/10'}`}
+                        title="Excluir Campanha"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                    {camp.genre && <span className="inline-block mt-2 px-2 py-1 bg-surface-deep text-xs text-secondary rounded uppercase tracking-wide">{camp.genre}</span>}
+
+                    <div className="relative pointer-events-none z-10">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <span className={`${isCyber ? 'text-[#0ff]' : 'text-accent-text'} text-2xl select-none flex items-center justify-center`}>☽☉☾</span>
+                        <h3 className={`text-xl font-bold truncate pr-8 ${isCyber ? 'text-[#0ff] tracking-wider' : 'text-heading'}`}>{camp.name}</h3>
+                      </div>
+                      {camp.genre && <span className={`inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold ${isCyber ? 'cyber-glowing-pill' : 'bg-surface-deep text-secondary'}`}>{camp.genre}</span>}
+                    </div>
+                    
+                    <div className={`relative flex justify-between items-end text-sm pt-4 mt-auto pointer-events-none z-10 ${isCyber ? 'border-t border-[#0ff]/30 text-[#0ff]/70' : 'border-t border-border-subtle text-faint'}`}>
+                      <span className={isCyber ? 'cyber-glowing-pill px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mt-1' : ''}>{camp.system || 'Unknown System'}</span>
+                      <span className={`font-semibold px-4 py-1.5 rounded transition-colors ${isCyber ? 'cyber-enter-btn text-xs tracking-widest' : 'group-hover:text-accent-text'}`}>
+                        {isCyber ? 'ENTER' : 'Enter'} &rarr;
+                      </span>
+                    </div>
                   </div>
-                  
-                  <div className="relative flex justify-between items-end text-sm text-faint border-t border-border-subtle pt-4 mt-auto pointer-events-none">
-                    <span>{camp.system || 'Unknown System'}</span>
-                    <span className="group-hover:text-accent-text transition-colors font-semibold">Enter &rarr;</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </main>
@@ -491,7 +531,7 @@ function App() {
         locations={locations} 
       />
 
-    </MedievalLayout>
+    </>
   );
 }
 

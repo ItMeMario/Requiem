@@ -1,0 +1,242 @@
+/* ============================================================
+   CYBERPUNK THEME OVERRIDES (Global Tailwind Palette)
+   ============================================================ */
+.theme-cyberpunk {
+  /* ---- Surfaces / Backgrounds ---- */
+  --surface-app:       #02050a; /* Deepest screen background */
+  --surface-sidebar:   #040a12;
+  --surface-card:      #050c18; /* Dark carbon area */
+  --surface-input:     #08121f;
+  --surface-hover:     #0b1828;
+  --surface-active:    rgba(0, 255, 255, 0.15);
+  --surface-elevated:  rgba(0, 255, 255, 0.05); /* Subtle glow */
+  --surface-elevated2: rgba(0, 255, 255, 0.08);
+  --surface-overlay:   rgba(2, 5, 10, 0.85);
+  --surface-deep:      rgba(0, 255, 255, 0.02);
+
+  /* ---- Text ---- */
+  --text-heading:   #00ffff; /* Glowing cyan */
+  --text-primary:   #d0f0ff; /* Bright readable ice blue */
+  --text-secondary: #7090b0; /* Steel blue */
+  --text-muted:     #405060;
+  --text-faint:     #203040;
+  --text-icon:      #00ffff;
+
+  /* ---- Borders ---- */
+  --border-default:  #152535; /* Dark steel border */
+  --border-subtle:   rgba(0, 255, 255, 0.15); /* Neon subtle */
+  --border-hover:    #00ffff; /* Neon highlight */
+
+  /* ---- Accent (Neon Cyan) ---- */
+  --accent:          #00ffff;
+  --accent-hover:    #00cccc;
+  --accent-text:     #00ffff;
+  --accent-glow:     rgba(0, 255, 255, 0.4);
+  --accent-muted-bg: rgba(0, 255, 255, 0.1);
+  --accent-grad-from:#00ffff;
+  --accent-grad-to:  #0055ff;
+
+  /* ---- Accent 2 (Purple/Pink Neon) ---- */
+  --accent2:         #ff00ff;
+  --accent2-hover:   #cc00cc;
+  --accent2-text:    #ff00ff;
+  --accent2-heading: #ff00ff;
+  --accent2-muted-bg:rgba(255, 0, 255, 0.1);
+
+  /* ---- Danger (Neon Red) ---- */
+  --danger:            #ff003c;
+  --danger-hover:      #cc0030;
+  --danger-text:       #ff003c;
+  --danger-muted-bg:   rgba(255, 0, 60, 0.1);
+  --danger-muted-hover:rgba(255, 0, 60, 0.2);
+  --danger-border:     rgba(255, 0, 60, 0.5);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-track: #040a12;
+  --scrollbar-thumb: #152535;
+  --scrollbar-thumb-hover: #00ffff;
+
+  /* ---- Misc ---- */
+  --font-family-base: "Inter", "Roboto", "Courier New", sans-serif;
+  --quill-editor-bg: #050c18;
+  --quill-editor-text: #d0f0ff;
+}
+
+/* Base definitions for pure theme targeting */
+:root[data-theme='cyberpunk'] {
+  --neon-cyan: #0ff;
+  --neon-blue: #0088ff;
+  --dark-bg: #02050a;
+}
+
+[data-theme='cyberpunk'] {
+  background-color: var(--dark-bg);
+  color: var(--neon-cyan);
+}
+
+/* ============================================================
+   AESTHETIC UTILITIES
+   ============================================================ */
+
+/* CRT Scanline effect */
+.crt-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+/* Blinking cursor effect */
+.terminal-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  background-color: var(--neon-cyan);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Grid background - very subtle tech grid */
+.cyber-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Glitch text effect utility */
+.glitch-text {
+  position: relative;
+  text-shadow: 0.05em 0 0 var(--neon-blue), -0.05em -0.025em 0 #00ff41;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+.glitch-text::before {
+  left: 2px;
+  text-shadow: -1px 0 red;
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-anim 3s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+  left: -2px;
+  text-shadow: -1px 0 blue;
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-anim 2.5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(66px, 9999px, 11px, 0); }
+  20% { clip: rect(12px, 9999px, 88px, 0); }
+  40% { clip: rect(54px, 9999px, 20px, 0); }
+  60% { clip: rect(89px, 9999px, 49px, 0); }
+  80% { clip: rect(31px, 9999px, 92px, 0); }
+  100% { clip: rect(98px, 9999px, 63px, 0); }
+}
+
+/* ============================================================
+   NEW: METALLIC & CARBON FIBER UTILITIES FOR CARDS / UI
+   ============================================================ */
+
+/* Metallic Box for Start Campaign */
+.cyber-metallic-panel {
+  background: radial-gradient(circle at 50% 50%, #2a3b4e 0%, #172433 70%, #0d1520 100%);
+  border: 4px solid #304a63;
+  box-shadow: 
+    inset 0 0 20px rgba(0,0,0,0.8),
+    inset 0 0 5px rgba(0, 255, 255, 0.2),
+    0 10px 20px rgba(0,0,0,0.7);
+  position: relative;
+}
+
+.cyber-metallic-panel::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.cyber-metallic-panel::after {
+  content: '';
+  position: absolute;
+  inset: 15px;
+  border: 1px dashed rgba(0, 255, 255, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+}
+
+.cyber-metallic-screw {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 30% 30%, #5a7b9e, #1a2b3c);
+  border-radius: 50%;
+  box-shadow: inset -1px -1px 3px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.2);
+  border: 1px solid #111;
+}
+
+/* Carbon Fiber background for playing cards */
+.cyber-carbon-card {
+  background: 
+    linear-gradient(27deg, #151515 5px, transparent 5px) 0 5px,
+    linear-gradient(207deg, #151515 5px, transparent 5px) 10px 0px,
+    linear-gradient(27deg, #222 5px, transparent 5px) 0px 10px,
+    linear-gradient(207deg, #222 5px, transparent 5px) 10px 5px,
+    linear-gradient(90deg, #1b1b1b 10px, transparent 10px),
+    linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #242424 75%, #242424 100%),
+    #131313;
+  background-size: 20px 20px;
+  border: 3px solid #1d2b38;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+}
+
+.cyber-carbon-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: #0ff;
+  box-shadow: 0 0 10px #0ff;
+}
+
+.cyber-glowing-pill {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+  color: #0ff;
+}
+
+.cyber-enter-btn {
+  background: linear-gradient(to bottom, #112233, #0a1522);
+  border: 1px solid #0ff;
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2), 0 0 5px rgba(0, 255, 255, 0.3);
+  color: #0ff;
+  text-shadow: 0 0 5px rgba(0,255,255,0.5);
+  transition: all 0.2s ease;
+}
+.cyber-enter-btn:hover {
+  background: rgba(0, 255, 255, 0.15);
+  box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.4), 0 0 10px rgba(0, 255, 255, 0.6);
+}

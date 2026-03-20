@@ -8,6 +8,9 @@ export const THEME_LABELS = {
   light: {
     dashboardTitle: 'Campaign Dashboard',
   },
+  cyberpunk: {
+    dashboardTitle: 'Mainframe Access',
+  },
 };
 
 export function getThemeLabels(theme: string) {
