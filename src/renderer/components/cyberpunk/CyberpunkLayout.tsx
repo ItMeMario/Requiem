@@ -42,7 +42,7 @@ export function CyberpunkLayout({ children }: CyberpunkLayoutProps) {
         <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#0ff] pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#0ff] pointer-events-none" />
 
-        <div className="flex-1 flex flex-col w-full h-full relative z-10 overflow-hidden terminal-content-wrapper">
+        <div className="flex-1 flex flex-col w-full h-full relative z-10 overflow-hidden overflow-y-auto terminal-content-wrapper">
           {/* We will inject a global CSS file or handle text colors explicitly in App via data-theme, 
               but CyberpunkLayout guarantees the container has the right aesthetics. */}
           {children}

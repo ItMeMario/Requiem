@@ -15,7 +15,7 @@ export function ResumeButton({ lastOpenedCampaign, handleSelectCampaign }: Resum
   const isCyber = theme === 'cyberpunk';
   const isMed = theme === 'medieval';
 
-  let btnClass = "absolute top-6 left-6 z-[100] flex items-center space-x-2 px-4 py-2 rounded-lg transition-all shadow-md ";
+  let btnClass = "flex items-center space-x-2 px-4 py-2 rounded-lg transition-all shadow-md ";
   
   if (isCyber) {
     btnClass += "cyber-carbon-card border border-[#0ff]/50 text-[#0ff] hover:shadow-[0_0_15px_rgba(0,255,255,0.4)]";
