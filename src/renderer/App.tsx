@@ -6,6 +6,7 @@ import { useEntities } from './hooks/useEntities';
 import { useTheme } from './context/ThemeContext';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
+import { ResumeButton } from './components/ResumeButton';
 import { MedievalLayout } from './components/medieval/MedievalLayout';
 import { CyberpunkLayout } from './components/cyberpunk/CyberpunkLayout';
 import { MedievalDashboard } from './components/medieval/MedievalDashboard';
@@ -303,6 +304,12 @@ function App() {
       <ThemeSwitcher size="md" />
       {renderLayout(
         <>
+          {!selectedCampaign && lastOpenedCampaign && (
+            <ResumeButton 
+              lastOpenedCampaign={lastOpenedCampaign} 
+              handleSelectCampaign={handleSelectCampaign} 
+            />
+          )}
           {!selectedCampaign ? (
             theme === 'medieval' ? (
               <MedievalDashboard 
@@ -313,8 +320,8 @@ function App() {
                 setShowCreateModal={setShowCreateModal}
               />
             ) : (
-        <main className="flex-1 flex flex-col bg-surface-app overflow-y-auto w-full">
-          <header className={`px-8 py-6 border-b flex items-center justify-between z-10 sticky top-0 ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : 'bg-surface-app border-border-default'}`}>
+        <main className="flex-1 flex flex-col bg-surface-app overflow-y-auto w-full relative">
+          <header className={`pr-8 pl-56 py-6 border-b flex items-center justify-between z-10 sticky top-0 ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : 'bg-surface-app border-border-default'}`}>
             <div className="flex items-center space-x-3">
               <span className={`text-3xl tracking-widest select-none flex items-center justify-center ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : 'text-accent-text'}`} data-text="☽☉☾">☽☉☾</span>
               <h1 className={`text-2xl font-bold tracking-wider ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : ''}`} data-text="REQUIEM">REQUIEM</h1>
@@ -329,16 +336,6 @@ function App() {
                 </h2>
                 <p className="text-muted mt-2">Select a campaign or create a new one to begin your journey.</p>
               </div>
-              {lastOpenedCampaign && (
-                <button
-                  onClick={() => handleSelectCampaign(lastOpenedCampaign)}
-                  className="flex items-center space-x-2 px-5 py-2.5 rounded-lg bg-surface-elevated border border-border-subtle hover:border-accent text-muted hover:text-accent-text transition-all shadow-sm"
-                  title="Resume Last Campaign"
-                >
-                  <Play size={18} className="text-accent2-text" />
-                  <span className="font-semibold whitespace-nowrap">Resume: {lastOpenedCampaign.name}</span>
-                </button>
-              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

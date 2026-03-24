@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Play, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { getThemeLabels } from '../../utils/themeLabels';
 
 interface MedievalDashboardProps {
@@ -50,20 +50,8 @@ export function MedievalDashboard({
               <span className="text-xl font-semibold tracking-wide font-serif">Start New Campaign</span>
             </button>
           </div>
-          
-          {lastOpenedCampaign && (
-            <button
-              onClick={() => handleSelectCampaign(lastOpenedCampaign)}
-              className="absolute top-4 left-4 flex items-center space-x-2 px-4 py-2 rounded-md bg-[#e8d8b0] border border-border-subtle hover:border-accent text-primary hover:text-accent-text transition-all shadow-sm"
-              title="Resume Last Campaign"
-            >
-              <Play size={16} className="text-[#8b4513]" />
-              <span className="font-semibold whitespace-nowrap text-sm">Resume: {lastOpenedCampaign.name}</span>
-            </button>
-          )}
 
         </div>
-
 
         {/* RIGHT PAGE - EXISTING CAMPAIGNS */}
         <div className="flex-1 flex flex-col pl-4 relative h-full overflow-y-auto custom-scrollbar pt-8">
