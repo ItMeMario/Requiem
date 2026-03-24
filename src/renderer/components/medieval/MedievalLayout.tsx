@@ -18,7 +18,7 @@ export function MedievalLayout({ children }: MedievalLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen w-full bg-black items-center justify-center p-4 md:p-12 relative overflow-hidden">
+    <div className="flex h-screen w-full bg-black p-2 sm:p-4 md:p-6 relative overflow-hidden">
       {/* Background ambient lighting/candles (simulated with CSS gradients) */}
       <div className="absolute inset-0 bg-[#120a05] z-0">
         {/* Left candle glow */}
@@ -28,7 +28,7 @@ export function MedievalLayout({ children }: MedievalLayoutProps) {
       </div>
       
       {/* The Book Container */}
-      <div className="relative w-full max-w-7xl h-full flex rounded-xl shadow-[0_20px_80px_rgba(0,0,0,0.9)] bg-[#4a2e1b] z-10" style={{ border: '2px solid #2a180b' }}>
+      <div className="relative w-full h-full flex rounded-xl shadow-[0_20px_80px_rgba(0,0,0,0.9)] bg-[#4a2e1b] z-10" style={{ border: '2px solid #2a180b' }}>
         
         {/* Leather texture & stitching */}
         <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">

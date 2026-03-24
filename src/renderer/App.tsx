@@ -324,9 +324,9 @@ function App() {
             )}
           </header>
 
-          <div className="p-8 max-w-7xl mx-auto w-full">
+          <div className="p-8 max-w-6xl mx-auto w-full xl:px-12">
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-24 md:gap-y-12">
               {/* Cards Grid */}
               {theme === 'cyberpunk' ? (
                 <button 
