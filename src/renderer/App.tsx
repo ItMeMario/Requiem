@@ -298,8 +298,11 @@ function App() {
     );
   };
 
-  return renderLayout(
+  return (
     <>
+      <ThemeSwitcher size="md" />
+      {renderLayout(
+        <>
           {!selectedCampaign ? (
             theme === 'medieval' ? (
               <MedievalDashboard 
@@ -316,8 +319,6 @@ function App() {
               <span className={`text-3xl tracking-widest select-none flex items-center justify-center ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : 'text-accent-text'}`} data-text="☽☉☾">☽☉☾</span>
               <h1 className={`text-2xl font-bold tracking-wider ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : ''}`} data-text="REQUIEM">REQUIEM</h1>
             </div>
-            
-            <ThemeSwitcher size="md" />
           </header>
 
           <div className="p-8 max-w-7xl mx-auto w-full">
@@ -438,8 +439,6 @@ function App() {
                 </div>
               </div>
             </div>
-            
-            <ThemeSwitcher size="sm" />
           </header>
 
           {/* Tabs */}
@@ -542,6 +541,8 @@ function App() {
         locations={locations} 
       />
 
+        </>
+      )}
     </>
   );
 }

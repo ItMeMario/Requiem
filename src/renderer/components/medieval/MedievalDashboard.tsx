@@ -1,6 +1,5 @@
 import React from 'react';
 import { Plus, Play, Trash2 } from 'lucide-react';
-import { ThemeSwitcher } from '../ThemeSwitcher';
 import { getThemeLabels } from '../../utils/themeLabels';
 
 interface MedievalDashboardProps {
@@ -50,10 +49,6 @@ export function MedievalDashboard({
               <Plus size={36} strokeWidth={2.5} className="mb-2" />
               <span className="text-xl font-semibold tracking-wide font-serif">Start New Campaign</span>
             </button>
-          </div>
-
-          <div className="absolute bottom-4 left-4">
-             <ThemeSwitcher size="md" />
           </div>
           
           {lastOpenedCampaign && (
