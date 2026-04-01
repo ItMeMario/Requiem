@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, Sword, Terminal } from 'lucide-react';
+import { Sun, Moon, Sword, Terminal, Droplet } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 interface ThemeSwitcherProps {
@@ -21,6 +21,7 @@ export function ThemeSwitcher({ size = 'md' }: ThemeSwitcherProps) {
       if (targetTheme === 'dark') return `${base} bg-surface-hover text-accent-text shadow-sm`;
       if (targetTheme === 'medieval') return `${base} bg-surface-hover text-amber-500 shadow-sm`;
       if (targetTheme === 'cyberpunk') return `${base} bg-[#0ff]/10 text-[#0ff] border-[#0ff] shadow-[0_0_8px_rgba(0,255,255,0.4)]`;
+      if (targetTheme === 'vampire') return `${base} bg-[#2a0404] text-[#ff3333] border-[#8b0000] shadow-[0_0_8px_rgba(255,0,0,0.5)]`;
     }
     
     if (isCyber) return `${base} text-[#0ff]/50 hover:text-[#0ff] hover:border-[#0ff]/50 hover:bg-[#0ff]/5`;
@@ -58,6 +59,13 @@ export function ThemeSwitcher({ size = 'md' }: ThemeSwitcherProps) {
         title="Cyberpunk Mode"
       >
         <Terminal size={iconSize} />
+      </button>
+      <button
+        onClick={() => setTheme('vampire')}
+        className={buttonClass('vampire')}
+        title="Vampire Mode"
+      >
+        <Droplet size={iconSize} />
       </button>
     </div>
   );

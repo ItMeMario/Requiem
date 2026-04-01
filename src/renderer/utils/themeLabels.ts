@@ -11,6 +11,9 @@ export const THEME_LABELS = {
   cyberpunk: {
     dashboardTitle: 'Mainframe Access',
   },
+  vampire: {
+    dashboardTitle: 'Bloodline Records',
+  },
 };
 
 export function getThemeLabels(theme: string) {
