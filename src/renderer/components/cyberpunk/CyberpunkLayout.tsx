@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { CyberReactiveBackground } from './CyberReactiveBackground';
 import '../../cyberpunk.css';
 
 interface CyberpunkLayoutProps {
@@ -24,8 +25,11 @@ export function CyberpunkLayout({ children }: CyberpunkLayoutProps) {
       data-theme="cyberpunk"
     >
       {/* Smoky Ambient Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#0ff] opacity-[0.03] blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#0055ff] opacity-[0.05] blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#0ff] opacity-[0.02] blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#0055ff] opacity-[0.03] blur-[150px] rounded-full pointer-events-none" />
+
+      {/* Reactive Neural Network Background */}
+      <CyberReactiveBackground />
 
       {/* Retro CRT Scanlines Overlay */}
       <div className="fixed inset-0 crt-scanlines z-50 pointer-events-none" />
