@@ -91,3 +91,20 @@
   pointer-events: none;
   z-index: 5;
 }
+
+/* Coffin Intro Styles */
+.clip-coffin {
+  clip-path: polygon(30% 0%, 70% 0%, 100% 15%, 80% 100%, 20% 100%, 0% 15%);
+}
+
+@keyframes coffinShake {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  50% { transform: rotate(-1deg); }
+  75% { transform: rotate(0.5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.coffin-shake:hover {
+  animation: coffinShake 0.4s ease-in-out infinite;
+}

@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { VampireBats } from './VampireBats';
+import { VampireIntro } from './VampireIntro';
 import '../../vampire.css';
+
+let hasSeenVampireIntro = false;
 
 interface VampireLayoutProps {
   children: React.ReactNode;
@@ -9,6 +12,7 @@ interface VampireLayoutProps {
 
 export function VampireLayout({ children }: VampireLayoutProps) {
   const { theme } = useTheme();
+  const [introFinished, setIntroFinished] = useState(hasSeenVampireIntro);
 
   if (theme !== 'vampire') {
     return (
@@ -23,6 +27,11 @@ export function VampireLayout({ children }: VampireLayoutProps) {
       className="flex h-screen w-full bg-[#030304] p-2 sm:p-4 md:p-6 overflow-hidden relative font-sans text-[#d1d1d6]"
       data-theme="vampire"
     >
+      {!introFinished && <VampireIntro onOpen={() => {
+        hasSeenVampireIntro = true;
+        setIntroFinished(true);
+      }} />}
+
       {/* Deep Blood Ambient Lighting */}
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#8b0000] opacity-10 blur-[150px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-20%] w-[50%] h-[50%] bg-[#4a0000] opacity-20 blur-[120px] rounded-full pointer-events-none" />
