@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../../vampire.css';
+import './vampire.css';
 
 interface VampireIntroProps {
   onOpen: () => void;

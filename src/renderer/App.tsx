@@ -7,11 +7,10 @@ import { useTheme } from './context/ThemeContext';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { ResumeButton } from './components/ResumeButton';
-import { MedievalLayout } from './components/medieval/MedievalLayout';
-import { CyberpunkLayout } from './components/cyberpunk/CyberpunkLayout';
-import { VampireLayout } from './components/vampire/VampireLayout';
-import { useDiaryGate } from './hooks/useDiaryGate';
-import { useCyberpunkGate } from './hooks/useCyberpunkGate';
+import { MedievalLayout } from './themes/medieval/MedievalLayout';
+import { CyberpunkLayout } from './themes/cyberpunk/CyberpunkLayout';
+import { VampireLayout } from './themes/vampire/VampireLayout';
+import { useIntroGate } from './hooks/useIntroGate';
 import { getThemeLabels } from './utils/themeLabels';
 
 import { CharacterList } from './components/characters/CharacterList';
@@ -22,8 +21,9 @@ import { CreateCampaignModal } from './components/modals/CreateCampaignModal';
 import { CharacterModal } from './components/modals/CharacterModal';
 import { LocationModal } from './components/modals/LocationModal';
 import { EntryModal } from './components/modals/EntryModal';
-import { DiaryEntry } from './components/DiaryEntry';
-import { TerminalEntry } from './components/cyberpunk/TerminalEntry';
+import { MedievalIntro } from './themes/medieval/MedievalIntro';
+import { CyberpunkIntro } from './themes/cyberpunk/CyberpunkIntro';
+import { VampireIntro } from './themes/vampire/VampireIntro';
 
 const initCharState = { name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' };
 const initLocState = { name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' };
@@ -34,8 +34,7 @@ function App() {
   const { characters, locations, entries, loadEntities, crud } = useEntities();
   const { theme, setTheme } = useTheme();
 
-  const { showDiaryGate, openDiary } = useDiaryGate();
-  const { showTerminalGate, openTerminal } = useCyberpunkGate();
+  const { showIntro, dismissIntro } = useIntroGate();
   
   const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal'>('characters');
 
@@ -281,12 +280,13 @@ function App() {
     }
   };
 
-  if (showDiaryGate) {
-    return <DiaryEntry onOpen={openDiary} />;
-  }
-
-  if (showTerminalGate) {
-    return <TerminalEntry onOpen={openTerminal} />;
+  if (showIntro) {
+    const IntroComponent = {
+      medieval: MedievalIntro,
+      cyberpunk: CyberpunkIntro,
+      vampire: VampireIntro,
+    }[theme as 'medieval' | 'cyberpunk' | 'vampire'];
+    return <IntroComponent onOpen={dismissIntro} />;
   }
 
   const renderLayout = (children: React.ReactNode) => {

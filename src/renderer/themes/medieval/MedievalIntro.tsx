@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Key } from 'lucide-react';
 
-interface DiaryEntryProps {
+interface MedievalIntroProps {
   onOpen: () => void;
 }
 
-export function DiaryEntry({ onOpen }: DiaryEntryProps) {
+export function MedievalIntro({ onOpen }: MedievalIntroProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClick = () => {

@@ -4,6 +4,65 @@
 */
 
 [data-theme='vampire'] {
+  /* ---- Surfaces / Backgrounds ---- */
+  --surface-app:       #030304;
+  --surface-sidebar:   #08080b;
+  --surface-card:      #0d0d12;
+  --surface-input:     #111118;
+  --surface-hover:     #16161e;
+  --surface-active:    rgba(139, 0, 0, 0.15);
+  --surface-elevated:  rgba(139, 0, 0, 0.05);
+  --surface-elevated2: rgba(139, 0, 0, 0.08);
+  --surface-overlay:   rgba(3, 3, 4, 0.85);
+  --surface-deep:      rgba(139, 0, 0, 0.02);
+
+  /* ---- Text ---- */
+  --text-heading:   #e0e0e0;
+  --text-primary:   #d1d1d6;
+  --text-secondary: #a0a0b0;
+  --text-muted:     #606070;
+  --text-faint:     #555566;
+  --text-icon:      #8b0000;
+
+  /* ---- Borders ---- */
+  --border-default:  #1f1f2e;
+  --border-subtle:   #1a1a25;
+  --border-hover:    #3d3d4a;
+
+  /* ---- Accent (Blood Red) ---- */
+  --accent:          #8b0000;
+  --accent-hover:    #b00000;
+  --accent-text:     #ff3333;
+  --accent-glow:     rgba(139, 0, 0, 0.4);
+  --accent-muted-bg: rgba(139, 0, 0, 0.1);
+  --accent-grad-from:#8b0000;
+  --accent-grad-to:  #4a0000;
+
+  /* ---- Accent 2 (Ghostly Silver) ---- */
+  --accent2:         #a0a0b0;
+  --accent2-hover:   #c0c0d0;
+  --accent2-text:    #a0a0b0;
+  --accent2-heading: #c0c0d0;
+  --accent2-muted-bg:rgba(160, 160, 176, 0.1);
+
+  /* ---- Danger ---- */
+  --danger:            #ff3333;
+  --danger-hover:      #cc0000;
+  --danger-text:       #ff3333;
+  --danger-muted-bg:   rgba(255, 51, 51, 0.1);
+  --danger-muted-hover:rgba(255, 51, 51, 0.2);
+  --danger-border:     rgba(255, 51, 51, 0.5);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-track: rgba(42, 4, 4, 0.4);
+  --scrollbar-thumb: rgba(139, 0, 0, 0.6);
+  --scrollbar-thumb-hover: rgba(180, 0, 0, 0.8);
+
+  /* ---- Misc ---- */
+  --font-family-base: "Georgia", "Times New Roman", serif;
+  --quill-editor-bg: #0d0d12;
+  --quill-editor-text: #d1d1d6;
+
   /* Scrollbar override for webkit */
   ::-webkit-scrollbar {
     width: 10px;

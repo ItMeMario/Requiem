@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { VampireBats } from './VampireBats';
-import { VampireIntro } from './VampireIntro';
-import '../../vampire.css';
-
-let hasSeenVampireIntro = false;
+import { VampireBg } from './vampireAssets/VampireBg';
+import './vampire.css';
 
 interface VampireLayoutProps {
   children: React.ReactNode;
@@ -12,7 +9,6 @@ interface VampireLayoutProps {
 
 export function VampireLayout({ children }: VampireLayoutProps) {
   const { theme } = useTheme();
-  const [introFinished, setIntroFinished] = useState(hasSeenVampireIntro);
 
   if (theme !== 'vampire') {
     return (
@@ -27,17 +23,7 @@ export function VampireLayout({ children }: VampireLayoutProps) {
       className="flex h-screen w-full bg-[#030304] p-2 sm:p-4 md:p-6 overflow-hidden relative font-sans text-[#d1d1d6]"
       data-theme="vampire"
     >
-      {!introFinished && <VampireIntro onOpen={() => {
-        hasSeenVampireIntro = true;
-        setIntroFinished(true);
-      }} />}
-
-      {/* Deep Blood Ambient Lighting */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#8b0000] opacity-10 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-20%] w-[50%] h-[50%] bg-[#4a0000] opacity-20 blur-[120px] rounded-full pointer-events-none" />
-      <div className="vampire-fog" />
-
-      <VampireBats />
+      <VampireBg />
 
       {/* Main Coffin/Gothic Frame */}
       <div className="flex w-full h-full bg-[#0a0a0f]/95 backdrop-blur-md overflow-hidden relative rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.9),inset_0_0_80px_rgba(0,0,0,0.8)] border-2 border-[#1f1f2e] z-10 flex-col"

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Play } from 'lucide-react';
+import { MedievalBg } from './medievalAssets/MedievalBg';
 
 interface MedievalLayoutProps {
   children: React.ReactNode;
@@ -19,13 +20,8 @@ export function MedievalLayout({ children }: MedievalLayoutProps) {
 
   return (
     <div className="flex h-screen w-full bg-black p-2 sm:p-4 md:p-6 relative overflow-hidden">
-      {/* Background ambient lighting/candles (simulated with CSS gradients) */}
-      <div className="absolute inset-0 bg-[#120a05] z-0">
-        {/* Left candle glow */}
-        <div className="absolute bottom-20 left-10 w-64 h-64 bg-[#ff9900] rounded-full mix-blend-screen filter blur-[100px] opacity-20" />
-        {/* Right candle glow */}
-        <div className="absolute bottom-40 right-10 w-80 h-80 bg-[#ffaa00] rounded-full mix-blend-screen filter blur-[120px] opacity-15" />
-      </div>
+      {/* Background ambient lighting/candles */}
+      <MedievalBg />
       
       {/* The Book Container */}
       <div className="relative w-full h-full flex rounded-xl shadow-[0_20px_80px_rgba(0,0,0,0.9)] bg-[#4a2e1b] z-10" style={{ border: '2px solid #2a180b' }}>

@@ -9,7 +9,7 @@ interface Node {
   phase: number;
 }
 
-export function CyberReactiveBackground() {
+export function CyberpunkBg() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
 

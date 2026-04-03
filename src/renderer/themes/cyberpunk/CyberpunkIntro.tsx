@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal as TerminalIcon } from 'lucide-react';
-import '../../cyberpunk.css';
+import './cyberpunk.css';
 
-interface TerminalEntryProps {
+interface CyberpunkIntroProps {
   onOpen: () => void;
 }
 
-export function TerminalEntry({ onOpen }: TerminalEntryProps) {
+export function CyberpunkIntro({ onOpen }: CyberpunkIntroProps) {
   const [bootSequence, setBootSequence] = useState<string[]>([]);
   const [isReady, setIsReady] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
