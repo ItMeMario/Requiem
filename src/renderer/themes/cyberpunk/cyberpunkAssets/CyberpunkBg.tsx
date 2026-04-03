@@ -3,10 +3,20 @@ import React, { useEffect, useRef } from 'react';
 interface Node {
   x: number;
   y: number;
+  z: number; // Depth for parallax (1 to 3)
   vx: number;
   vy: number;
   baseRadius: number;
   phase: number;
+  colorType: 'cyan' | 'purple' | 'blue';
+}
+
+interface HexChar {
+  x: number;
+  y: number;
+  char: string;
+  speed: number;
+  opacity: number;
 }
 
 export function CyberpunkBg() {
@@ -23,35 +33,61 @@ export function CyberpunkBg() {
     let width = 0;
     let height = 0;
     let nodes: Node[] = [];
+    let hexDrops: HexChar[] = [];
 
-    // Configuration for a subtle, atmospheric effect
-    const SPACING = 55; // Distance between nodes in grid
-    const JITTER = 20; // Random offset from perfect grid
-    const CONNECTION_DISTANCE = 85;
-    const MOUSE_RADIUS = 180;
-    const BASE_COLOR = '0, 255, 255'; // #0ff
+    const SPACING = 65; 
+    const JITTER = 25; 
+    const CONNECTION_DISTANCE = 100;
+    const MOUSE_RADIUS = 200;
     
-    const initNodes = () => {
+    // Cyberpunk Color Palette
+    const COLORS = {
+      cyan: '0, 255, 255',
+      purple: '180, 0, 255',
+      blue: '0, 85, 255'
+    };
+
+    const HEX_CHARS = "0123456789ABCDEF@#$&*";
+
+    const initCanvas = () => {
       nodes = [];
-      const cols = Math.ceil(width / SPACING) + 1;
-      const rows = Math.ceil(height / SPACING) + 1;
+      hexDrops = [];
+      const cols = Math.ceil(width / SPACING) + 2;
+      const rows = Math.ceil(height / SPACING) + 2;
       
-      for (let i = -1; i <= cols; i++) {
-        for (let j = -1; j <= rows; j++) {
+      for (let i = -2; i <= cols; i++) {
+        for (let j = -2; j <= rows; j++) {
+          const z = Math.random() > 0.7 ? 1 : Math.random() > 0.4 ? 2 : 3; // 1 = Foreground, 3 = Background
+          const colorRoll = Math.random();
+          const colorType = colorRoll > 0.85 ? 'purple' : (colorRoll > 0.6 ? 'blue' : 'cyan');
+
           nodes.push({
             x: i * SPACING + (Math.random() - 0.5) * JITTER,
             y: j * SPACING + (Math.random() - 0.5) * JITTER,
-            vx: (Math.random() - 0.5) * 0.2, // Very slow movement
-            vy: (Math.random() - 0.5) * 0.2,
-            baseRadius: 0.8 + Math.random() * 0.7, // Small base radius
-            phase: Math.random() * Math.PI * 2
+            z: z,
+            vx: (Math.random() - 0.5) * 0.15 * (4 - z), // Closer nodes move slightly faster
+            vy: (Math.random() - 0.5) * 0.15 * (4 - z),
+            baseRadius: (0.5 + Math.random() * 0.8) / z, 
+            phase: Math.random() * Math.PI * 2,
+            colorType
           });
         }
+      }
+
+      // Init Hex Drops
+      const numDrops = Math.floor(width / 40);
+      for(let i=0; i<numDrops; i++) {
+        hexDrops.push({
+          x: Math.random() * width,
+          y: Math.random() * height * -1,
+          char: HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)],
+          speed: 0.5 + Math.random() * 1.5,
+          opacity: 0.05 + Math.random() * 0.15
+        });
       }
     };
 
     const resize = () => {
-      // Use devicePixelRatio for sharp rendering
       const dpr = window.devicePixelRatio || 1;
       width = window.innerWidth;
       height = window.innerHeight;
@@ -62,7 +98,7 @@ export function CyberpunkBg() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       
-      initNodes();
+      initCanvas();
     };
 
     window.addEventListener('resize', resize);
@@ -79,100 +115,130 @@ export function CyberpunkBg() {
     window.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseleave', handleMouseLeave);
 
-    const draw = () => {
-      // Clear with slight transparency for trailing effect if desired, but here we just clear
-      ctx.clearRect(0, 0, width, height);
+    const drawHexGrid = (ctx: CanvasRenderingContext2D, w: number, h: number) => {
+      const hexSize = 40;
+      const hexHeight = hexSize * Math.sqrt(3);
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.015)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      
+      for(let y = 0; y < h + hexHeight; y += hexHeight) {
+        for(let x = 0, odd = false; x < w + hexSize * 1.5; x += hexSize * 1.5, odd = !odd) {
+          const cy = odd ? y + hexHeight/2 : y;
+          ctx.moveTo(x + hexSize * Math.cos(0), cy + hexSize * Math.sin(0));
+          for (let i = 1; i <= 6; i++) {
+            ctx.lineTo(x + hexSize * Math.cos(i * Math.PI / 3), cy + hexSize * Math.sin(i * Math.PI / 3));
+          }
+        }
+      }
+      ctx.stroke();
+    };
 
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
       const mx = mouseRef.current.x;
       const my = mouseRef.current.y;
       const time = Date.now() * 0.001;
 
-      // Update node positions subtly
-      nodes.forEach(node => {
-        // Idle wandering
-        node.x += node.vx;
-        node.y += node.vy;
+      // 1. Draw Hexagonal Grid Background
+      drawHexGrid(ctx, width, height);
 
-        // Wrap around bounds (with margin)
-        if (node.x < -SPACING * 2) node.x = width + SPACING;
-        if (node.x > width + SPACING * 2) node.x = -SPACING;
-        if (node.y < -SPACING * 2) node.y = height + SPACING;
-        if (node.y > height + SPACING * 2) node.y = -SPACING;
+      // 2. Draw Digital Rain (Hex drops)
+      ctx.font = '12px Courier New';
+      hexDrops.forEach(drop => {
+        ctx.fillStyle = `rgba(0, 255, 255, ${drop.opacity})`;
+        ctx.fillText(drop.char, drop.x, drop.y);
+        drop.y += drop.speed;
+        if(Math.random() > 0.98) drop.char = HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)];
+        if(drop.y > height) {
+          drop.y = -20;
+          drop.x = Math.random() * width;
+        }
       });
 
-      // Draw connections
+      // Update node positions with Parallax Response to Mouse (Subtle)
+      const targetParallaxX = (mx - width/2) * 0.01;
+      const targetParallaxY = (my - height/2) * 0.01;
+
+      nodes.forEach(node => {
+        node.x += node.vx + (targetParallaxX / node.z);
+        node.y += node.vy + (targetParallaxY / node.z);
+
+        if (node.x < -SPACING * 3) node.x = width + SPACING * 2;
+        if (node.x > width + SPACING * 3) node.x = -SPACING * 2;
+        if (node.y < -SPACING * 3) node.y = height + SPACING * 2;
+        if (node.y > height + SPACING * 3) node.y = -SPACING * 2;
+      });
+
+      // 3. Draw Nodes and Connections
+      // Sort nodes by depth so background draws first
+      const sortedNodes = [...nodes].sort((a, b) => b.z - a.z);
+
       ctx.lineWidth = 1;
-      for (let i = 0; i < nodes.length; i++) {
-        const n1 = nodes[i];
+      for (let i = 0; i < sortedNodes.length; i++) {
+        const n1 = sortedNodes[i];
         
-        // Distance to mouse for the first node
         const dx1 = n1.x - mx;
         const dy1 = n1.y - my;
         const distToMouse1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
-        
-        // Calculate influence of mouse on this node
         const mouseInfluence1 = Math.max(0, 1 - distToMouse1 / MOUSE_RADIUS);
 
-        for (let j = i + 1; j < nodes.length; j++) {
-          const n2 = nodes[j];
+        for (let j = i + 1; j < sortedNodes.length; j++) {
+          const n2 = sortedNodes[j];
           
+          // Only connect nodes somewhat on the same depth layer to maintain parallax illusion
+          if (Math.abs(n1.z - n2.z) > 1) continue;
+
           const dx = n1.x - n2.x;
           const dy = n1.y - n2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < CONNECTION_DISTANCE) {
-            // Check second node's mouse connection
             const dx2 = n2.x - mx;
             const dy2 = n2.y - my;
             const distToMouse2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
             const mouseInfluence2 = Math.max(0, 1 - distToMouse2 / MOUSE_RADIUS);
             
-            // Average influence
             const avgInfluence = (mouseInfluence1 + mouseInfluence2) / 2;
             
-            // Base opacity for connections is very low, spikes near mouse
-            const baseOpacity = Math.max(0, 1 - dist / CONNECTION_DISTANCE) * 0.05;
-            const activeOpacity = baseOpacity + (avgInfluence * 0.35); // Max opacity ~0.4
+            const baseOpacity = Math.max(0, 1 - dist / CONNECTION_DISTANCE) * (0.05 / n1.z); // Farther = fainter
+            const activeOpacity = baseOpacity + (avgInfluence * 0.4); 
 
             if (activeOpacity > 0.01) {
               ctx.beginPath();
               ctx.moveTo(n1.x, n1.y);
               ctx.lineTo(n2.x, n2.y);
-              ctx.strokeStyle = `rgba(${BASE_COLOR}, ${activeOpacity})`;
+              
+              // Gradient line between different colors
+              const grad = ctx.createLinearGradient(n1.x, n1.y, n2.x, n2.y);
+              grad.addColorStop(0, `rgba(${COLORS[n1.colorType]}, ${activeOpacity})`);
+              grad.addColorStop(1, `rgba(${COLORS[n2.colorType]}, ${activeOpacity})`);
+              
+              ctx.strokeStyle = grad;
               ctx.stroke();
             }
           }
         }
-      }
 
-      // Draw nodes
-      nodes.forEach(node => {
-        const dx = node.x - mx;
-        const dy = node.y - my;
-        const distToMouse = Math.sqrt(dx * dx + dy * dy);
-        const mouseInfluence = Math.max(0, 1 - distToMouse / MOUSE_RADIUS);
-
-        // Breathing pulse
-        const pulse = Math.sin(time + node.phase) * 0.5 + 0.5;
-        
-        // Base opacity is subtle, gets brighter with pulse and much brighter near mouse
-        const nodeOpacity = 0.15 + (pulse * 0.15) + (mouseInfluence * 0.7);
-        const currentRadius = node.baseRadius + (mouseInfluence * 1.5);
+        // Draw individual Node
+        const pulse = Math.sin(time + n1.phase) * 0.5 + 0.5;
+        const nodeOpacity = (0.1 + (pulse * 0.2) + (mouseInfluence1 * 0.5)) / (n1.z * 0.8);
+        const currentRadius = n1.baseRadius + (mouseInfluence1 * 2);
 
         ctx.beginPath();
-        ctx.arc(node.x, node.y, currentRadius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${BASE_COLOR}, ${nodeOpacity})`;
+        ctx.arc(n1.x, n1.y, currentRadius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${COLORS[n1.colorType]}, ${nodeOpacity})`;
         
-        if (mouseInfluence > 0.2) {
-          ctx.shadowBlur = 10 * mouseInfluence;
-          ctx.shadowColor = `rgba(${BASE_COLOR}, 1)`;
+        if (mouseInfluence1 > 0.1) {
+          ctx.shadowBlur = 12 * mouseInfluence1;
+          ctx.shadowColor = `rgba(${COLORS[n1.colorType]}, 1)`;
         } else {
           ctx.shadowBlur = 0;
         }
         
         ctx.fill();
-        ctx.shadowBlur = 0; // Reset
-      });
+        ctx.shadowBlur = 0;
+      }
 
       animationFrameId = requestAnimationFrame(draw);
     };
@@ -188,9 +254,13 @@ export function CyberpunkBg() {
   }, []);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      className="fixed inset-0 pointer-events-none z-0 mix-blend-screen"
-    />
+    <div className="fixed inset-0 pointer-events-none z-0">
+      {/* Background Deep Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0e001f]/20 via-transparent to-[#001133]/20 mix-blend-multiply" />
+      <canvas 
+        ref={canvasRef} 
+        className="absolute inset-0 mix-blend-screen"
+      />
+    </div>
   );
 }

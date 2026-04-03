@@ -311,15 +311,47 @@ function App() {
           {!selectedCampaign ? (
         <main className={`flex-1 flex flex-col overflow-y-auto w-full relative ${theme === 'medieval' ? 'text-primary' : 'bg-surface-app'}`}>
           <header className={`px-8 py-6 border-b flex items-center justify-between z-10 sticky top-0 ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : theme === 'vampire' ? 'bg-[#08080b]/90 backdrop-blur-md border-[#1f1f2e] shadow-[0_4px_20px_rgba(0,0,0,0.4)]' : theme === 'medieval' ? 'border-[#d9c596]/40' : 'bg-surface-app border-border-default'}`}>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center space-x-3 mb-1">
-                <span className={`text-3xl tracking-widest select-none flex items-center justify-center ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : theme === 'vampire' ? 'text-[#a0a0b0] drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]' : 'text-accent-text'}`} data-text="☽☉☾">☽☉☾</span>
-                <h1 className={`text-2xl font-bold tracking-wider ${theme === 'cyberpunk' ? 'text-[#0ff] glitch-text' : theme === 'medieval' ? 'text-[#3e2723] font-serif tracking-widest' : theme === 'vampire' ? 'text-[#e0e0e0] font-serif tracking-widest drop-shadow-[0_0_5px_rgba(0,0,0,0.8)]' : ''}`} style={(theme === 'medieval' || theme === 'vampire') ? {fontFamily: '"Georgia", "Times New Roman", serif'} : {}} data-text="REQUIEM">REQUIEM</h1>
+            <div className="flex w-full items-center justify-between">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center space-x-3 mb-1">
+                  <span className={`text-3xl tracking-widest select-none flex items-center justify-center ${theme === 'cyberpunk' ? 'text-[#0ff] text-cyan-glitch' : theme === 'vampire' ? 'text-[#a0a0b0] drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]' : 'text-accent-text'}`} data-text="☽☉☾">☽☉☾</span>
+                  <h1 className={`text-2xl font-bold tracking-wider ${theme === 'cyberpunk' ? 'text-[#0ff] text-cyan-glitch' : theme === 'medieval' ? 'text-[#3e2723] font-serif tracking-widest' : theme === 'vampire' ? 'text-[#e0e0e0] font-serif tracking-widest drop-shadow-[0_0_5px_rgba(0,0,0,0.8)]' : ''}`} style={(theme === 'medieval' || theme === 'vampire') ? {fontFamily: '"Georgia", "Times New Roman", serif'} : {}} data-text={theme === 'cyberpunk' ? "REQUIEM MEMORY SIPHON" : "REQUIEM"}>{theme === 'cyberpunk' ? "REQUIEM MEMORY SIPHON" : "REQUIEM"}</h1>
+                </div>
+                {theme === 'cyberpunk' ? (
+                  <h2 className="text-sm font-mono text-[#0ff]/70 tracking-widest uppercase">
+                    <span className="text-[#b400ff] mr-2">SYS.OP:</span>Ghost Interface: REQUIEM
+                  </h2>
+                ) : (
+                  <>
+                    <h2 className={`text-xl font-bold ${theme === 'medieval' ? 'text-[#3e2723]' : theme === 'vampire' ? 'text-[#8b0000]' : 'text-heading'}`} style={(theme === 'medieval' || theme === 'vampire') ? {fontFamily: '"Georgia", "Times New Roman", serif'} : {}}>
+                      {getThemeLabels(theme).dashboardTitle}
+                    </h2>
+                    <p className={`text-sm ${theme === 'medieval' ? 'text-[#4e342e]' : theme === 'vampire' ? 'text-[#606070]' : 'text-muted'}`}>Select a campaign or create a new one to begin your journey.</p>
+                  </>
+                )}
               </div>
-              <h2 className={`text-xl font-bold ${theme === 'medieval' ? 'text-[#3e2723]' : theme === 'vampire' ? 'text-[#8b0000]' : 'text-heading'}`} style={(theme === 'medieval' || theme === 'vampire') ? {fontFamily: '"Georgia", "Times New Roman", serif'} : {}}>
-                {getThemeLabels(theme).dashboardTitle}
-              </h2>
-              <p className={`text-sm ${theme === 'medieval' ? 'text-[#4e342e]' : theme === 'vampire' ? 'text-[#606070]' : 'text-muted'}`}>Select a campaign or create a new one to begin your journey.</p>
+              
+              {theme === 'cyberpunk' && (
+                <div className="flex items-center space-x-8">
+                  <div className="hidden lg:flex flex-col items-end mr-4">
+                    <div className="text-[10px] text-[#0ff]/50 mb-1 tracking-widest">NEURAL SYNC ACTIVE</div>
+                    <div className="eeg-waveform">
+                      {Array.from({ length: 15 }).map((_, i) => (
+                        <div key={i} className="eeg-bar" style={{ animationDelay: `${i * 0.1}s` }} />
+                      ))}
+                      <div className="eeg-particles">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className="eeg-particle" style={{ animationDelay: `${i * 0.3}s` }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end text-[#0ff]/40 text-xs font-mono">
+                    <span>NET.SEC: <span className="text-[#0ff]">OPTIMAL</span></span>
+                    <span>MEM.CAP: <span className="text-[#b400ff]">84%</span></span>
+                  </div>
+                </div>
+              )}
             </div>
           </header>
 
@@ -331,7 +363,7 @@ function App() {
                 onClick={() => handleSelectCampaign(lastOpenedCampaign)}
                 className={`w-full mb-12 rounded-xl group cursor-pointer relative overflow-hidden transition-all duration-300 ${
                   theme === 'cyberpunk' 
-                    ? 'h-32 cyber-carbon-card border border-[#0ff]/50 hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] flex items-center' 
+                    ? 'h-32 cyber-smoked-glass hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] flex items-center' 
                     : theme === 'medieval'
                     ? 'h-32 bg-[#e8d8b0] border-2 border-[#8b4513]/60 hover:border-[#8b4513] shadow-[inset_0_2px_10px_rgba(139,69,19,0.2),0_5px_15px_rgba(0,0,0,0.3)] flex items-center relative'
                     : theme === 'vampire'
@@ -342,8 +374,8 @@ function App() {
                 {/* Theme-specific Background details */}
                 {theme === 'cyberpunk' && (
                   <>
-                     <div className="absolute inset-0 opacity-20 cyber-grid pointer-events-none" />
-                     <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#0ff]/10 to-transparent pointer-events-none" />
+                     <div className="micro-circuit-pattern" />
+                     <div className="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-[#0ff]/5 to-transparent pointer-events-none" />
                   </>
                 )}
                 {theme === 'medieval' && (
@@ -363,7 +395,7 @@ function App() {
                 <div className="px-8 flex-1 flex justify-between items-center relative z-10 w-full h-full">
                   <div className="flex items-center space-x-6">
                     <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-lg ${
-                       theme === 'cyberpunk' ? 'bg-[#0ff]/10 border-2 border-[#0ff] shadow-[0_0_15px_rgba(0,255,255,0.4)]' :
+                       theme === 'cyberpunk' ? 'neon-ring-pulse bg-[#02050a] border-2 border-[#0ff] shadow-[0_0_15px_rgba(0,255,255,0.4)] z-10' :
                        theme === 'medieval' ? 'bg-[#8b4513] border border-[#5c2e0b]' :
                        theme === 'vampire' ? 'bg-[#0a0a0f] border-2 border-[#3d3d4a] group-hover:border-[#ff3333]' :
                        'bg-accent/10 border border-accent'
@@ -385,7 +417,7 @@ function App() {
                          RESUME JOURNEY
                       </h3>
                       <h2 className={`text-2xl md:text-3xl font-bold truncate ${
-                         theme === 'cyberpunk' ? 'text-[#0ff] tracking-wider drop-shadow-[0_0_5px_rgba(0,255,255,0.5)]' :
+                         theme === 'cyberpunk' ? 'text-[#0ff] tracking-wider drop-shadow-[0_0_5px_rgba(0,255,255,0.5)] z-10' :
                          theme === 'medieval' ? 'text-[#3e2723] font-serif tracking-wide' :
                          theme === 'vampire' ? 'text-[#d1d1d6] font-serif tracking-widest group-hover:text-[#ff3333] transition-colors' :
                          'text-heading'
@@ -414,14 +446,20 @@ function App() {
               {theme === 'cyberpunk' ? (
                 <button 
                   onClick={() => setShowCreateModal(true)}
-                  className="h-48 rounded-xl cyber-metallic-panel flex flex-col items-center justify-center text-[#0ff] hover:text-white hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-all group overflow-hidden"
+                  className="h-48 rounded-xl cyber-smoked-glass flex flex-col items-center justify-center text-[#0ff] hover:text-white hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-all group overflow-hidden relative"
                 >
-                  <div className="absolute inset-5 border border-[#0ff]/30 rounded-full flex items-center justify-center">
-                    <div className="absolute inset-4 border-[3px] border-dashed border-[#0ff]/40 rounded-full animate-[spin_30s_linear_infinite]" />
-                    <div className="absolute inset-0 border border-[#0ff]/10 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
-                    <Plus size={54} strokeWidth={3} className="text-[#0ff] group-hover:scale-110 transition-transform drop-shadow-[0_0_12px_rgba(0,255,255,1)]" />
+                  <div className="micro-circuit-pattern" />
+                  
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <div className="absolute w-36 h-36 border border-[#0ff]/10 rounded-full animate-[spin_20s_linear_infinite]" />
+                    <div className="absolute w-24 h-24 border-[2px] border-dashed border-[#0ff]/30 rounded-full animate-[spin_10s_linear_infinite_reverse]" />
+                    <div className="absolute w-12 h-12 bg-[#02050a] border border-[#0ff] rounded-full shadow-[0_0_15px_rgba(0,255,255,0.6)] flex items-center justify-center group-hover:scale-110 group-hover:border-[#b400ff] transition-all duration-300">
+                      <div className="w-3 h-3 bg-[#0ff] group-hover:bg-[#b400ff] rounded-sm animate-pulse" />
+                      <div className="absolute inset-0 rounded-full border border-[#0ff]/50 animate-ping" style={{ animationDuration: '3s' }} />
+                    </div>
                   </div>
-                  <span className="mt-28 text-sm font-bold tracking-widest z-10 bg-[#02050a] px-6 py-1.5 rounded-sm border border-[#0ff]/50 shadow-[0_0_10px_rgba(0,255,255,0.3)]">START NEW CAMPAIGN</span>
+
+                  <span className="mt-28 text-sm font-bold tracking-widest z-20 bg-[#02050a]/80 backdrop-blur-md px-6 py-1.5 rounded-sm border border-[#0ff]/50 shadow-[0_0_10px_rgba(0,255,255,0.3)] group-hover:bg-[#0ff]/10 group-hover:border-[#0ff] transition-all">START NEW CAMPAIGN</span>
                 </button>
               ) : theme === 'vampire' ? (
                 <button 
@@ -475,7 +513,7 @@ function App() {
                     }}
                     className={
                       isCyber 
-                        ? 'h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer cyber-carbon-card hover:border-[#0ff]/80 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]' 
+                        ? 'h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer cyber-smoked-glass hover:border-[#0ff]/80 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]' 
                         : isMed
                         ? 'h-48 text-center rounded p-6 flex flex-col justify-between transition-all group cursor-pointer relative overflow-hidden wood-plank shadow-[2px_4px_10px_rgba(0,0,0,0.15)] hover:-translate-y-1 hover:shadow-[4px_8px_15px_rgba(0,0,0,0.25)] border-[#5c3a21] border'
                         : isVamp
@@ -484,6 +522,7 @@ function App() {
                     }
                   >
                     {!isCyber && !isMed && !isVamp && <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />}
+                    {isCyber && <div className="micro-circuit-pattern" />}
                     {isMed && (
                       <>
                         <div className="absolute inset-0 bg-[#d4a373] mix-blend-multiply opacity-20 pointer-events-none" />
@@ -523,8 +562,10 @@ function App() {
                         </h3>
                       )}
                       
-                      {!isMed && camp.genre && <span className={`inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start ${isCyber ? 'cyber-glowing-pill' : isVamp ? 'bg-[#1f1f2e]/60 text-[#a0a0b0] border border-[#2a2a35]' : 'bg-surface-deep text-secondary'}`}>{camp.genre}</span>}
+                      {!isMed && camp.genre && <span className={`inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start ${isCyber ? 'cyber-glowing-pill text-cyan-glitch' : isVamp ? 'bg-[#1f1f2e]/60 text-[#a0a0b0] border border-[#2a2a35]' : 'bg-surface-deep text-secondary'}`}>{camp.genre}</span>}
                     </div>
+                    
+                    {isCyber && <div className="absolute bottom-4 left-6 text-[10px] text-[#0ff]/40 font-mono">v.1.{camp.id} | RAD DX</div>}
                     
                     <div className={`relative flex items-end text-sm mt-auto pointer-events-none z-10 ${
                       isCyber ? 'justify-between pt-4 border-t border-[#0ff]/30 text-[#0ff]/70' : 
