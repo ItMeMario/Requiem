@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'dark' | 'light' | 'medieval' | 'cyberpunk' | 'vampire';
+type Theme = 'medieval' | 'cyberpunk' | 'vampire';
 
 interface ThemeContextType {
   theme: Theme;
@@ -11,13 +11,16 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('app-theme');
-    return (saved as Theme) || 'dark';
+    const saved = localStorage.getItem('app-theme') as Theme;
+    if (saved === 'medieval' || saved === 'cyberpunk' || saved === 'vampire') {
+      return saved;
+    }
+    return 'medieval';
   });
 
   useEffect(() => {
     localStorage.setItem('app-theme', theme);
-    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-medieval', 'theme-cyberpunk', 'theme-vampire');
+    document.documentElement.classList.remove('theme-medieval', 'theme-cyberpunk', 'theme-vampire');
     document.documentElement.classList.add(`theme-${theme}`);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);

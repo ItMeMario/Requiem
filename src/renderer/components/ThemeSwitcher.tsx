@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, Sword, Terminal, Droplet } from 'lucide-react';
+import { Sword, Terminal, Droplet } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 interface ThemeSwitcherProps {
@@ -17,8 +17,6 @@ export function ThemeSwitcher({ size = 'md' }: ThemeSwitcherProps) {
     const isActive = theme === targetTheme;
     
     if (isActive) {
-      if (targetTheme === 'light') return `${base} bg-surface-hover text-yellow-500 shadow-sm`;
-      if (targetTheme === 'dark') return `${base} bg-surface-hover text-accent-text shadow-sm`;
       if (targetTheme === 'medieval') return `${base} bg-surface-hover text-amber-500 shadow-sm`;
       if (targetTheme === 'cyberpunk') return `${base} bg-[#0ff]/10 text-[#0ff] border-[#0ff] shadow-[0_0_8px_rgba(0,255,255,0.4)]`;
       if (targetTheme === 'vampire') return `${base} bg-[#2a0404] text-[#ff3333] border-[#8b0000] shadow-[0_0_8px_rgba(255,0,0,0.5)]`;
@@ -32,20 +30,7 @@ export function ThemeSwitcher({ size = 'md' }: ThemeSwitcherProps) {
 
   return (
     <div className={containerClass}>
-      <button
-        onClick={() => setTheme('light')}
-        className={buttonClass('light')}
-        title="Light Mode"
-      >
-        <Sun size={iconSize} />
-      </button>
-      <button
-        onClick={() => setTheme('dark')}
-        className={buttonClass('dark')}
-        title="Dark Mode"
-      >
-        <Moon size={iconSize} />
-      </button>
+
       <button
         onClick={() => setTheme('medieval')}
         className={buttonClass('medieval')}
