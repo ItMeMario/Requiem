@@ -3,11 +3,15 @@ import { useTheme } from '../../context/ThemeContext';
 import { VampireBg } from './vampireAssets/VampireBg';
 import './vampire.css';
 
+import { Play } from 'lucide-react';
+
 interface VampireLayoutProps {
   children: React.ReactNode;
+  lastOpenedCampaign?: any;
+  handleSelectCampaign?: (camp: any) => void;
 }
 
-export function VampireLayout({ children }: VampireLayoutProps) {
+export function VampireLayout({ children, lastOpenedCampaign, handleSelectCampaign }: VampireLayoutProps) {
   const { theme } = useTheme();
 
   if (theme !== 'vampire') {

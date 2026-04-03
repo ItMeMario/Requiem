@@ -6,7 +6,6 @@ import { useEntities } from './hooks/useEntities';
 import { useTheme } from './context/ThemeContext';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
-import { ResumeButton } from './components/ResumeButton';
 import { MedievalLayout } from './themes/medieval/MedievalLayout';
 import { CyberpunkLayout } from './themes/cyberpunk/CyberpunkLayout';
 import { VampireLayout } from './themes/vampire/VampireLayout';
@@ -290,9 +289,13 @@ function App() {
   }
 
   const renderLayout = (children: React.ReactNode) => {
-    if (theme === 'medieval') return <MedievalLayout>{children}</MedievalLayout>;
-    if (theme === 'cyberpunk') return <CyberpunkLayout>{children}</CyberpunkLayout>;
-    if (theme === 'vampire') return <VampireLayout>{children}</VampireLayout>;
+    const layoutProps = {
+      lastOpenedCampaign: !selectedCampaign ? lastOpenedCampaign : null,
+      handleSelectCampaign
+    };
+    if (theme === 'medieval') return <MedievalLayout {...layoutProps}>{children}</MedievalLayout>;
+    if (theme === 'cyberpunk') return <CyberpunkLayout {...layoutProps}>{children}</CyberpunkLayout>;
+    if (theme === 'vampire') return <VampireLayout {...layoutProps}>{children}</VampireLayout>;
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-surface-app text-primary font-sans relative">
         {children}
@@ -318,15 +321,93 @@ function App() {
               </h2>
               <p className={`text-sm ${theme === 'medieval' ? 'text-[#4e342e]' : theme === 'vampire' ? 'text-[#606070]' : 'text-muted'}`}>Select a campaign or create a new one to begin your journey.</p>
             </div>
-            {lastOpenedCampaign && (
-              <ResumeButton 
-                lastOpenedCampaign={lastOpenedCampaign} 
-                handleSelectCampaign={handleSelectCampaign} 
-              />
-            )}
           </header>
 
           <div className="p-8 max-w-6xl mx-auto w-full xl:px-12">
+            
+            {/* New Resume Campaign Featured Banner */}
+            {lastOpenedCampaign && (
+              <div 
+                onClick={() => handleSelectCampaign(lastOpenedCampaign)}
+                className={`w-full mb-12 rounded-xl group cursor-pointer relative overflow-hidden transition-all duration-300 ${
+                  theme === 'cyberpunk' 
+                    ? 'h-32 cyber-carbon-card border border-[#0ff]/50 hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] flex items-center' 
+                    : theme === 'medieval'
+                    ? 'h-32 bg-[#e8d8b0] border-2 border-[#8b4513]/60 hover:border-[#8b4513] shadow-[inset_0_2px_10px_rgba(139,69,19,0.2),0_5px_15px_rgba(0,0,0,0.3)] flex items-center relative'
+                    : theme === 'vampire'
+                    ? 'h-32 bg-[#0d0d12] border border-[#1f1f2e] hover:border-[#500000] hover:shadow-[0_5px_25px_rgba(80,0,0,0.5)] flex items-center relative'
+                    : 'h-32 bg-surface-elevated border border-border-subtle hover:border-accent shadow-md flex items-center'
+                }`}
+              >
+                {/* Theme-specific Background details */}
+                {theme === 'cyberpunk' && (
+                  <>
+                     <div className="absolute inset-0 opacity-20 cyber-grid pointer-events-none" />
+                     <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#0ff]/10 to-transparent pointer-events-none" />
+                  </>
+                )}
+                {theme === 'medieval' && (
+                  <>
+                     <div className="absolute inset-0 opacity-40 mix-blend-multiply pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, transparent 20%, #8b4513 120%)' }} />
+                     <div className="absolute inset-2 border border-[#8b4513] border-dashed opacity-30 pointer-events-none rounded" />
+                  </>
+                )}
+                {theme === 'vampire' && (
+                  <>
+                     <div className="absolute inset-0 opacity-30 pointer-events-none mix-blend-overlay bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wIDBMMCA0TDQgNEw0IDBaIiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')]"/>
+                     <div className="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-[#500000]/30 to-transparent pointer-events-none" />
+                  </>
+                )}
+
+                {/* Content */}
+                <div className="px-8 flex-1 flex justify-between items-center relative z-10 w-full h-full">
+                  <div className="flex items-center space-x-6">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-lg ${
+                       theme === 'cyberpunk' ? 'bg-[#0ff]/10 border-2 border-[#0ff] shadow-[0_0_15px_rgba(0,255,255,0.4)]' :
+                       theme === 'medieval' ? 'bg-[#8b4513] border border-[#5c2e0b]' :
+                       theme === 'vampire' ? 'bg-[#0a0a0f] border-2 border-[#3d3d4a] group-hover:border-[#ff3333]' :
+                       'bg-accent/10 border border-accent'
+                    }`}>
+                      <Play size={28} className={`${
+                         theme === 'cyberpunk' ? 'text-[#0ff] group-hover:drop-shadow-[0_0_8px_rgba(0,255,255,1)] ml-1' :
+                         theme === 'medieval' ? 'text-[#f4eacc] ml-1' :
+                         theme === 'vampire' ? 'text-[#a0a0b0] group-hover:text-[#ff3333] ml-1 transition-colors' :
+                         'text-accent-text ml-1'
+                      }`} />
+                    </div>
+                    <div>
+                      <h3 className={`text-sm uppercase tracking-widest font-bold mb-1 ${
+                         theme === 'cyberpunk' ? 'text-[#0ff]/70' :
+                         theme === 'medieval' ? 'text-[#8b4513]/70 font-serif' :
+                         theme === 'vampire' ? 'text-[#606070] font-serif' :
+                         'text-muted'
+                      }`}>
+                         RESUME JOURNEY
+                      </h3>
+                      <h2 className={`text-2xl md:text-3xl font-bold truncate ${
+                         theme === 'cyberpunk' ? 'text-[#0ff] tracking-wider drop-shadow-[0_0_5px_rgba(0,255,255,0.5)]' :
+                         theme === 'medieval' ? 'text-[#3e2723] font-serif tracking-wide' :
+                         theme === 'vampire' ? 'text-[#d1d1d6] font-serif tracking-widest group-hover:text-[#ff3333] transition-colors' :
+                         'text-heading'
+                      }`}>
+                        {lastOpenedCampaign.name}
+                      </h2>
+                    </div>
+                  </div>
+                  
+                  {/* Additional info or aesthetics on the right side */}
+                  <div className={`hidden md:flex flex-col items-end ${
+                       theme === 'cyberpunk' ? 'text-[#0ff]/50' :
+                       theme === 'medieval' ? 'text-[#8b4513]/60 font-serif' :
+                       theme === 'vampire' ? 'text-[#555566] font-serif' :
+                       'text-muted'
+                  }`}>
+                    {lastOpenedCampaign.system && <span className="text-sm font-semibold tracking-wider uppercase mb-1">{lastOpenedCampaign.system}</span>}
+                    {lastOpenedCampaign.genre && <span className="text-xs font-semibold">{lastOpenedCampaign.genre}</span>}
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-24 md:gap-y-12">
               {/* Cards Grid */}

@@ -3,11 +3,15 @@ import { useTheme } from '../../context/ThemeContext';
 import { CyberpunkBg } from './cyberpunkAssets/CyberpunkBg';
 import './cyberpunk.css';
 
+import { Play } from 'lucide-react';
+
 interface CyberpunkLayoutProps {
   children: React.ReactNode;
+  lastOpenedCampaign?: any;
+  handleSelectCampaign?: (camp: any) => void;
 }
 
-export function CyberpunkLayout({ children }: CyberpunkLayoutProps) {
+export function CyberpunkLayout({ children, lastOpenedCampaign, handleSelectCampaign }: CyberpunkLayoutProps) {
   const { theme } = useTheme();
 
   if (theme !== 'cyberpunk') {

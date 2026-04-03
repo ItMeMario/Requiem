@@ -5,9 +5,11 @@ import { MedievalBg } from './medievalAssets/MedievalBg';
 
 interface MedievalLayoutProps {
   children: React.ReactNode;
+  lastOpenedCampaign?: any;
+  handleSelectCampaign?: (camp: any) => void;
 }
 
-export function MedievalLayout({ children }: MedievalLayoutProps) {
+export function MedievalLayout({ children, lastOpenedCampaign, handleSelectCampaign }: MedievalLayoutProps) {
   const { theme } = useTheme();
 
   if (theme !== 'medieval') {
@@ -52,13 +54,6 @@ export function MedievalLayout({ children }: MedievalLayoutProps) {
                    <div className="w-8 h-8 rounded-full shadow-[inset_4px_0_0_0_#6b5633]" style={{ transform: 'rotate(-20deg)' }}></div>
                 </div>
             </div>
-        </div>
-
-        {/* Bookmark */}
-        <div className="absolute top-[40%] right-[-30px] w-12 h-20 bg-[#f4eacc] rounded-r shadow-[5px_5px_15px_rgba(0,0,0,0.5)] z-0 flex items-center justify-end pr-2" style={{ border: '1px solid #d9c596', borderLeft: 'none' }}>
-           {/* Ribbon effect bottom (triangle cutout) */}
-           <div className="absolute bottom-[-10px] left-0 w-full h-10 bg-[#f4eacc] border-b border-[#d9c596] shadow-[5px_5px_15px_rgba(0,0,0,0.5)]" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 60%, 0 100%)' }}></div>
-           <Play size={18} className="text-[#8b4513] opacity-40 z-10" />
         </div>
 
         {/* Inner Pages Container */}
