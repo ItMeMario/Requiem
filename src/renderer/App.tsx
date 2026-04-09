@@ -309,7 +309,7 @@ function App() {
       {renderLayout(
         <>
           {!selectedCampaign ? (
-        <main className={`flex-1 flex flex-col overflow-y-auto w-full relative ${theme === 'medieval' ? 'text-primary' : 'bg-surface-app'}`}>
+        <main className={`flex-1 flex flex-col overflow-y-auto w-full relative ${theme === 'medieval' ? 'text-primary' : theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
           <header className={`px-8 py-6 border-b flex items-center justify-between z-10 sticky top-0 ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : theme === 'vampire' ? 'bg-[#08080b]/90 backdrop-blur-md border-[#1f1f2e] shadow-[0_4px_20px_rgba(0,0,0,0.4)]' : theme === 'medieval' ? 'border-[#d9c596]/40' : 'bg-surface-app border-border-default'}`}>
             <div className="flex w-full items-center justify-between">
               <div className="flex flex-col gap-2">
@@ -595,7 +595,7 @@ function App() {
           </div>
         </main>
       ) : (
-        <main className="flex-1 flex flex-col h-full z-0 w-full overflow-hidden bg-surface-app">
+        <main className={`flex-1 flex flex-col h-full z-0 w-full overflow-hidden ${theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
           {/* Header */}
           <header className="px-8 py-4 border-b border-border-subtle bg-surface-elevated flex items-center justify-between">
             <div className="flex items-center space-x-6">

@@ -42,7 +42,7 @@ export function CyberpunkLayout({ children, lastOpenedCampaign, handleSelectCamp
       <div className="absolute inset-0 cyber-grid opacity-20 pointer-events-none" />
 
       {/* Main Cyber Frame */}
-      <div className="flex w-full h-full bg-[#050510]/90 backdrop-blur-md overflow-hidden relative rounded-sm shadow-[0_0_20px_rgba(0,255,255,0.1)] border border-[#0ff]/20 z-10 flex-col">
+      <div className="flex w-full h-full bg-transparent overflow-hidden relative rounded-sm shadow-[0_0_20px_rgba(0,255,255,0.1)] border border-[#0ff]/20 z-10 flex-col">
         
         {/* Frame corner decorative elements */}
         <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#0ff] pointer-events-none" />
