@@ -480,219 +480,163 @@
 }
 
 /* ═══════════════════════════════════════════
-   BLOOD IMMERSION BACKGROUND
+   VEIN BACKGROUND & BLOOD BUBBLES
    ═══════════════════════════════════════════ */
-.blood-ocean {
+.vein-background {
+  background: radial-gradient(circle at center, #350000 0%, #0d0000 100%);
+}
+
+.vein-wall-left, .vein-wall-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+  pointer-events: none;
+  z-index: 1;
+}
+.vein-wall-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.9), rgba(50,0,0,0.4), transparent);
+}
+.vein-wall-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0,0,0,0.9), rgba(50,0,0,0.4), transparent);
+}
+
+.blood-flow {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, #110000 0%, #3a0000 100%);
-  z-index: 0;
+  z-index: 2;
   overflow: hidden;
 }
 
-.blood-wave {
+.pulse-vein-glow {
+  animation: pulse-vein 4s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-vein {
+  0% { transform: scale(1); opacity: 0.05; }
+  100% { transform: scale(1.1); opacity: 0.15; }
+}
+
+.blood-bubble {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 200%;
-  height: 100%;
-  background: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'><path d='M0,400 C200,500 300,300 500,400 C700,500 800,300 1000,400 L1000,1000 L0,1000 Z' fill='rgba(100, 0, 0, 0.3)'/></svg>") repeat-x;
-  background-size: 1000px 1000px;
-  background-position: 0 bottom;
-  animation: blood-wave-flow 25s linear infinite;
-  transform-origin: bottom;
-}
-
-.blood-wave-2 {
-  animation: blood-wave-flow 18s linear infinite reverse;
-  opacity: 0.6;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'><path d='M0,450 C200,350 300,550 500,450 C700,350 800,550 1000,450 L1000,1000 L0,1000 Z' fill='rgba(139, 0, 0, 0.4)'/></svg>");
-}
-
-.blood-wave-3 {
-  animation: blood-wave-flow 12s linear infinite;
+  bottom: -100px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,100,100,0.8), rgba(150,0,0,1) 60%, rgba(50,0,0,1) 100%);
+  box-shadow: 0 0 10px rgba(255,0,0,0.4), inset -5px -5px 15px rgba(0,0,0,0.6);
   opacity: 0.8;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'><path d='M0,500 C200,600 300,400 500,500 C700,600 800,400 1000,500 L1000,1000 L0,1000 Z' fill='rgba(180, 0, 0, 0.5)'/></svg>");
+  animation: float-up-bubble infinite ease-in;
 }
 
-.blood-particles {
+.blood-cell {
   position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(255, 50, 50, 0.4) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: floatUp 20s linear infinite;
-  opacity: 0.5;
+  bottom: -150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,0,0,1) 0%, rgba(80,0,0,1) 100%);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 5px rgba(0,0,0,0.5);
+  border: 4px solid rgba(200,0,0,0.5);
+  animation: float-up-cell infinite linear;
 }
 
-@keyframes blood-wave-flow {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+.bubble-1 { width: 40px; height: 40px; left: 20%; animation-duration: 8s; animation-delay: 1s; }
+.bubble-2 { width: 25px; height: 25px; left: 40%; animation-duration: 6s; animation-delay: 3s; }
+.bubble-3 { width: 60px; height: 60px; left: 60%; animation-duration: 10s; animation-delay: 0s; }
+.bubble-4 { width: 15px; height: 15px; left: 75%; animation-duration: 5s; animation-delay: 2s; }
+.bubble-5 { width: 35px; height: 35px; left: 35%; animation-duration: 7s; animation-delay: 4s; }
+.bubble-6 { width: 80px; height: 80px; left: 10%; animation-duration: 12s; animation-delay: 1s; opacity: 0.5; }
+.bubble-7 { width: 20px; height: 20px; left: 85%; animation-duration: 6s; animation-delay: 5s; }
+.bubble-8 { width: 50px; height: 50px; left: 50%; animation-duration: 9s; animation-delay: 2.5s; }
+
+.cell-1 { width: 70px; height: 70px; left: 30%; animation-duration: 15s; }
+.cell-2 { width: 90px; height: 90px; left: 70%; animation-duration: 18s; animation-delay: 4s; }
+.cell-3 { width: 50px; height: 50px; left: 50%; animation-duration: 12s; animation-delay: 2s; }
+
+@keyframes float-up-bubble {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
 }
 
-@keyframes floatUp {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-40px); }
+@keyframes float-up-cell {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
 }
+
 
 /* ═══════════════════════════════════════════
-   GOTHIC CASTLE BORDER (VICTORIAN)
+   HEAVY GOTHIC CASTLE ROOM (FOREGROUND)
    ═══════════════════════════════════════════ */
-.gothic-castle-frame {
+
+/* Castle Ceiling */
+.castle-ceiling {
+  background-color: #050202;
+  border-bottom: 6px solid #1a0505;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M0 100 Q 50 0 100 100' fill='none' stroke='%23110202' stroke-width='4'/%3E%3C/svg%3E");
+  background-size: 200px 100px;
+  box-shadow: 0 30px 60px rgba(0,0,0,1);
+}
+
+.castle-arch {
   position: absolute;
-  /* Removed opaque backgrounds and blurs to allow vision of the blood */
-  pointer-events: none;
+  top: 100%;
+  width: 500px;
+  height: 60px;
+  background: transparent;
+  border: 15px solid #050202;
+  border-bottom: none;
+  border-top-left-radius: 500px 100px;
+  border-top-right-radius: 500px 100px;
+  box-shadow: inset 0 20px 40px rgba(0,0,0,1), 0 -10px 30px rgba(0,0,0,1);
+  transform: translateY(-15px);
 }
 
-.gothic-stone-wall {
-  background-color: #0a0404;
-  /* SVG Brick pattern */
-  background-image: url("data:image/svg+xml,%3Csvg width='42' height='44' viewBox='0 0 42 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23050202' fill-opacity='0.9'%3E%3Cpath d='M0 0h42v44H0V0zm1 1h40v20H1V1zM0 23h20v20H0V23zm22 0h20v20H22V23z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  box-shadow: inset 0 0 30px #000;
-  z-index: 5;
-}
-
-
-
-.gothic-corner {
+.gothic-moon-symbol-top {
   position: absolute;
-  width: 50px;
-  height: 50px;
-  pointer-events: none;
-  z-index: 20;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #8b0000;
+  font-size: 32px;
+  text-shadow: 0 0 20px #ff0000;
 }
 
-.gothic-corner-tl {
-  top: 5px;
-  left: 5px;
-  border-top: 6px solid #8b0000;
-  border-left: 6px solid #8b0000;
-  border-top-left-radius: 12px;
-  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.8);
-}
-.gothic-corner-tl::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 20px;
-  height: 20px;
-  border-top: 2px solid #ff3333;
-  border-left: 2px solid #ff3333;
-  border-top-left-radius: 5px;
+/* Base Stone Texture for Walls */
+.castle-wall-side, .castle-wall-floor {
+  background-color: #070303;
+  background-image: 
+    linear-gradient(335deg, rgba(0,0,0,0.8) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(0,0,0,0.8) 23px, transparent 23px),
+    linear-gradient(335deg, rgba(0,0,0,0.8) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(0,0,0,0.8) 23px, transparent 23px);
+  background-size: 58px 58px;
+  background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
 }
 
-.gothic-corner-tr {
-  top: 5px;
-  right: 5px;
-  border-top: 6px solid #8b0000;
-  border-right: 6px solid #8b0000;
-  border-top-right-radius: 12px;
-  box-shadow: inset -4px 4px 10px rgba(0,0,0,0.8);
-}
-.gothic-corner-tr::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 20px;
-  height: 20px;
-  border-top: 2px solid #ff3333;
-  border-right: 2px solid #ff3333;
-  border-top-right-radius: 5px;
+.castle-wall-side {
+  border-left: 4px solid #1a0505;
+  border-right: 4px solid #1a0505;
 }
 
-.gothic-corner-bl {
-  bottom: 5px;
-  left: 5px;
-  border-bottom: 6px solid #8b0000;
-  border-left: 6px solid #8b0000;
-  border-bottom-left-radius: 12px;
-  box-shadow: inset 4px -4px 10px rgba(0,0,0,0.8);
-}
-.gothic-corner-bl::after {
-  content: '';
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: 20px;
-  height: 20px;
-  border-bottom: 2px solid #ff3333;
-  border-left: 2px solid #ff3333;
-  border-bottom-left-radius: 5px;
+.castle-wall-floor {
+  border-top: 6px solid #2a0505;
 }
 
-.gothic-corner-br {
-  bottom: 5px;
-  right: 5px;
-  border-bottom: 6px solid #8b0000;
-  border-right: 6px solid #8b0000;
-  border-bottom-right-radius: 12px;
-  box-shadow: inset -4px -4px 10px rgba(0,0,0,0.8);
-}
-.gothic-corner-br::after {
-  content: '';
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 20px;
-  height: 20px;
-  border-bottom: 2px solid #ff3333;
-  border-right: 2px solid #ff3333;
-  border-bottom-right-radius: 5px;
-}
-
-
-
-.gothic-arch-top {
-  position: absolute;
-  top: 10px;
-  left: 10%;
-  right: 10%;
-  height: 40px;
-  background: radial-gradient(ellipse at top center, rgba(139,0,0,0.3) 0%, transparent 70%);
-  border-bottom: 2px solid rgba(80,0,0,0.5);
-  border-bottom-left-radius: 300px;
-  border-bottom-right-radius: 300px;
-  pointer-events: none;
-  z-index: 10;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-}
-
-.gothic-arch-inner {
+/* Thick Pillars */
+.castle-pillar {
+  width: 80px;
+  background: linear-gradient(to right, #000 0%, #1a0505 50%, #000 100%);
+  box-shadow: 15px 0 30px rgba(0,0,0,0.9), -15px 0 30px rgba(0,0,0,0.9);
+  border-left: 2px solid #330505;
+  border-right: 2px solid #330505;
   position: absolute;
   top: 0;
-  left: 5%;
-  right: 5%;
-  height: 20px;
-  border-bottom: 1px dashed rgba(255,51,51,0.5);
-  border-bottom-left-radius: 200px;
-  border-bottom-right-radius: 200px;
+  bottom: 0;
 }
 
-.gothic-moon-symbol {
-  position: absolute;
-  top: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #ff3333;
-  font-size: 24px;
-  text-shadow: 0 0 10px #ff0000;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(139,0,0,0.5) 0%, transparent 70%);
-}
-
-.gothic-arch-bottom {
-  position: absolute;
-  bottom: 10px;
-  left: 10%;
-  right: 10%;
-  height: 20px;
-  border-top: 2px solid rgba(80,0,0,0.5);
-  border-top-left-radius: 300px;
-  border-top-right-radius: 300px;
-  pointer-events: none;
-  z-index: 10;
-  background: radial-gradient(ellipse at bottom center, rgba(139,0,0,0.3) 0%, transparent 70%);
-}
+.pillar-left { left: 80px; }
+.pillar-right { right: 80px; }

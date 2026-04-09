@@ -30,34 +30,29 @@ export function VampireLayout({ children, lastOpenedCampaign, handleSelectCampai
       <VampireBg />
 
       {/* Main Gothic Frame */}
-      <div className="gothic-castle-frame absolute inset-0 z-10 pointer-events-none">
+      <div className="gothic-castle-frame absolute inset-0 z-10 pointer-events-none flex flex-col">
+        
+        {/* Castle Ceiling / Vaulted Arch */}
+        <div className="castle-ceiling relative w-full h-32 flex justify-center z-30">
+          <div className="castle-arch" />
+          <div className="gothic-moon-symbol-top">☽☉☾</div>
+        </div>
+
+        {/* Pillars framing the left and right */}
+        <div className="castle-pillar pillar-left z-20" />
+        <div className="castle-pillar pillar-right z-20" />
         
         {/* Stone Walls for Borders */}
-        <div className="absolute top-0 left-0 right-0 h-10 gothic-stone-wall border-b-2 border-[#220303]" />
-        <div className="absolute bottom-0 left-0 right-0 h-10 gothic-stone-wall border-t-2 border-[#220303]" />
-        <div className="absolute top-0 bottom-0 left-0 w-10 gothic-stone-wall border-r-2 border-[#220303]" />
-        <div className="absolute top-0 bottom-0 right-0 w-10 gothic-stone-wall border-l-2 border-[#220303]" />
-
-        {/* Victorian Gothic Corner Ornaments */}
-        <div className="gothic-corner gothic-corner-tl" />
-        <div className="gothic-corner gothic-corner-tr" />
-        <div className="gothic-corner gothic-corner-bl" />
-        <div className="gothic-corner gothic-corner-br" />
-
-        {/* Top Arch Decoration Overlay */}
-        <div className="gothic-arch-top">
-          <div className="gothic-arch-inner" />
-          <div className="gothic-moon-symbol flex items-center justify-center">☽☉☾</div>
-        </div>
-        <div className="gothic-arch-bottom" />
+        <div className="absolute top-0 bottom-0 left-0 w-20 castle-wall-side shadow-[inset_-20px_0_40px_rgba(0,0,0,0.9)] z-10" />
+        <div className="absolute top-0 bottom-0 right-0 w-20 castle-wall-side shadow-[inset_20px_0_40px_rgba(0,0,0,0.9)] z-10" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 castle-wall-floor shadow-[inset_0_20px_40px_rgba(0,0,0,0.9)] z-10" />
 
         {/* Inner shadow over edge of the viewing area */}
-        <div className="absolute top-10 bottom-10 left-10 right-10 shadow-[inset_0_0_80px_rgba(0,0,0,0.9)] pointer-events-none" />
+        <div className="absolute top-24 bottom-10 left-20 right-20 shadow-[inset_0_0_120px_rgba(0,0,0,1)] pointer-events-none z-30" />
       </div>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col w-full h-full relative z-20 overflow-hidden overflow-y-auto px-12 md:px-16 pt-16 pb-16">
-        {/* Removed opaque background overlays so blood animation is clearly visible */}
+      <div className="flex-1 flex flex-col w-full h-full relative z-20 overflow-hidden overflow-y-auto px-28 pt-40 pb-20">
         <div className="min-h-full">
           {children}
         </div>
