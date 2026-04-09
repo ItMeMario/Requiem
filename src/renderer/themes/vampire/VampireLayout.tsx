@@ -24,28 +24,41 @@ export function VampireLayout({ children, lastOpenedCampaign, handleSelectCampai
 
   return (
     <div 
-      className="flex h-screen w-full bg-[#030304] p-2 sm:p-4 md:p-6 overflow-hidden relative font-sans text-[#d1d1d6]"
+      className="flex h-screen w-full bg-transparent overflow-hidden relative font-sans text-[#d1d1d6]"
       data-theme="vampire"
     >
       <VampireBg />
 
-      {/* Main Coffin/Gothic Frame */}
-      <div className="flex w-full h-full bg-[#0a0a0f]/95 backdrop-blur-md overflow-hidden relative rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.9),inset_0_0_80px_rgba(0,0,0,0.8)] border-2 border-[#1f1f2e] z-10 flex-col"
-           style={{
-             backgroundImage: 'radial-gradient(circle at center, rgba(30,30,40,0.3) 0%, #050508 100%)'
-           }}
-      >
+      {/* Main Gothic Frame */}
+      <div className="gothic-castle-frame absolute inset-0 z-10 pointer-events-none">
         
-        {/* Ornate corner decorations (simulated with CSS borders) */}
-        <div className="absolute top-2 left-2 w-8 h-8 border-t-2 border-l-2 border-[#3d3d4a] rounded-tl-lg pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.8)]" />
-        <div className="absolute top-2 right-2 w-8 h-8 border-t-2 border-r-2 border-[#3d3d4a] rounded-tr-lg pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.8)]" />
-        <div className="absolute bottom-2 left-2 w-8 h-8 border-b-2 border-l-2 border-[#3d3d4a] rounded-bl-lg pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.8)]" />
-        <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-[#3d3d4a] rounded-br-lg pointer-events-none shadow-[0_0_10px_rgba(0,0,0,0.8)]" />
+        {/* Stone Walls for Borders */}
+        <div className="absolute top-0 left-0 right-0 h-10 gothic-stone-wall border-b-2 border-[#220303]" />
+        <div className="absolute bottom-0 left-0 right-0 h-10 gothic-stone-wall border-t-2 border-[#220303]" />
+        <div className="absolute top-0 bottom-0 left-0 w-10 gothic-stone-wall border-r-2 border-[#220303]" />
+        <div className="absolute top-0 bottom-0 right-0 w-10 gothic-stone-wall border-l-2 border-[#220303]" />
 
-        {/* Velvet interior texture overlay */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wIDBMODggTTggMEwwIDgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIwLjUiLz4KPC9zdmc+')] mix-blend-multiply" />
+        {/* Victorian Gothic Corner Ornaments */}
+        <div className="gothic-corner gothic-corner-tl" />
+        <div className="gothic-corner gothic-corner-tr" />
+        <div className="gothic-corner gothic-corner-bl" />
+        <div className="gothic-corner gothic-corner-br" />
 
-        <div className="flex-1 flex flex-col w-full h-full relative z-10 overflow-hidden overflow-y-auto pl-2 pr-2">
+        {/* Top Arch Decoration Overlay */}
+        <div className="gothic-arch-top">
+          <div className="gothic-arch-inner" />
+          <div className="gothic-moon-symbol flex items-center justify-center">☽☉☾</div>
+        </div>
+        <div className="gothic-arch-bottom" />
+
+        {/* Inner shadow over edge of the viewing area */}
+        <div className="absolute top-10 bottom-10 left-10 right-10 shadow-[inset_0_0_80px_rgba(0,0,0,0.9)] pointer-events-none" />
+      </div>
+
+      {/* Content area */}
+      <div className="flex-1 flex flex-col w-full h-full relative z-20 overflow-hidden overflow-y-auto px-12 md:px-16 pt-16 pb-16">
+        {/* Removed opaque background overlays so blood animation is clearly visible */}
+        <div className="min-h-full">
           {children}
         </div>
       </div>
