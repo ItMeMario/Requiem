@@ -23,6 +23,7 @@ import { EntryModal } from './components/modals/EntryModal';
 import { MedievalIntro } from './themes/medieval/MedievalIntro';
 import { CyberpunkIntro } from './themes/cyberpunk/CyberpunkIntro';
 import { VampireIntro } from './themes/vampire/VampireIntro';
+import { ConfirmDialog } from './resources/ConfirmDialog';
 
 const initCharState = { name: '', race: '', status: '', age: '', faction: '', lore: '', bonds: '', personal_notes: '', image_url: '' };
 const initLocState = { name: '', region: '', type: '', description: '', lore: '', present_npcs: '', atmosphere: '', image_url: '' };
@@ -54,6 +55,14 @@ function App() {
   const [newLoc, setNewLoc] = useState(initLocState);
   const [newEntry, setNewEntry] = useState(initEntryState);
 
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    onCancel: () => {}
+  });
+
   const lastOpenedIdStr = localStorage.getItem('lastOpenedCampaignId');
   const lastOpenedId = lastOpenedIdStr ? parseInt(lastOpenedIdStr, 10) : null;
   const lastOpenedCampaign = campaigns.find(c => c.id === lastOpenedId) || (campaigns.length > 0 ? campaigns[campaigns.length - 1] : null);
@@ -65,13 +74,20 @@ function App() {
   };
 
   const handleDeleteCampaign = async (id: number, name: string) => {
-    if (window.confirm(`Você tem certeza que deseja excluir a campanha "${name}"? Esta ação é irreversível e excluirá todo o conteúdo associado.`)) {
-      try {
-        await deleteCampaign(id);
-      } catch (error) {
-        console.error('Error deleting campaign:', error);
-      }
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Confirm Deletion',
+      message: `Você tem certeza que deseja excluir a campanha "${name}"?\nEsta ação é irreversível e excluirá todo o conteúdo associado.`,
+      onConfirm: async () => {
+        try {
+          await deleteCampaign(id);
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Error deleting campaign:', error);
+        }
+      },
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+    });
   };
 
   const handleCreateCampaignWrapper = async (e: React.FormEvent) => {
@@ -111,14 +127,21 @@ function App() {
   };
 
   const handleDeleteChar = async (id: number) => {
-    if (confirm('Are you sure you want to delete this character?')) {
-      try {
-        await (window as any).api.deleteCharacter(id);
-        crud.removeCharacter(id);
-      } catch (error) {
-        console.error('Error deleting character:', error);
-      }
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Character',
+      message: 'Are you sure you want to delete this character? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          await (window as any).api.deleteCharacter(id);
+          crud.removeCharacter(id);
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Error deleting character:', error);
+        }
+      },
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+    });
   };
 
   const handleCloseCharModal = () => {
@@ -164,14 +187,21 @@ function App() {
   };
 
   const handleDeleteLoc = async (id: number) => {
-    if (confirm('Are you sure you want to delete this location?')) {
-      try {
-        await (window as any).api.deleteLocation(id);
-        crud.removeLocation(id);
-      } catch (error) {
-        console.error('Error deleting location:', error);
-      }
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Location',
+      message: 'Are you sure you want to delete this location? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          await (window as any).api.deleteLocation(id);
+          crud.removeLocation(id);
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Error deleting location:', error);
+        }
+      },
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+    });
   };
 
   const handleCloseLocModal = () => {
@@ -232,17 +262,24 @@ function App() {
   };
 
   const handleDeleteEntry = async (id: number) => {
-    if (confirm('Are you sure you want to delete this entry?')) {
-      try {
-        await (window as any).api.deleteEntry(id);
-        crud.removeEntry(id);
-        if (editingEntryId === id) {
-          setShowEntryModal(false);
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Entry',
+      message: 'Are you sure you want to delete this journal entry? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          await (window as any).api.deleteEntry(id);
+          crud.removeEntry(id);
+          if (editingEntryId === id) {
+            setShowEntryModal(false);
+          }
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Error deleting entry:', error);
         }
-      } catch (error) {
-        console.error('Error deleting entry:', error);
-      }
-    }
+      },
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+    });
   };
 
   const openNewEntryModal = () => {
@@ -774,6 +811,7 @@ function App() {
         characters={characters} 
         locations={locations} 
       />
+      <ConfirmDialog {...confirmDialog} />
 
         </>
       )}
