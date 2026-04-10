@@ -35,7 +35,6 @@ export function VampireLayout({ children, lastOpenedCampaign, handleSelectCampai
         {/* Castle Ceiling / Vaulted Arch */}
         <div className="castle-ceiling relative w-full h-32 flex justify-center z-30">
           <div className="castle-arch" />
-          <div className="gothic-moon-symbol-top">☽☉☾</div>
         </div>
 
         {/* Pillars framing the left and right */}

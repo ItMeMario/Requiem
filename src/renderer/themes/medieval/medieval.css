@@ -5,13 +5,13 @@
   /* ---- Surfaces / Backgrounds ---- */
   --surface-app:       transparent;
   --surface-sidebar:   rgba(232, 216, 176, 0.4);
-  --surface-card:      transparent;
-  --surface-input:     rgba(232, 216, 176, 0.5);
+  --surface-card:      #fdf5db;
+  --surface-input:     rgba(232, 216, 176, 0.6);
   --surface-hover:     rgba(217, 197, 150, 0.3);
   --surface-active:    rgba(139, 69, 19, 0.2);
   --surface-elevated:  rgba(0, 0, 0, 0.05);
   --surface-elevated2: rgba(0, 0, 0, 0.02);
-  --surface-overlay:   rgba(62, 39, 35, 0.5);
+  --surface-overlay:   rgba(62, 39, 35, 0.6);
   --surface-deep:      rgba(139, 69, 19, 0.1);
 
   /* ---- Text ---- */
