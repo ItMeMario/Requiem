@@ -1,0 +1,14 @@
+Copyright (c) 2026 [Mario].
+All rights reserved.
+
+License Agreement
+
+This software is provided free of charge. You are granted the right to use, copy, and modify this software for any personal or non-commercial purposes.
+
+Conditions:
+1. You may not sell, sub-license, rent, or otherwise profit from this software (or any modified versions of it) without explicit prior written consent from the author(s).
+2. The software is provided "as is", without warranty of any kind. The author(s) shall not be liable for any damages arising from the use of this software.
+
+Author contact: [GitHub: https://github.com/ItMeMario]
+
+Initial project version: 19/03/2026

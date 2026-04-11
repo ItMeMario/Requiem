@@ -1,59 +1,24 @@
-﻿
 # Requiem
 
-Requiem is a desktop application designed to be the ultimate companion for Game Masters managing tabletop RPG campaigns. Built with modern web technologies, it offers a seamless and organized way to track your world's characters, locations, and unfolding story.
+Requiem is a desktop application designed to be the ultimate companion for Game Masters and players managing tabletop RPG campaigns. Keep track of characters, locations, and your unfolding story in one simple, organized place.
 
-##  Features
+## Installation
 
-*   **Campaign Management:** Create and organize multiple campaigns, each with its own genre and system (e.g., D&D 5e, Pathfinder).
-*   **Character Tracking:** Keep detailed records of NPCs and player characters, including their race, faction, lore, bonds, and personal notes. Add image URLs for quick visual reference.
-*   **Location Database:** Document the world's geography, from vast regions to specific points of interest. Describe the atmosphere, present NPCs, and underlying lore.
-*   **Dynamic Journal entries:** Write down session summaries or your campaign's unfolding epic.
-    *   **Entity Linking:** Mention characters or locations in your journal using {Character Name} syntax. The text automatically becomes an interactive link.
-    *   **Quick Reference:** Clicking a linked entity instantly opens its details panel for rapid consultation or editing. Upon closing, you are returned seamlessly to your journal entry.
-    *   **Rich Text Editing:** Use a clean, embedded rich-text editor to format your notes exactly as you want them.
+1. Download **`requiem.exe`**.
+2. Run the executable and follow the on-screen installation instructions.
 
-##  Technology Stack
+## Execution
 
-*   **Frontend:** React, Tailwind CSS, Lucide Icons, React Quill (for rich text).
-*   **Framework:** Vite for fast, modern web development bundling.
-*   **Backend/Desktop Wrapper:** Electron (IPC communication ensures secure and robust data handling).
-*   **Database:** SQLite (etter-sqlite3) managed in the Electron Main process for fast, local data storage without requiring an internet connection.
+Once installed, simply double-click the Requiem shortcut on your desktop or run it from your Start menu to launch the application.
 
-##  Getting Started
+## Features
 
-### Prerequisites
+* **Campaign Management:** Create and organize multiple campaigns.
+* **Entity Tracking:** Keep detailed records of NPCs, player characters, and locations.
+* **Dynamic Journals:** Write session summaries with rich text and smart linking to your characters and locations.
 
-*   Node.js (v16 or higher recommended)
-*   npm (comes with Node.js)
+## License
 
-### Installation
+You are free to use, modify, and share this software for any non-commercial purpose. Commercial use or sale of this software is strictly prohibited without the express written authorization of the author.
 
-1.  Clone the repository:
-    \\\bash
-    git clone https://github.com/yourusername/requiem.git
-    cd requiem
-    \\\
-
-2.  Install dependencies:
-    \\\ash
-    npm install
-    \\\
-
-3.  Run the application in development mode:
-    \\\bash
-    npm run dev
-    \\\
-    *(This will start both the Vite frontend server and the Electron desktop app concurrently).*
-
-##  Building for Production
-
-To package the application for distribution:
-
-\\\bash
-npm run build
-\\\
-*(Check your package.json for specific packaging scripts depending on your target OS).*
-
-
-
+See [Licence.txt](/Requiem/Licence.txt) for the full license text.
