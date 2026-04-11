@@ -50,8 +50,10 @@ export function MedievalLayout({ children, lastOpenedCampaign, handleSelectCampa
         <div className="absolute top-[16px] left-1/2 -translate-x-1/2 w-28 h-28 bg-[#2c1a10] rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.8)] z-40 flex items-center justify-center border-4 border-[#1a0f08] transition-transform hover:scale-105 cursor-pointer">
             <div className="w-20 h-20 bg-gradient-to-br from-[#d9c596] via-[#a68a56] to-[#6b5633] rounded-full flex items-center justify-center shadow-[inset_0_2px_8px_rgba(255,255,255,0.5),0_2px_10px_rgba(0,0,0,0.8)] border border-[#ffe0ad]">
                 <div className="w-14 h-14 rounded-full border-2 border-[#8b6e41] flex items-center justify-center" style={{ background: 'radial-gradient(circle, #e8d4a2, #ba9c61)' }}>
-                   {/* Moon Clasp Icon */}
-                   <div className="w-8 h-8 rounded-full shadow-[inset_4px_0_0_0_#6b5633]" style={{ transform: 'rotate(-20deg)' }}></div>
+                   {/* Requiem Clasp Icon: Text Symbol */}
+                   <span className="text-xl font-serif text-[#5c4a2e] flex items-center justify-center pt-1" style={{ textShadow: '1px 1px 0px rgba(255,255,255,0.3), -1px -1px 0px rgba(0,0,0,0.5)', letterSpacing: '1px' }}>
+                     ☽☉☾
+                   </span>
                 </div>
             </div>
         </div>
