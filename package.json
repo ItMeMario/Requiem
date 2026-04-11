@@ -5,10 +5,10 @@
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "dev:vite": "vite",
-    "dev:electron": "wait-on tcp:5173 && tsc -p tsconfig.node.json && electron .",
+    "dev:electron": "wait-on tcp:5173 && tsc -b tsconfig.node.json --force && electron .",
     "dev": "concurrently -k \"npm run dev:vite\" \"npm run dev:electron\"",
     "build:vite": "vite build",
-    "build:electron": "tsc -p tsconfig.node.json",
+    "build:electron": "tsc -b tsconfig.node.json --force",
     "build": "npm run build:vite && npm run build:electron && electron-builder"
   },
   "keywords": [],
@@ -17,7 +17,6 @@
   "description": "",
   "dependencies": {
     "better-sqlite3": "^12.6.2",
-    "electron": "^40.8.0",
     "lucide-react": "^0.577.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -25,6 +24,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "electron": "^40.8.0",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.4.0",
@@ -40,5 +40,27 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "wait-on": "^9.0.4"
+  },
+  "build": {
+    "appId": "com.mario.requiem",
+    "productName": "Requiem",
+    "asar": false,
+    "directories": {
+      "buildResources": "src/build",
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "src/build/icon.ico"
+    },
+    "mac": {
+      "icon": "src/build/icon.icns"
+    },
+    "linux": {
+      "icon": "src/build/icon.png"
+    }
   }
 }
