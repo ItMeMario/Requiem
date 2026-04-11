@@ -28,6 +28,10 @@ export const api = {
   createLocation: (data: any) => ipcRenderer.invoke('create-location', data),
   updateLocation: (id: number, data: any) => ipcRenderer.invoke('update-location', id, data),
   deleteLocation: (id: number) => ipcRenderer.invoke('delete-location', id),
+
+  // Backups
+  exportDatabase: () => ipcRenderer.invoke('export-database'),
+  importDatabase: () => ipcRenderer.invoke('import-database'),
 };
 
 contextBridge.exposeInMainWorld('api', api);

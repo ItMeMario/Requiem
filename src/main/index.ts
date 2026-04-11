@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
+import fs from 'fs';
 import { db, initDb } from './database';
 
 const isDev = !app.isPackaged;
@@ -144,6 +145,53 @@ function setupIpc() {
     const stmt = db.prepare('DELETE FROM locations WHERE id = ?');
     stmt.run(id);
     return true;
+  });
+
+  // Backups
+  ipcMain.handle('export-database', async (event) => {
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: 'Export Database Backup',
+      defaultPath: 'requiem_backup.db',
+      filters: [{ name: 'SQLite Database', extensions: ['db', 'sqlite'] }]
+    });
+    if (canceled || !filePath) return false;
+    
+    try {
+      await db.backup(filePath);
+      return true;
+    } catch (err) {
+      console.error('Error exporting database:', err);
+      throw err;
+    }
+  });
+
+  ipcMain.handle('import-database', async (event) => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      title: 'Import Database Backup',
+      properties: ['openFile'],
+      filters: [{ name: 'SQLite Database', extensions: ['db', 'sqlite'] }]
+    });
+    
+    if (canceled || filePaths.length === 0) return false;
+    
+    const sourcePath = filePaths[0];
+    const dbPath = path.join(app.getPath('userData'), 'requiem.db');
+    
+    try {
+      db.close();
+      const walPath = `${dbPath}-wal`;
+      const shmPath = `${dbPath}-shm`;
+      if (fs.existsSync(walPath)) fs.unlinkSync(walPath);
+      if (fs.existsSync(shmPath)) fs.unlinkSync(shmPath);
+      
+      fs.copyFileSync(sourcePath, dbPath);
+      app.relaunch();
+      app.exit();
+      return true;
+    } catch (err) {
+      console.error('Error importing database:', err);
+      throw err;
+    }
   });
 }
 

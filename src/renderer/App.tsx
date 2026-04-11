@@ -6,6 +6,7 @@ import { useEntities } from './hooks/useEntities';
 import { useTheme } from './context/ThemeContext';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
+import { DatabaseControls } from './components/DatabaseControls';
 import { MedievalLayout } from './themes/medieval/MedievalLayout';
 import { CyberpunkLayout } from './themes/cyberpunk/CyberpunkLayout';
 import { VampireLayout } from './themes/vampire/VampireLayout';
@@ -343,6 +344,7 @@ function App() {
   return (
     <>
       <ThemeSwitcher size="md" />
+      <DatabaseControls />
       {renderLayout(
         <>
           {!selectedCampaign ? (
