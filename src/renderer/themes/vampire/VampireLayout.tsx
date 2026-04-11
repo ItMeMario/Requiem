@@ -33,7 +33,7 @@ export function VampireLayout({ children, lastOpenedCampaign, handleSelectCampai
       <div className="gothic-castle-frame absolute inset-0 z-10 pointer-events-none flex flex-col">
         
         {/* Castle Ceiling / Vaulted Arch */}
-        <div className="castle-ceiling relative w-full h-32 flex justify-center z-30">
+        <div className="castle-ceiling relative w-full h-16 flex justify-center z-30">
           <div className="castle-arch" />
         </div>
 
@@ -47,11 +47,11 @@ export function VampireLayout({ children, lastOpenedCampaign, handleSelectCampai
         <div className="absolute bottom-0 left-0 right-0 h-16 castle-wall-floor shadow-[inset_0_20px_40px_rgba(0,0,0,0.9)] z-10" />
 
         {/* Inner shadow over edge of the viewing area */}
-        <div className="absolute top-24 bottom-10 left-20 right-20 shadow-[inset_0_0_120px_rgba(0,0,0,1)] pointer-events-none z-30" />
+        <div className="absolute top-12 bottom-10 left-20 right-20 shadow-[inset_0_0_120px_rgba(0,0,0,1)] pointer-events-none z-30" />
       </div>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col w-full h-full relative z-20 overflow-hidden overflow-y-auto px-28 pt-40 pb-20">
+      <div className="flex-1 flex flex-col w-full h-full relative z-20 overflow-hidden overflow-y-auto px-28 pt-16 pb-20">
         <div className="min-h-full">
           {children}
         </div>
