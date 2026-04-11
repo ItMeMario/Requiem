@@ -88,7 +88,10 @@ export const EntryModal: React.FC<EntryModalProps> = ({
           <div className="w-80 bg-surface-card flex flex-col overflow-hidden">
             <div className="p-4 border-b border-border-default bg-surface-card/80 sticky top-0 z-10 backdrop-blur">
               <h4 className="font-semibold text-secondary">References</h4>
-              <p className="text-xs text-muted mt-1">Check characters and locations while writing.</p>
+              <p className="text-xs text-muted mt-1 mb-2">Check characters and locations while writing.</p>
+              <p className="text-xs text-faint">
+                <strong className="text-accent-text">Tip:</strong> Wrap a character or location name in {'{ }'} to link it.
+              </p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
               <div>
