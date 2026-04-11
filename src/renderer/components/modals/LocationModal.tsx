@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Map as MapIcon, X } from 'lucide-react';
 import { InputField } from '../InputField';
 import { TextAreaField } from '../TextAreaField';
@@ -17,8 +18,8 @@ export const LocationModal: React.FC<LocationModalProps> = ({
 }) => {
   if (!showLocModal) return null;
 
-  return (
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
       <div className="bg-surface-card border border-border-default rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
         <button onClick={handleCloseLocModal} className="absolute top-4 right-4 text-muted hover:text-heading"><X size={20} /></button>
         <h3 className="text-xl font-bold text-heading mb-6 flex items-center gap-2"><MapIcon className="text-accent2-text"/> {editingLocId ? 'Edit Location' : 'New Location'}</h3>
@@ -39,6 +40,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

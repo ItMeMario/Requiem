@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { InputField } from '../InputField';
 
@@ -15,8 +16,8 @@ export const CreateCampaignModal: React.FC<CreateCampaignModalProps> = ({
 }) => {
   if (!showCreateModal) return null;
 
-  return (
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
       <div className="bg-surface-card border border-border-default rounded-xl p-6 w-full max-w-md shadow-2xl relative">
         <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 text-muted hover:text-heading"><X size={20} /></button>
         <h3 className="text-xl font-bold text-heading mb-6">New Campaign</h3>
@@ -30,6 +31,7 @@ export const CreateCampaignModal: React.FC<CreateCampaignModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

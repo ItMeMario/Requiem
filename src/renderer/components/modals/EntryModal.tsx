@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Book, X, Edit2, Users, Map as MapIcon } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -28,8 +29,8 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 }) => {
   if (!showEntryModal) return null;
 
-  return (
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
       <div className="bg-surface-card border border-border-default rounded-xl w-full max-w-6xl shadow-2xl relative h-[90vh] flex flex-col overflow-hidden">
         <button onClick={() => setShowEntryModal(false)} className="absolute top-4 right-4 text-muted hover:text-heading z-20"><X size={20} /></button>
         <div className="p-6 border-b border-border-default flex-shrink-0 flex items-center justify-between pr-12">
@@ -136,6 +137,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
