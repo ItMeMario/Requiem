@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import { db, initDb } from './database';
+import { db, initDb, dbPath as currentDbPath } from './database';
 
 const isDev = !app.isPackaged;
 
@@ -176,7 +176,7 @@ function setupIpc() {
     if (canceled || filePaths.length === 0) return false;
     
     const sourcePath = filePaths[0];
-    const dbPath = path.join(app.getPath('userData'), 'requiem.db');
+    const dbPath = currentDbPath;
     
     try {
       db.close();

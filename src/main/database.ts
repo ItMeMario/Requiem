@@ -1,10 +1,21 @@
 const Database = require('better-sqlite3');
 import { app } from 'electron';
 import path from 'path';
+import fs from 'fs';
 
-// Get the user data path
-const userDataPath = app.getPath('userData');
-const dbPath = path.join(userDataPath, 'requiem.db');
+const isDev = !app.isPackaged;
+
+// Get the appropriate database path based on the environment
+let dbDir = app.getPath('userData');
+
+if (isDev) {
+  dbDir = path.join(process.cwd(), 'dev-data');
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+}
+
+export const dbPath = path.join(dbDir, 'requiem.db');
 
 export const db = new Database(dbPath, { verbose: console.log });
 db.pragma('journal_mode = WAL');
