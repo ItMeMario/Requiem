@@ -40,7 +40,7 @@ export const CharacterList: React.FC<CharacterListProps> = ({ characters, handle
               </div>
               {char.image_url ? (
                 <div className="h-48 w-full bg-surface-hover overflow-hidden relative">
-                  <img src={char.image_url} alt={char.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={char.image_url} alt={char.name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent" />
                 </div>
               ) : (

@@ -30,7 +30,36 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
             <InputField label="Status" value={newChar.status} onChange={(e:any) => setNewChar({...newChar, status: e.target.value})} />
             <InputField label="Age (Idade)" value={newChar.age} onChange={(e:any) => setNewChar({...newChar, age: e.target.value})} />
             <InputField label="Faction (Facção)" value={newChar.faction} onChange={(e:any) => setNewChar({...newChar, faction: e.target.value})} />
-            <InputField label="Image URL (Imagem)" value={newChar.image_url} onChange={(e:any) => setNewChar({...newChar, image_url: e.target.value})} placeholder="https://..." />
+            <div className="flex flex-col space-y-1">
+              <label className="text-sm font-medium text-secondary">Image (Imagem)</label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setNewChar({...newChar, image_url: reader.result as string});
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="block w-full text-sm text-secondary file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-hover file:text-heading hover:file:bg-surface-elevated2 transition-colors cursor-pointer"
+                />
+                {newChar.image_url && (
+                  <button 
+                    type="button" 
+                    onClick={() => setNewChar({...newChar, image_url: ''})}
+                    className="p-2 text-danger hover:bg-danger/10 rounded transition-colors"
+                    title="Remove Image"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
           <TextAreaField label="Lore" value={newChar.lore} onChange={(e:any) => setNewChar({...newChar, lore: e.target.value})} />
           <TextAreaField label="Bonds (Vínculos)" value={newChar.bonds} onChange={(e:any) => setNewChar({...newChar, bonds: e.target.value})} />
