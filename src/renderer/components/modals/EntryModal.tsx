@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Book, X, Edit2, Users, Map as MapIcon } from 'lucide-react';
+import { Book, X, Edit2, Users, Map as MapIcon, Link as LinkIcon } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { InputField } from '../InputField';
@@ -27,6 +27,85 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   entries, newEntry, setNewEntry, handleCreateEntry, handleDeleteEntry, handleMentionClick, 
   characters, locations 
 }) => {
+  const quillRef = useRef<any>(null);
+  const [contextMenu, setContextMenu] = useState<{show: boolean, x: number, y: number, text: string, index: number, length: number} | null>(null);
+
+  useEffect(() => {
+    const handleClick = () => {
+      if (contextMenu) setContextMenu(null);
+    };
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
+  }, [contextMenu]);
+
+  const makeLinkHandler = function(this: any) {
+    const quill = this.quill || this;
+    const range = quill.getSelection();
+    if (range && range.length > 0) {
+      const text = quill.getText(range.index, range.length);
+      quill.deleteText(range.index, range.length);
+      quill.insertText(range.index, `{${text}}`);
+      quill.setSelection(range.index + text.length + 2, 0);
+    }
+  };
+
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['link', 'makeLink'],
+        ['clean']
+      ],
+      handlers: {
+        makeLink: makeLinkHandler
+      }
+    },
+    keyboard: {
+      bindings: {
+        makeLink: {
+          key: 'L',
+          shortKey: true,
+          handler: function(this: any, range: any) {
+            makeLinkHandler.call(this);
+            return false;
+          }
+        }
+      }
+    }
+  }), []);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (!quillRef.current) return;
+    const editor = quillRef.current.getEditor();
+    const selection = editor.getSelection();
+    
+    if (selection && selection.length > 0) {
+      e.preventDefault();
+      const text = editor.getText(selection.index, selection.length);
+      setContextMenu({
+        show: true,
+        x: e.clientX,
+        y: e.clientY,
+        text,
+        index: selection.index,
+        length: selection.length
+      });
+    } else {
+      setContextMenu(null);
+    }
+  };
+
+  const createLinkFromMenu = () => {
+    if (!contextMenu || !quillRef.current) return;
+    const editor = quillRef.current.getEditor();
+    editor.deleteText(contextMenu.index, contextMenu.length);
+    editor.insertText(contextMenu.index, `{${contextMenu.text}}`);
+    setContextMenu(null);
+  };
+
   if (!showEntryModal) return null;
 
   return createPortal(
@@ -70,14 +149,54 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 <InputField label="Title *" value={newEntry.title} onChange={(e:any) => setNewEntry({...newEntry, title: e.target.value})} placeholder="Day 1: The Journey Begins..." />
                 
                 <div className="flex-1 flex flex-col min-h-[400px]">
-                  <label className="block text-sm text-muted mb-1">Content <span className="text-xs text-faint ml-2">(Tip: Use {'{Character Name}'} to link them!)</span></label>
-                  <div className="flex-1 rounded-lg overflow-hidden flex flex-col" style={{ background: 'var(--quill-editor-bg)', color: 'var(--quill-editor-text)' }}>
+                  <label className="block text-sm text-muted mb-1">Content <span className="text-xs text-faint ml-2">(Tip: Select text and press Ctrl+L or right-click to link!)</span></label>
+                  <div 
+                    className="flex-1 rounded-lg overflow-hidden flex flex-col relative" 
+                    style={{ background: 'var(--quill-editor-bg)', color: 'var(--quill-editor-text)' }}
+                    onContextMenu={handleContextMenu}
+                  >
+                    <style>{`
+                      .ql-snow .ql-toolbar button.ql-makeLink {
+                        width: auto;
+                        padding: 0 5px;
+                        font-weight: bold;
+                        font-family: monospace;
+                        font-size: 14px;
+                        color: var(--quill-editor-text);
+                      }
+                      .ql-snow .ql-toolbar button.ql-makeLink::before {
+                        content: '{ }';
+                      }
+                      .ql-snow .ql-toolbar button.ql-makeLink:hover {
+                        color: #06c;
+                      }
+                    `}</style>
                     <ReactQuill 
+                      ref={quillRef}
                       theme="snow"
                       value={newEntry.content}
                       onChange={(val) => setNewEntry({...newEntry, content: val})}
+                      modules={modules}
                       className="flex-1 h-full flex flex-col [&_.ql-container]:flex-1 [&_.ql-editor]:h-full"
                     />
+                    
+                    {contextMenu && contextMenu.show && (
+                      <div 
+                        className="fixed z-[10000] bg-surface-card border border-border-default rounded-md shadow-lg py-1 w-48"
+                        style={{ top: contextMenu.y, left: contextMenu.x }}
+                      >
+                        <button 
+                          className="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-surface-hover hover:text-heading flex items-center gap-2"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            createLinkFromMenu();
+                          }}
+                        >
+                          <LinkIcon size={14} />
+                          Link Text
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </form>
@@ -90,7 +209,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
               <h4 className="font-semibold text-secondary">References</h4>
               <p className="text-xs text-muted mt-1 mb-2">Check characters and locations while writing.</p>
               <p className="text-xs text-faint">
-                <strong className="text-accent-text">Tip:</strong> Wrap a character or location name in {'{ }'} to link it.
+                <strong className="text-accent-text">Tip:</strong> Select text and click {'{ }'}, use <kbd className="bg-surface-app px-1 rounded border border-border-default">Ctrl+L</kbd>, or right-click to link it.
               </p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
