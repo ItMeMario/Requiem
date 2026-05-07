@@ -4,6 +4,7 @@ import { Users, Map as MapIcon, Book, Plus, ArrowLeft, Trash2, Play } from 'luci
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
 import { useTheme } from './context/ThemeContext';
+import { getDataService } from './services';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { DatabaseControls } from './components/DatabaseControls';
@@ -107,10 +108,10 @@ function App() {
     try {
       const data = { ...newChar, campaign_id: selectedCampaign.id };
       if (editingCharId !== null) {
-        await (window as any).api.updateCharacter(editingCharId, data);
+        await getDataService().updateCharacter(editingCharId, data);
         crud.editCharacter(editingCharId, data);
       } else {
-        const id = await (window as any).api.createCharacter(data);
+        const id = await getDataService().createCharacter(data);
         crud.addCharacter({ id, ...data });
       }
       handleCloseCharModal();
@@ -134,7 +135,7 @@ function App() {
       message: 'Are you sure you want to delete this character? This action cannot be undone.',
       onConfirm: async () => {
         try {
-          await (window as any).api.deleteCharacter(id);
+          await getDataService().deleteCharacter(id);
           crud.removeCharacter(id);
           setConfirmDialog(prev => ({ ...prev, isOpen: false }));
         } catch (error) {
@@ -167,10 +168,10 @@ function App() {
     try {
       const data = { ...newLoc, campaign_id: selectedCampaign.id };
       if (editingLocId !== null) {
-        await (window as any).api.updateLocation(editingLocId, data);
+        await getDataService().updateLocation(editingLocId, data);
         crud.editLocation(editingLocId, data);
       } else {
-        const id = await (window as any).api.createLocation(data);
+        const id = await getDataService().createLocation(data);
         crud.addLocation({ id, ...data });
       }
       handleCloseLocModal();
@@ -194,7 +195,7 @@ function App() {
       message: 'Are you sure you want to delete this location? This action cannot be undone.',
       onConfirm: async () => {
         try {
-          await (window as any).api.deleteLocation(id);
+          await getDataService().deleteLocation(id);
           crud.removeLocation(id);
           setConfirmDialog(prev => ({ ...prev, isOpen: false }));
         } catch (error) {
@@ -234,10 +235,10 @@ function App() {
       };
       
       if (isEditing) {
-        await (window as any).api.updateEntry(editingEntryId, data);
+        await getDataService().updateEntry(editingEntryId, data);
         crud.editEntry(editingEntryId, data);
       } else {
-        const id = await (window as any).api.createEntry(data);
+        const id = await getDataService().createEntry(data);
         crud.addEntry({ id, ...data });
       }
       setShowEntryModal(false);
@@ -269,7 +270,7 @@ function App() {
       message: 'Are you sure you want to delete this journal entry? This action cannot be undone.',
       onConfirm: async () => {
         try {
-          await (window as any).api.deleteEntry(id);
+          await getDataService().deleteEntry(id);
           crud.removeEntry(id);
           if (editingEntryId === id) {
             setShowEntryModal(false);

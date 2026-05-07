@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Download, Upload } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { getDataService } from '../services';
 
 export function DatabaseControls() {
   const { theme } = useTheme();
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isCyber = theme === 'cyberpunk';
   const containerClass = `fixed bottom-4 right-4 z-[100] flex gap-1.5 p-1.5 ${isCyber ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`;
@@ -15,8 +17,19 @@ export function DatabaseControls() {
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      const success = await (window as any).api.exportDatabase();
-      if (success) {
+      const result = await getDataService().exportDatabase();
+      if (typeof result === 'boolean') {
+        if (result) alert("Database backup exported successfully!");
+      } else if (result instanceof Uint8Array) {
+        const blob = new Blob([result.buffer as ArrayBuffer], { type: 'application/x-sqlite3' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `requiem_backup_${new Date().toISOString().split('T')[0]}.db`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
         alert("Database backup exported successfully!");
       }
     } catch (e) {
@@ -27,14 +40,20 @@ export function DatabaseControls() {
     }
   };
 
-  const handleImport = async () => {
+  const handleImportClick = () => {
+    if (typeof window !== 'undefined' && (window as any).api) {
+      handleElectronImport();
+    } else {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleElectronImport = async () => {
     if (confirm("Importing a backup will replace your current database and the application will restart. Are you sure you want to continue?")) {
       try {
         setIsImporting(true);
-        const success = await (window as any).api.importDatabase();
-        if (!success) {
-          setIsImporting(false);
-        }
+        const success = await getDataService().importDatabase();
+        if (!success) setIsImporting(false);
       } catch (e) {
         console.error(e);
         alert("Error importing database.");
@@ -43,8 +62,40 @@ export function DatabaseControls() {
     }
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (confirm("Importing a backup will replace your current database. Are you sure you want to continue?")) {
+      try {
+        setIsImporting(true);
+        const buffer = await file.arrayBuffer();
+        const data = new Uint8Array(buffer);
+        const success = await getDataService().importDatabase(data);
+        if (success) {
+           alert("Database imported successfully. Please reload the page.");
+           window.location.reload();
+        } else {
+           setIsImporting(false);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error importing database.");
+        setIsImporting(false);
+      }
+    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <div className={containerClass}>
+      <input 
+        type="file" 
+        accept=".db,.sqlite" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        style={{ display: 'none' }} 
+      />
       <button
         onClick={handleExport}
         disabled={isExporting}
@@ -54,7 +105,7 @@ export function DatabaseControls() {
         <Download size={16} className={isExporting ? 'animate-bounce' : ''} />
       </button>
       <button
-        onClick={handleImport}
+        onClick={handleImportClick}
         disabled={isImporting}
         className={buttonClass}
         title="Import Database (Restore)"

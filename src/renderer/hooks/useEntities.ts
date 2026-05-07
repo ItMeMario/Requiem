@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { getDataService } from '../services';
 
 export const useEntities = () => {
   const [characters, setCharacters] = useState<any[]>([]);
@@ -6,17 +7,15 @@ export const useEntities = () => {
   const [entries, setEntries] = useState<any[]>([]);
 
   const loadEntities = useCallback(async (campaignId: number) => {
-    if ((window as any).api) {
-      try {
-        const chars = await (window as any).api.getCharacters(campaignId);
-        setCharacters(chars);
-        const locs = await (window as any).api.getLocations(campaignId);
-        setLocations(locs);
-        const ents = await (window as any).api.getEntries(campaignId);
-        setEntries(ents);
-      } catch (error) {
-         console.error('Error loading entities for campaign:', error);
-      }
+    try {
+      const chars = await getDataService().getCharacters(campaignId);
+      setCharacters(chars);
+      const locs = await getDataService().getLocations(campaignId);
+      setLocations(locs);
+      const ents = await getDataService().getEntries(campaignId);
+      setEntries(ents);
+    } catch (error) {
+       console.error('Error loading entities for campaign:', error);
     }
   }, []);
 
