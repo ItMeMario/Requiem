@@ -29,6 +29,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 }) => {
   const quillRef = useRef<any>(null);
   const [contextMenu, setContextMenu] = useState<{show: boolean, x: number, y: number, text: string, index: number, length: number} | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   useEffect(() => {
     const handleClick = () => {
@@ -109,24 +110,29 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   if (!showEntryModal) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-surface-card border border-border-default rounded-xl w-full max-w-6xl shadow-2xl relative h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
+      <div className="bg-surface-card border-y sm:border border-border-default sm:rounded-xl w-full max-w-full lg:max-w-6xl shadow-2xl relative h-full sm:h-[90vh] flex flex-col overflow-hidden">
         <button onClick={() => setShowEntryModal(false)} className="absolute top-4 right-4 text-muted hover:text-heading z-20"><X size={20} /></button>
-        <div className="p-6 border-b border-border-default flex-shrink-0 flex items-center justify-between pr-12">
-          <h3 className="text-xl font-bold text-heading flex items-center gap-2">
-            <Book className="text-accent-text"/> 
+        <div className="p-4 sm:p-6 border-b border-border-default flex-shrink-0 flex items-center justify-between pr-12">
+          <h3 className="text-lg sm:text-xl font-bold text-heading flex items-center gap-2 truncate">
+            <Book className="text-accent-text hidden sm:block"/> 
             {isViewingEntry ? 'View Journal Entry' : (editingEntryId ? 'Edit Journal Entry' : 'New Journal Entry')}
           </h3>
-          {isViewingEntry && (
-            <div className="flex space-x-2">
-              <button onClick={() => setIsViewingEntry(false)} className="px-4 py-2 bg-accent hover:bg-accent-hover rounded text-heading text-sm font-medium transition-colors flex items-center gap-2">
-                <Edit2 size={16} /> Edit Entry
-              </button>
-              <button onClick={() => handleDeleteEntry(editingEntryId!)} className="px-4 py-2 bg-danger-muted-bg hover:bg-danger-muted-hover text-danger-text border border-danger-border rounded text-sm font-medium transition-colors">
-                Delete
-              </button>
-            </div>
-          )}
+          <div className="flex space-x-2">
+            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 bg-surface-hover text-muted hover:text-heading rounded border border-border-subtle" title="Show References">
+              <MapIcon size={18} />
+            </button>
+            {isViewingEntry && (
+              <div className="flex space-x-2">
+                <button onClick={() => setIsViewingEntry(false)} className="px-3 sm:px-4 py-2 bg-accent hover:bg-accent-hover rounded text-heading text-xs sm:text-sm font-medium transition-colors flex items-center gap-2">
+                  <Edit2 size={16} className="hidden sm:block" /> Edit
+                </button>
+                <button onClick={() => handleDeleteEntry(editingEntryId!)} className="px-3 sm:px-4 py-2 bg-danger-muted-bg hover:bg-danger-muted-hover text-danger-text border border-danger-border rounded text-xs sm:text-sm font-medium transition-colors">
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         
         <div className="flex-1 flex overflow-hidden">
@@ -204,8 +210,14 @@ export const EntryModal: React.FC<EntryModalProps> = ({
           </div>
 
           {/* Right Column: References Sidebar */}
-          <div className="w-80 bg-surface-card flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-border-default bg-surface-card/80 sticky top-0 z-10 backdrop-blur">
+          <div className={`${showSidebar ? 'absolute inset-0 z-50 flex bg-surface-card' : 'hidden'} lg:relative lg:flex lg:z-auto w-full lg:w-80 flex-col overflow-hidden border-l border-border-default`}>
+            {showSidebar && (
+              <div className="p-4 border-b border-border-default flex items-center justify-between lg:hidden bg-surface-elevated">
+                <h3 className="font-bold">References</h3>
+                <button onClick={() => setShowSidebar(false)} className="p-2 text-muted hover:text-heading"><X size={20}/></button>
+              </div>
+            )}
+            <div className="p-4 border-b border-border-default bg-surface-card/80 sticky top-0 z-10 backdrop-blur hidden lg:block">
               <h4 className="font-semibold text-secondary">References</h4>
               <p className="text-xs text-muted mt-1 mb-2">Check characters and locations while writing.</p>
               <p className="text-xs text-faint">

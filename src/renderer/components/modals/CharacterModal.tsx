@@ -19,12 +19,12 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   if (!showCharModal) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-surface-card border border-border-default rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
+      <div className="bg-surface-card sm:border border-border-default sm:rounded-xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
         <button onClick={handleCloseCharModal} className="absolute top-4 right-4 text-muted hover:text-heading"><X size={20} /></button>
         <h3 className="text-xl font-bold text-heading mb-6 flex items-center gap-2"><User className="text-accent-text"/> {editingCharId ? 'Edit Character' : 'New Character'}</h3>
         <form onSubmit={handleCreateChar} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField label="Name *" value={newChar.name} onChange={(e:any) => setNewChar({...newChar, name: e.target.value})} />
             <InputField label="Race (Raça)" value={newChar.race} onChange={(e:any) => setNewChar({...newChar, race: e.target.value})} />
             <InputField label="Status" value={newChar.status} onChange={(e:any) => setNewChar({...newChar, status: e.target.value})} />

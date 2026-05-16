@@ -36,11 +36,11 @@ export const JournalList: React.FC<JournalListProps> = ({
         <div className="flex flex-col space-y-4">
           {entries.map(entry => (
             <div key={entry.id} onClick={() => handleViewEntry(entry)} className="bg-surface-card border border-border-default rounded-lg p-5 hover:border-border-hover transition-colors group relative cursor-pointer">
-              <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <button onClick={(e) => { e.stopPropagation(); handleEditEntry(entry); }} className="p-1.5 bg-surface-hover hover:bg-accent rounded text-secondary hover:text-heading transition-colors">
+              <div className="absolute top-4 right-4 flex space-x-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
+                <button onClick={(e) => { e.stopPropagation(); handleEditEntry(entry); }} className="p-2 bg-surface-hover hover:bg-accent rounded text-secondary hover:text-heading transition-colors shadow-sm">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDeleteEntry(entry.id); }} className="p-1.5 bg-surface-hover hover:bg-danger rounded text-secondary hover:text-heading transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); handleDeleteEntry(entry.id); }} className="p-2 bg-surface-hover hover:bg-danger rounded text-secondary hover:text-heading transition-colors shadow-sm">
                   <Trash2 size={16} />
                 </button>
               </div>

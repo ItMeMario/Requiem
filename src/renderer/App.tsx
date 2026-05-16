@@ -350,7 +350,7 @@ function App() {
         <>
           {!selectedCampaign ? (
         <main className={`flex-1 flex flex-col overflow-y-auto w-full relative ${theme === 'medieval' ? 'text-primary' : theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
-          <header className={`px-8 py-6 border-b flex items-center justify-between z-10 ${theme === 'medieval' ? 'relative' : 'sticky top-0'} ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : theme === 'vampire' ? 'bg-[#08080b]/90 backdrop-blur-md border-[#1f1f2e] shadow-[0_4px_20px_rgba(0,0,0,0.4)]' : theme === 'medieval' ? 'border-[#d9c596]/40' : 'bg-surface-app border-border-default'}`}>
+          <header className={`px-4 md:px-8 py-4 md:py-6 border-b flex items-center justify-between z-10 ${theme === 'medieval' ? 'relative' : 'sticky top-0'} ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : theme === 'vampire' ? 'bg-[#08080b]/90 backdrop-blur-md border-[#1f1f2e] shadow-[0_4px_20px_rgba(0,0,0,0.4)]' : theme === 'medieval' ? 'border-[#d9c596]/40' : 'bg-surface-app border-border-default'}`}>
             {theme === 'medieval' ? (
               <div className="flex w-full items-center justify-center relative py-4">
                  <div className="flex flex-col w-full relative max-w-2xl mx-auto">
@@ -364,7 +364,7 @@ function App() {
                        </div>
                     </div>
                     <div className="text-center">
-                       <h2 className="text-4xl text-[#3e2723] mb-3 tracking-widest font-bold" style={{ fontFamily: '"Georgia", "Times New Roman", serif', textShadow: '1px 1px 0px rgba(255,255,255,0.8)' }}>
+                       <h2 className="text-2xl md:text-4xl text-[#3e2723] mb-3 tracking-widest font-bold" style={{ fontFamily: '"Georgia", "Times New Roman", serif', textShadow: '1px 1px 0px rgba(255,255,255,0.8)' }}>
                           {getThemeLabels(theme).dashboardTitle}
                        </h2>
                        <p className="text-[#5c3a21] italic font-serif text-[17px] opacity-90 drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]">
@@ -386,7 +386,7 @@ function App() {
                        </div>
                     </div>
                     <div className="text-center">
-                       <h2 className="text-4xl text-[#e0e0e0] mb-3 tracking-[0.2em] font-bold" style={{ fontFamily: '"Georgia", "Times New Roman", serif', textShadow: '0 0 15px rgba(255,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>
+                       <h2 className="text-2xl md:text-4xl text-[#e0e0e0] mb-3 tracking-[0.2em] font-bold" style={{ fontFamily: '"Georgia", "Times New Roman", serif', textShadow: '0 0 15px rgba(255,0,0,0.6), 0 2px 4px rgba(0,0,0,0.9)' }}>
                           {getThemeLabels(theme).dashboardTitle}
                        </h2>
                        <p className="text-[#a0a0b0] italic font-serif text-[17px] opacity-80 drop-shadow-[0_1px_2px_rgba(0,0,0,1)]">
@@ -399,7 +399,7 @@ function App() {
               <div className="flex w-full items-center justify-center relative py-4">
                  <div className="flex flex-col w-full relative max-w-3xl mx-auto">
                     <div className="flex items-center justify-center mb-6 relative">
-                       <div className="flex-1 flex items-center justify-end mr-6 opacity-80">
+                       <div className="flex-1 hidden sm:flex items-center justify-end mr-6 opacity-80">
                          <div className="text-[10px] text-[#0ff]/50 tracking-[0.3em] mr-4 font-mono">SYS.OP: OPTIMAL</div>
                          <div className="h-[2px] w-full max-w-[120px] bg-gradient-to-l from-[#0ff] to-transparent shadow-[0_0_8px_#0ff]"></div>
                        </div>
@@ -412,7 +412,7 @@ function App() {
                          <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-[#0ff] animate-ping"></div>
                        </div>
 
-                       <div className="flex-1 flex items-center justify-start ml-6 opacity-80">
+                       <div className="flex-1 hidden sm:flex items-center justify-start ml-6 opacity-80">
                          <div className="h-[2px] w-full max-w-[120px] bg-gradient-to-r from-[#0ff] to-transparent shadow-[0_0_8px_#0ff] mr-4"></div>
                          <div className="eeg-waveform">
                             {Array.from({ length: 12 }).map((_, i) => (
@@ -423,7 +423,7 @@ function App() {
                     </div>
                     
                     <div className="text-center relative">
-                       <h2 className="text-4xl text-[#0ff] mb-3 tracking-[0.3em] font-bold font-mono text-cyan-glitch uppercase" data-text={getThemeLabels(theme).dashboardTitle} style={{ textShadow: '0 0 10px rgba(0,255,255,0.6)' }}>
+                       <h2 className="text-2xl md:text-4xl text-[#0ff] mb-3 tracking-[0.3em] font-bold font-mono text-cyan-glitch uppercase" data-text={getThemeLabels(theme).dashboardTitle} style={{ textShadow: '0 0 10px rgba(0,255,255,0.6)' }}>
                           {getThemeLabels(theme).dashboardTitle}
                        </h2>
                        <div className="text-[#0ff]/70 font-mono text-[13px] tracking-[0.15em] uppercase flex items-center justify-center">
@@ -454,7 +454,7 @@ function App() {
             )}
           </header>
 
-          <div className="p-8 max-w-6xl mx-auto w-full xl:px-12">
+          <div className="p-4 md:p-8 max-w-6xl mx-auto w-full xl:px-12">
             
             {/* New Resume Campaign Featured Banner */}
             {lastOpenedCampaign && (
@@ -696,11 +696,11 @@ function App() {
       ) : (
         <main className={`flex-1 flex flex-col h-full z-0 w-full overflow-hidden ${theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
           {/* Header */}
-          <header className="px-8 py-4 border-b border-border-subtle bg-surface-elevated flex items-center justify-between">
-            <div className="flex items-center space-x-6">
+          <header className="px-4 md:px-8 py-3 md:py-4 border-b border-border-subtle bg-surface-elevated flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:space-x-6 w-full sm:w-auto">
               <button 
                 onClick={() => setSelectedCampaign(null)}
-                className="text-muted hover:text-heading flex items-center space-x-2 transition-colors pr-6 border-r border-border-subtle"
+                className="text-muted hover:text-heading flex items-center space-x-2 transition-colors self-start sm:self-auto sm:pr-6 sm:border-r border-border-subtle"
               >
                 <ArrowLeft size={20} />
                 <span>Dashboard</span>
@@ -716,32 +716,32 @@ function App() {
           </header>
 
           {/* Tabs */}
-          <div className="flex px-8 border-b border-border-subtle bg-surface-elevated2">
+          <div className="flex px-4 md:px-8 border-b border-border-subtle bg-surface-elevated2">
             <button 
               onClick={() => setActiveTab('characters')}
               className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'characters' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
             >
               <Users size={18} />
-              <span>Characters</span>
+              <span className="hidden sm:inline">Characters</span>
             </button>
             <button 
               onClick={() => setActiveTab('locations')}
               className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'locations' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
             >
               <MapIcon size={18} />
-              <span>Locations</span>
+              <span className="hidden sm:inline">Locations</span>
             </button>
             <button 
               onClick={() => setActiveTab('journal')}
               className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'journal' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
             >
               <Book size={18} />
-              <span>Journal</span>
+              <span className="hidden sm:inline">Journal</span>
             </button>
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto p-8">
+          <div className="flex-1 overflow-y-auto p-4 md:p-8">
             {activeTab === 'characters' && (
               <CharacterList 
                 characters={characters} 

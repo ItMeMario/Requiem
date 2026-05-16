@@ -19,12 +19,12 @@ export const LocationModal: React.FC<LocationModalProps> = ({
   if (!showLocModal) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-surface-card border border-border-default rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
+      <div className="bg-surface-card sm:border border-border-default sm:rounded-xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
         <button onClick={handleCloseLocModal} className="absolute top-4 right-4 text-muted hover:text-heading"><X size={20} /></button>
         <h3 className="text-xl font-bold text-heading mb-6 flex items-center gap-2"><MapIcon className="text-accent2-text"/> {editingLocId ? 'Edit Location' : 'New Location'}</h3>
         <form onSubmit={handleCreateLoc} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField label="Name *" value={newLoc.name} onChange={(e:any) => setNewLoc({...newLoc, name: e.target.value})} />
             <InputField label="Region (Região)" value={newLoc.region} onChange={(e:any) => setNewLoc({...newLoc, region: e.target.value})} />
             <InputField label="Type (Tipo)" value={newLoc.type} onChange={(e:any) => setNewLoc({...newLoc, type: e.target.value})} />
