@@ -11,7 +11,7 @@ export function ThemeSwitcher({ size = 'md' }: ThemeSwitcherProps) {
 
   const isSmall = size === 'sm';
   const isCyber = theme === 'cyberpunk';
-  const containerClass = `fixed top-4 right-4 z-[100] flex gap-1.5 ${isSmall ? 'p-1 scale-90 origin-right' : 'p-1.5'} ${isCyber ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`;
+  const containerClass = `fixed bottom-20 sm:bottom-auto sm:top-4 right-4 z-[100] flex gap-1.5 ${isSmall ? 'p-1 scale-90 origin-right' : 'p-1.5'} ${isCyber ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`;
   
   const buttonClass = (targetTheme: string) => {
     // Base button styles: size and shape
