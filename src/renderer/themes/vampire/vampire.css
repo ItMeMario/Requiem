@@ -638,5 +638,36 @@
   bottom: 0;
 }
 
-.pillar-left { left: 80px; }
 .pillar-right { right: 80px; }
+
+/* ============================================================
+   MOBILE RESPONSIVENESS & PERFORMANCE
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Disable heavy animations to save battery */
+  .bat, .vampire-fog, .coffin-light-spill-active, .coffin-mist-active, 
+  .pulse-vein-glow, .blood-bubble, .blood-cell, .coffin-aura, .coffin-shake:hover, .coffin-awaken-text {
+    animation: none !important;
+  }
+
+  /* Hide decorative particles and heavy gradient walls to boost FPS */
+  .bat, .vampire-fog, .blood-bubble, .blood-cell, .vein-wall-left, .vein-wall-right {
+    display: none !important;
+  }
+
+  /* Simplify the castle ceiling background */
+  .castle-ceiling {
+    background-image: none !important;
+    border-bottom: 2px solid #1a0505 !important;
+  }
+  
+  /* Make coffin smaller on mobile so it fits the screen */
+  .coffin-body {
+    width: 200px;
+    height: 333px;
+  }
+  
+  .coffin-intro-overlay.coffin-intro-reveal {
+    animation-duration: 1.2s; /* Faster reveal on mobile */
+  }
+}

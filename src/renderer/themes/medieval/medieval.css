@@ -144,3 +144,21 @@
   transform: scale(1.5) rotate(10deg);
   transition: opacity 0.5s ease-in-out, transform 0.5s;
 }
+
+/* ============================================================
+   MOBILE RESPONSIVENESS
+   ============================================================ */
+@media (max-width: 640px) {
+  .wood-plank {
+    background-image: none;
+  }
+  
+  .diary-book {
+    width: 300px;
+    height: 420px;
+  }
+
+  .diary-book.is-open {
+    transform: rotateX(5deg) scale(1.1) translateX(50px);
+  }
+}

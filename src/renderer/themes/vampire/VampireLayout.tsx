@@ -38,34 +38,34 @@ export function VampireLayout({ children, lastOpenedCampaign, handleSelectCampai
         </div>
 
         {/* Pillars framing the left and right */}
-        <div className="castle-pillar pillar-left z-20" />
-        <div className="castle-pillar pillar-right z-20" />
+        <div className="hidden md:block castle-pillar pillar-left z-20" />
+        <div className="hidden md:block castle-pillar pillar-right z-20" />
         
         {/* Stone Walls for Borders */}
-        <div className="absolute top-0 bottom-0 left-0 w-20 castle-wall-side shadow-[inset_-20px_0_40px_rgba(0,0,0,0.9)] z-10" />
-        <div className="absolute top-0 bottom-0 right-0 w-20 castle-wall-side shadow-[inset_20px_0_40px_rgba(0,0,0,0.9)] z-10" />
-        <div className="absolute bottom-0 left-0 right-0 h-16 castle-wall-floor shadow-[inset_0_20px_40px_rgba(0,0,0,0.9)] z-10" />
+        <div className="hidden md:block absolute top-0 bottom-0 left-0 w-20 castle-wall-side shadow-[inset_-20px_0_40px_rgba(0,0,0,0.9)] z-10" />
+        <div className="hidden md:block absolute top-0 bottom-0 right-0 w-20 castle-wall-side shadow-[inset_20px_0_40px_rgba(0,0,0,0.9)] z-10" />
+        <div className="hidden md:block absolute bottom-0 left-0 right-0 h-16 castle-wall-floor shadow-[inset_0_20px_40px_rgba(0,0,0,0.9)] z-10" />
 
         {/* Inner shadow over edge of the viewing area */}
-        <div className="absolute top-12 bottom-10 left-20 right-20 shadow-[inset_0_0_120px_rgba(0,0,0,1)] pointer-events-none z-30" />
+        <div className="hidden md:block absolute top-12 bottom-10 left-20 right-20 shadow-[inset_0_0_120px_rgba(0,0,0,1)] pointer-events-none z-30" />
       </div>
 
       {/* Content area */}
-      <div className="flex-1 flex flex-col w-full h-full relative z-20 overflow-hidden px-8 md:px-16 lg:px-24 pt-12 pb-16">
+      <div className="flex-1 flex flex-col w-full h-full relative z-20 overflow-hidden px-2 sm:px-8 md:px-16 lg:px-24 pt-4 md:pt-12 pb-4 md:pb-16">
         
         {/* Top Gothic Header matching Medieval */}
-        <div className="h-24 bg-[#0a0a0f] border-y border-[#3d3d4a] shadow-[0_15px_30px_rgba(0,0,0,0.9)] z-30 flex items-center justify-between relative shrink-0 mb-6">
+        <div className="h-16 md:h-24 bg-[#0a0a0f] border-y border-[#3d3d4a] shadow-[0_15px_30px_rgba(0,0,0,0.9)] z-30 flex items-center justify-between relative shrink-0 mb-6">
            <div className="absolute inset-0 bg-[#8b0000] mix-blend-multiply opacity-20 pointer-events-none" />
            
-           <div className="text-[#a0a0b0] text-4xl md:text-5xl lg:text-6xl font-serif tracking-[0.2em] pl-4 md:pl-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-10 font-bold" style={{ textShadow: '0 0 10px rgba(255,0,0,0.2), 0 2px 4px rgba(0,0,0,1)' }}>
+           <div className="text-[#a0a0b0] text-2xl md:text-5xl lg:text-6xl font-serif tracking-[0.2em] pl-4 md:pl-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] z-10 font-bold" style={{ textShadow: '0 0 10px rgba(255,0,0,0.2), 0 2px 4px rgba(0,0,0,1)' }}>
              REQUIEM
            </div>
 
            {/* Central Gothic Clasp */}
-           <div className="absolute top-[16px] left-1/2 -translate-x-1/2 w-28 h-28 bg-[#0a0a0f] rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.8)] z-40 flex items-center justify-center border-4 border-[#1f1f2e] transition-transform hover:scale-105 cursor-pointer hover:border-[#500000] duration-500">
-               <div className="w-20 h-20 bg-gradient-to-b from-[#1a1a24] to-[#050508] rounded-full flex items-center justify-center shadow-[inset_0_2px_8px_rgba(255,0,0,0.1),0_2px_10px_rgba(0,0,0,0.8)] border border-[#3d3d4a]">
-                   <div className="w-14 h-14 rounded-full border border-[#500000] flex items-center justify-center" style={{ background: 'radial-gradient(circle, #2a0000, #0a0a0f)' }}>
-                      <span className="text-2xl font-serif text-[#ff3333] flex items-center justify-center pt-1 tracking-widest drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]">
+           <div className="absolute top-[8px] md:top-[16px] left-1/2 -translate-x-1/2 w-16 h-16 md:w-28 md:h-28 bg-[#0a0a0f] rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.8)] z-40 flex items-center justify-center border-2 md:border-4 border-[#1f1f2e] transition-transform hover:scale-105 cursor-pointer hover:border-[#500000] duration-500">
+               <div className="w-12 h-12 md:w-20 md:h-20 bg-gradient-to-b from-[#1a1a24] to-[#050508] rounded-full flex items-center justify-center shadow-[inset_0_2px_8px_rgba(255,0,0,0.1),0_2px_10px_rgba(0,0,0,0.8)] border border-[#3d3d4a]">
+                   <div className="w-8 h-8 md:w-14 md:h-14 rounded-full border border-[#500000] flex items-center justify-center" style={{ background: 'radial-gradient(circle, #2a0000, #0a0a0f)' }}>
+                      <span className="text-sm md:text-2xl font-serif text-[#ff3333] flex items-center justify-center md:pt-1 tracking-widest drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]">
                         ☽☉☾
                       </span>
                    </div>

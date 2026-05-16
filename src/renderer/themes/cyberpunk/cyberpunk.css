@@ -386,3 +386,38 @@
 .text-cyan-glitch:hover {
   animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
 }
+
+/* ============================================================
+   MOBILE RESPONSIVENESS & PERFORMANCE
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Disable heavy animations to save battery and improve FPS */
+  .glitch-text::before,
+  .glitch-text::after,
+  .text-cyan-glitch:hover,
+  .micro-circuit-pattern::after,
+  .neon-ring-pulse::before,
+  .eeg-bar,
+  .eeg-particle {
+    animation: none !important;
+  }
+  
+  /* Hide purely decorative animated pseudo-elements on mobile */
+  .glitch-text::before,
+  .glitch-text::after,
+  .micro-circuit-pattern::after,
+  .eeg-particle {
+    display: none !important;
+  }
+
+  /* Static fallback for EEG bars */
+  .eeg-bar {
+    height: 50% !important;
+  }
+
+  /* Reduce density of scanlines to improve mobile paint performance */
+  .crt-scanlines {
+    background-size: 100% 4px;
+    opacity: 0.5;
+  }
+}
