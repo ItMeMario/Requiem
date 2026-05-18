@@ -18,3 +18,8 @@ requiem.db-wal
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Capacitor Android
+android/app/build/
+android/.gradle/
+android/local.properties

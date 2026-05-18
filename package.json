@@ -12,6 +12,8 @@
     "build:electron": "tsc -b tsconfig.node.json --force",
     "build:web": "vite build --config vite.config.web.ts",
     "preview:web": "vite preview --config vite.config.web.ts",
+    "cap:sync": "npm run build:web && npx cap sync",
+    "cap:open": "npx cap open android",
     "build": "npm run build:vite && npm run build:electron && electron-builder"
   },
   "keywords": [],
@@ -29,6 +31,9 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.4.0",
