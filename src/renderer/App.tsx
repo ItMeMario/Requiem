@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Map as MapIcon, Book, Plus, ArrowLeft, Trash2, Play } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
@@ -37,11 +37,25 @@ function App() {
   const { theme, setTheme } = useTheme();
 
   const { showIntro, dismissIntro } = useIntroGate();
+
+  const [dbError, setDbError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Check DB initialization after a short delay
+    const timer = setTimeout(() => {
+      const svc = getDataService() as any;
+      if (svc.initError) {
+        setDbError(svc.initError);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
   
   const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal'>('characters');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCampaign, setNewCampaign] = useState({ name: '', genre: '', system: '' });
+
 
   const [showCharModal, setShowCharModal] = useState(false);
   const [showLocModal, setShowLocModal] = useState(false);
@@ -95,10 +109,15 @@ function App() {
   const handleCreateCampaignWrapper = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCampaign.name.trim()) return;
-    const camp = await createCampaign(newCampaign);
-    setShowCreateModal(false);
-    setNewCampaign({ name: '', genre: '', system: '' });
-    if (camp) handleSelectCampaign(camp);
+    try {
+      const camp = await createCampaign(newCampaign);
+      setShowCreateModal(false);
+      setNewCampaign({ name: '', genre: '', system: '' });
+      if (camp) handleSelectCampaign(camp);
+    } catch (error) {
+      console.error('Failed to create campaign:', error);
+      alert('Houve um erro ao criar a campanha. Verifique o console para mais detalhes.');
+    }
   };
 
   // --- Character Handlers ---
@@ -346,6 +365,11 @@ function App() {
     <>
       <ThemeSwitcher size="md" />
       <DatabaseControls />
+      {dbError && (
+        <div className="fixed top-0 left-0 right-0 z-[10000] bg-red-900 text-white p-3 text-xs font-mono break-all">
+          <strong>DB Error:</strong> {dbError}
+        </div>
+      )}
       {renderLayout(
         <>
           {!selectedCampaign ? (

@@ -1,4 +1,5 @@
 import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
+import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import { openDB } from 'idb';
 import { IDataService } from '../../shared/dataService';
 import { Campaign, Entry, Character, Location } from '../../shared/types';
@@ -11,16 +12,30 @@ export class WebDataService implements IDataService {
   private db: Database | null = null;
   private SQL: SqlJsStatic | null = null;
   private initPromise: Promise<void>;
+  public initError: string | null = null;
 
   constructor() {
     this.initPromise = this.init();
   }
 
   private async init() {
-    this.SQL = await initSqlJs({
-      locateFile: (file) => `/${file}`
-    });
-    
+    try {
+      // Fetch the WASM binary manually to avoid sql.js internal loading issues on Android WebView
+      const wasmResponse = await fetch(sqlWasmUrl);
+      if (!wasmResponse.ok) {
+        throw new Error(`Failed to fetch WASM: ${wasmResponse.status} ${wasmResponse.statusText} (URL: ${sqlWasmUrl})`);
+      }
+      const wasmBinary = await wasmResponse.arrayBuffer();
+
+      this.SQL = await initSqlJs({
+        wasmBinary: wasmBinary
+      });
+    } catch (e: any) {
+      this.initError = `sql.js init failed: ${e?.message || e}`;
+      console.error('[Requiem DB]', this.initError);
+      throw e;
+    }
+
     const idb = await openDB(DB_NAME, 1, {
       upgrade(db) {
         db.createObjectStore(STORE_NAME);
@@ -32,13 +47,15 @@ export class WebDataService implements IDataService {
       this.db = new this.SQL.Database(savedData);
     } else {
       this.db = new this.SQL.Database();
-      this.runInitialMigrations();
     }
+    await this.runInitialMigrations();
   }
 
-  private runInitialMigrations() {
+  private async runInitialMigrations() {
     if (!this.db) return;
-    
+
+    this.db.run("PRAGMA foreign_keys = ON;");
+
     this.db.run(`
       CREATE TABLE IF NOT EXISTS campaigns (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,6 +64,10 @@ export class WebDataService implements IDataService {
         system TEXT
       );
     `);
+
+    // Migrations for existing users (adding columns if they don't exist)
+    try { this.db.run("ALTER TABLE campaigns ADD COLUMN genre TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE campaigns ADD COLUMN system TEXT;"); } catch (e) {}
 
     this.db.run(`
       CREATE TABLE IF NOT EXISTS entries (
@@ -76,6 +97,8 @@ export class WebDataService implements IDataService {
       );
     `);
 
+    try { this.db.run("ALTER TABLE characters ADD COLUMN image_url TEXT;"); } catch (e) {}
+
     this.db.run(`
       CREATE TABLE IF NOT EXISTS locations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,8 +114,10 @@ export class WebDataService implements IDataService {
         FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
       );
     `);
-    
-    this.saveToIndexedDB();
+
+    try { this.db.run("ALTER TABLE locations ADD COLUMN image_url TEXT;"); } catch (e) {}
+
+    await this.saveToIndexedDB();
   }
 
   private async saveToIndexedDB() {
