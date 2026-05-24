@@ -1,3 +1,4 @@
+@reference "tailwindcss";
 /* ============================================================
    CYBERPUNK THEME OVERRIDES (Global Tailwind Palette)
    ============================================================ */
@@ -421,3 +422,89 @@
     opacity: 0.5;
   }
 }
+
+/* ============================================================
+   UNIFIED THEME LAYOUT (CYBERPUNK)
+   ============================================================ */
+.layout-root.layout-cyberpunk {
+  @apply flex h-screen w-full p-0 sm:p-2 md:p-6 overflow-hidden relative select-none;
+}
+.layout-cyberpunk .layout-overlays {
+  @apply absolute inset-0 pointer-events-none z-50;
+}
+.layout-cyberpunk .layout-overlay-1 {
+  @apply fixed inset-0;
+}
+.layout-cyberpunk .layout-overlay-2 {
+  @apply absolute inset-0 opacity-20;
+}
+.layout-cyberpunk .layout-overlay-3 {
+  @apply absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#0ff] opacity-[0.02] blur-[120px] rounded-full;
+}
+.layout-cyberpunk .layout-overlay-4 {
+  @apply absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#0055ff] opacity-[0.03] blur-[150px] rounded-full;
+}
+
+.layout-cyberpunk .layout-main-frame {
+  @apply flex w-full h-full bg-transparent overflow-hidden relative rounded-sm shadow-[0_0_20px_rgba(0,255,255,0.1)] border border-[#0ff]/20 z-10 flex-col;
+}
+
+.layout-cyberpunk .layout-header {
+  @apply h-14 md:h-24 bg-[#02050a]/90 backdrop-blur border-b-2 border-[#0ff] shadow-[0_4px_20px_rgba(0,255,255,0.3)] z-30 flex items-center justify-between relative shrink-0;
+}
+.layout-cyberpunk .layout-header-bg {
+  @apply absolute inset-0 bg-[#0ff]/5 pointer-events-none;
+}
+.layout-cyberpunk .layout-header-bg::after {
+  content: '';
+  @apply absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#0ff] to-transparent shadow-[0_0_8px_#0ff] pointer-events-none;
+}
+
+.layout-cyberpunk .layout-header-title {
+  @apply text-[#0ff] text-xl md:text-5xl lg:text-6xl font-mono tracking-[0.2em] md:tracking-[0.3em] pl-4 md:pl-20 drop-shadow-[0_0_10px_rgba(0,255,255,1)] z-10 uppercase font-bold;
+  text-shadow: 2px 0 0 rgba(255,0,255,0.5), -2px 0 0 rgba(0,255,255,0.5);
+}
+
+.layout-cyberpunk .layout-clasp {
+  @apply absolute top-[6px] md:top-[16px] left-1/2 -translate-x-1/2 w-14 h-14 md:w-28 md:h-28 bg-[#02050a] rounded-full shadow-[0_0_20px_rgba(0,255,255,0.4)] z-40 flex items-center justify-center border-2 md:border-4 border-[#0ff]/50 transition-transform hover:scale-105 cursor-pointer;
+}
+.layout-cyberpunk .layout-clasp-inner {
+  @apply w-10 h-10 md:w-20 md:h-20 bg-[#02050a] rounded-full flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,255,255,0.5)] border border-[#0ff];
+}
+.layout-cyberpunk .layout-clasp-core {
+  @apply w-6 h-6 md:w-14 md:h-14 rounded-full border border-[#0ff]/50 flex items-center justify-center relative;
+  background: radial-gradient(circle, rgba(0,255,255,0.1), transparent);
+}
+.layout-cyberpunk .layout-clasp-core::after {
+  content: '';
+  @apply absolute inset-0 border-[2px] border-dashed border-[#b400ff]/40 rounded-full animate-[spin_10s_linear_infinite];
+}
+.layout-cyberpunk .layout-clasp-symbol {
+  @apply text-xs md:text-lg font-mono text-[#0ff] font-bold z-10 tracking-widest mt-0.5;
+  text-shadow: 0 0 8px rgba(0,255,255,0.8);
+}
+
+.layout-cyberpunk .layout-frame-decorations {
+  @apply absolute inset-0 pointer-events-none;
+}
+.layout-cyberpunk .layout-decoration-1 {
+  @apply hidden md:block absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#0ff];
+}
+.layout-cyberpunk .layout-decoration-2 {
+  @apply hidden md:block absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#0ff];
+}
+.layout-cyberpunk .layout-decoration-3 {
+  @apply hidden md:block absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#0ff];
+}
+.layout-cyberpunk .layout-decoration-4 {
+  @apply hidden md:block absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#0ff];
+}
+
+.layout-cyberpunk .layout-content-wrapper {
+  @apply flex-1 flex flex-col w-full h-full relative z-10 overflow-hidden;
+}
+
+.layout-cyberpunk .layout-scroll-area {
+  @apply flex-1 flex flex-col w-full h-full relative z-10 overflow-y-auto overflow-x-hidden;
+}
+

@@ -8,9 +8,7 @@ import { getDataService } from './services';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { DatabaseControls } from './components/DatabaseControls';
-import { MedievalLayout } from './themes/medieval/MedievalLayout';
-import { CyberpunkLayout } from './themes/cyberpunk/CyberpunkLayout';
-import { VampireLayout } from './themes/vampire/VampireLayout';
+import { ThemeLayout } from './components/layout/ThemeLayout';
 import { useIntroGate } from './hooks/useIntroGate';
 import { getThemeLabels } from './utils/themeLabels';
 
@@ -351,14 +349,7 @@ function App() {
       lastOpenedCampaign: !selectedCampaign ? lastOpenedCampaign : null,
       handleSelectCampaign
     };
-    if (theme === 'medieval') return <MedievalLayout {...layoutProps}>{children}</MedievalLayout>;
-    if (theme === 'cyberpunk') return <CyberpunkLayout {...layoutProps}>{children}</CyberpunkLayout>;
-    if (theme === 'vampire') return <VampireLayout {...layoutProps}>{children}</VampireLayout>;
-    return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-surface-app text-primary font-sans relative">
-        {children}
-      </div>
-    );
+    return <ThemeLayout {...layoutProps}>{children}</ThemeLayout>;
   };
 
   return (
@@ -720,47 +711,50 @@ function App() {
       ) : (
         <main className={`flex-1 flex flex-col h-full z-0 w-full overflow-hidden ${theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
           {/* Header */}
-          <header className="px-4 md:px-8 py-3 md:py-4 border-b border-border-subtle bg-surface-elevated flex items-center justify-between">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:space-x-6 w-full sm:w-auto">
+          <header className="px-4 md:px-8 py-3 md:py-4 border-b border-border-subtle bg-surface-elevated flex items-center justify-between shrink-0">
+            <div className="flex flex-row items-center gap-2 sm:gap-4 sm:space-x-6 w-full sm:w-auto min-w-0">
               <button 
                 onClick={() => setSelectedCampaign(null)}
-                className="text-muted hover:text-heading flex items-center space-x-2 transition-colors self-start sm:self-auto sm:pr-6 sm:border-r border-border-subtle"
+                className="text-muted hover:text-heading flex items-center space-x-1 sm:space-x-2 transition-colors shrink-0 sm:pr-6 sm:border-r border-border-subtle"
               >
                 <ArrowLeft size={20} />
-                <span>Dashboard</span>
+                <span className="hidden sm:inline">Dashboard</span>
               </button>
-              <div>
-                <h2 className="text-2xl font-bold text-heading tracking-wide flex items-center space-x-2"><span className="text-accent-text text-xl mr-2 select-none">☽☉☾</span> {selectedCampaign.name}</h2>
-                <div className="flex space-x-4 text-xs text-muted mt-1">
-                  {selectedCampaign.genre && <span>Genre: <span className="text-secondary">{selectedCampaign.genre}</span></span>}
-                  {selectedCampaign.system && <span>System: <span className="text-secondary">{selectedCampaign.system}</span></span>}
+              <div className="min-w-0 overflow-hidden">
+                <h2 className="text-xl sm:text-2xl font-bold text-heading tracking-wide flex items-center space-x-2 truncate">
+                  <span className="text-accent-text text-lg sm:text-xl mr-1 sm:mr-2 select-none shrink-0">☽☉☾</span> 
+                  <span className="truncate">{selectedCampaign.name}</span>
+                </h2>
+                <div className="flex space-x-2 sm:space-x-4 text-[10px] sm:text-xs text-muted mt-1 truncate">
+                  {selectedCampaign.genre && <span className="truncate">Genre: <span className="text-secondary">{selectedCampaign.genre}</span></span>}
+                  {selectedCampaign.system && <span className="truncate">System: <span className="text-secondary">{selectedCampaign.system}</span></span>}
                 </div>
               </div>
             </div>
           </header>
 
           {/* Tabs */}
-          <div className="flex px-4 md:px-8 border-b border-border-subtle bg-surface-elevated2">
+          <div className="flex px-4 md:px-8 border-b border-border-subtle bg-surface-elevated2 overflow-x-auto custom-scrollbar shrink-0">
             <button 
               onClick={() => setActiveTab('characters')}
-              className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'characters' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+              className={`flex shrink-0 items-center space-x-2 py-3 px-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'characters' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
             >
               <Users size={18} />
-              <span className="hidden sm:inline">Characters</span>
+              <span className="sm:inline">Characters</span>
             </button>
             <button 
               onClick={() => setActiveTab('locations')}
-              className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'locations' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+              className={`flex shrink-0 items-center space-x-2 py-3 px-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'locations' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
             >
               <MapIcon size={18} />
-              <span className="hidden sm:inline">Locations</span>
+              <span className="sm:inline">Locations</span>
             </button>
             <button 
               onClick={() => setActiveTab('journal')}
-              className={`flex items-center space-x-2 py-3 px-4 border-b-2 transition-colors ${activeTab === 'journal' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+              className={`flex shrink-0 items-center space-x-2 py-3 px-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'journal' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
             >
               <Book size={18} />
-              <span className="hidden sm:inline">Journal</span>
+              <span className="sm:inline">Journal</span>
             </button>
           </div>
 
