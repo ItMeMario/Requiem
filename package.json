@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "main": "dist/main/index.js",
   "scripts": {
+    "start": "npm run dev",
     "postinstall": "electron-builder install-app-deps",
     "dev:vite": "vite",
     "dev:electron": "wait-on tcp:5173 && tsc -b tsconfig.node.json --force && electron .",
@@ -15,7 +16,8 @@
     "cap:sync": "npm run build:web && npx cap sync",
     "cap:open": "npx cap open android",
     "build": "npm run build:vite && npm run build:electron && electron-builder",
-    "build:apk": "npm run cap:sync && cd android && gradlew.bat assembleDebug"
+    "build:apk": "npm run cap:sync && cd android && gradlew.bat assembleDebug",
+    "dist": "node scripts/build.js"
   },
   "keywords": [],
   "author": "",
@@ -60,10 +62,12 @@
     "asar": false,
     "directories": {
       "buildResources": "src/build",
-      "output": "release"
+      "output": "dist/desktop"
     },
     "files": [
       "dist/**/*",
+      "!dist/desktop",
+      "!dist/mobile",
       "package.json"
     ],
     "win": {
