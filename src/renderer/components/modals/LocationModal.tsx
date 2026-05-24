@@ -28,7 +28,36 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             <InputField label="Name *" value={newLoc.name} onChange={(e:any) => setNewLoc({...newLoc, name: e.target.value})} />
             <InputField label="Region (Região)" value={newLoc.region} onChange={(e:any) => setNewLoc({...newLoc, region: e.target.value})} />
             <InputField label="Type (Tipo)" value={newLoc.type} onChange={(e:any) => setNewLoc({...newLoc, type: e.target.value})} />
-            <InputField label="Image URL (Imagem)" value={newLoc.image_url} onChange={(e:any) => setNewLoc({...newLoc, image_url: e.target.value})} placeholder="https://..." />
+            <div className="flex flex-col space-y-1">
+              <label className="text-sm font-medium text-secondary">Image (Imagem)</label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setNewLoc({...newLoc, image_url: reader.result as string});
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="block w-full text-sm text-secondary file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-hover file:text-heading hover:file:bg-surface-elevated2 transition-colors cursor-pointer"
+                />
+                {newLoc.image_url && (
+                  <button 
+                    type="button" 
+                    onClick={() => setNewLoc({...newLoc, image_url: ''})}
+                    className="p-2 text-danger hover:bg-danger/10 rounded transition-colors"
+                    title="Remove Image"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
           <TextAreaField label="Description (Descrição)" value={newLoc.description} onChange={(e:any) => setNewLoc({...newLoc, description: e.target.value})} />
           <TextAreaField label="Lore" value={newLoc.lore} onChange={(e:any) => setNewLoc({...newLoc, lore: e.target.value})} />
