@@ -461,7 +461,7 @@
 }
 
 .layout-cyberpunk .layout-header-title {
-  @apply text-[#0ff] text-xl md:text-5xl lg:text-6xl font-mono tracking-[0.2em] md:tracking-[0.3em] pl-4 md:pl-20 drop-shadow-[0_0_10px_rgba(0,255,255,1)] z-10 uppercase font-bold;
+  @apply text-[#0ff] text-lg sm:text-xl md:text-5xl lg:text-6xl font-mono tracking-widest md:tracking-[0.3em] pl-2 sm:pl-4 md:pl-20 drop-shadow-[0_0_10px_rgba(0,255,255,1)] z-10 uppercase font-bold;
   text-shadow: 2px 0 0 rgba(255,0,255,0.5), -2px 0 0 rgba(0,255,255,0.5);
 }
 

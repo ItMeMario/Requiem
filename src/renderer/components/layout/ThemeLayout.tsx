@@ -82,6 +82,10 @@ export function ThemeLayout({ children }: ThemeLayoutProps) {
 
         <div className="layout-content-wrapper">
           <div className="layout-content-bg" />
+          <div className="layout-content-decorations">
+            <div className="layout-content-decoration-1" />
+            <div className="layout-content-decoration-2" />
+          </div>
           <div className="layout-scroll-area custom-scrollbar terminal-content-wrapper">
             {children}
           </div>
