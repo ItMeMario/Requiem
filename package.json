@@ -14,7 +14,8 @@
     "preview:web": "vite preview --config vite.config.web.ts",
     "cap:sync": "npm run build:web && npx cap sync",
     "cap:open": "npx cap open android",
-    "build": "npm run build:vite && npm run build:electron && electron-builder"
+    "build": "npm run build:vite && npm run build:electron && electron-builder",
+    "build:apk": "npm run cap:sync && cd android && gradlew.bat assembleDebug"
   },
   "keywords": [],
   "author": "",

@@ -166,11 +166,11 @@ export class WebDataService implements IDataService {
     return res[0];
   }
   async createCampaign(data: Omit<Campaign, 'id'>): Promise<number> {
-    const id = await this.execute('INSERT INTO campaigns (name, genre, system) VALUES (?, ?, ?)', [data.name, data.genre || null, data.system || null]);
+    const id = await this.execute('INSERT INTO campaigns (name, genre, system) VALUES (?, ?, ?)', [data.name, data.genre ?? null, data.system ?? null]);
     return id || 0;
   }
   async updateCampaign(id: number, data: Partial<Campaign>): Promise<boolean> {
-    await this.execute('UPDATE campaigns SET name = ?, genre = ?, system = ? WHERE id = ?', [data.name, data.genre || null, data.system || null, id]);
+    await this.execute('UPDATE campaigns SET name = ?, genre = ?, system = ? WHERE id = ?', [data.name, data.genre ?? null, data.system ?? null, id]);
     return true;
   }
   async deleteCampaign(id: number): Promise<boolean> {
@@ -187,11 +187,11 @@ export class WebDataService implements IDataService {
     return res[0];
   }
   async createEntry(data: Omit<Entry, 'id'>): Promise<number> {
-    const id = await this.execute('INSERT INTO entries (campaign_id, title, content, creation_date) VALUES (?, ?, ?, ?)', [data.campaign_id, data.title, data.content || null, data.creation_date]);
+    const id = await this.execute('INSERT INTO entries (campaign_id, title, content, creation_date) VALUES (?, ?, ?, ?)', [data.campaign_id, data.title, data.content ?? null, data.creation_date]);
     return id || 0;
   }
   async updateEntry(id: number, data: Partial<Entry>): Promise<boolean> {
-    await this.execute('UPDATE entries SET title = ?, content = ? WHERE id = ?', [data.title, data.content || null, id]);
+    await this.execute('UPDATE entries SET title = ?, content = ? WHERE id = ?', [data.title, data.content ?? null, id]);
     return true;
   }
   async deleteEntry(id: number): Promise<boolean> {
@@ -212,7 +212,7 @@ export class WebDataService implements IDataService {
       INSERT INTO characters (
         campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [data.campaign_id, data.name, data.race || null, data.status || null, data.age || null, data.faction || null, data.lore || null, data.bonds || null, data.personal_notes || null, data.image_url || null]);
+    `, [data.campaign_id, data.name, data.race ?? null, data.status ?? null, data.age ?? null, data.faction ?? null, data.lore ?? null, data.bonds ?? null, data.personal_notes ?? null, data.image_url ?? null]);
     return id || 0;
   }
   async updateCharacter(id: number, data: Partial<Character>): Promise<boolean> {
@@ -221,7 +221,7 @@ export class WebDataService implements IDataService {
         name = ?, race = ?, status = ?, age = ?, 
         faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?
       WHERE id = ?
-    `, [data.name, data.race || null, data.status || null, data.age || null, data.faction || null, data.lore || null, data.bonds || null, data.personal_notes || null, data.image_url || null, id]);
+    `, [data.name, data.race ?? null, data.status ?? null, data.age ?? null, data.faction ?? null, data.lore ?? null, data.bonds ?? null, data.personal_notes ?? null, data.image_url ?? null, id]);
     return true;
   }
   async deleteCharacter(id: number): Promise<boolean> {
@@ -242,7 +242,7 @@ export class WebDataService implements IDataService {
       INSERT INTO locations (
         campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [data.campaign_id, data.name, data.region || null, data.type || null, data.description || null, data.lore || null, data.present_npcs || null, data.atmosphere || null, data.image_url || null]);
+    `, [data.campaign_id, data.name, data.region ?? null, data.type ?? null, data.description ?? null, data.lore ?? null, data.present_npcs ?? null, data.atmosphere ?? null, data.image_url ?? null]);
     return id || 0;
   }
   async updateLocation(id: number, data: Partial<Location>): Promise<boolean> {
@@ -251,7 +251,7 @@ export class WebDataService implements IDataService {
         name = ?, region = ?, type = ?, description = ?, 
         lore = ?, present_npcs = ?, atmosphere = ?, image_url = ?
       WHERE id = ?
-    `, [data.name, data.region || null, data.type || null, data.description || null, data.lore || null, data.present_npcs || null, data.atmosphere || null, data.image_url || null, id]);
+    `, [data.name, data.region ?? null, data.type ?? null, data.description ?? null, data.lore ?? null, data.present_npcs ?? null, data.atmosphere ?? null, data.image_url ?? null, id]);
     return true;
   }
   async deleteLocation(id: number): Promise<boolean> {

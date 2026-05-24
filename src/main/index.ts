@@ -35,12 +35,12 @@ function setupIpc() {
   });
   ipcMain.handle('create-campaign', (_, data: any) => {
     const stmt = db.prepare('INSERT INTO campaigns (name, genre, system) VALUES (?, ?, ?)');
-    const info = stmt.run(data.name, data.genre, data.system);
+    const info = stmt.run(data.name, data.genre ?? null, data.system ?? null);
     return info.lastInsertRowid;
   });
   ipcMain.handle('update-campaign', (_, id: number, data: any) => {
     const stmt = db.prepare('UPDATE campaigns SET name = ?, genre = ?, system = ? WHERE id = ?');
-    stmt.run(data.name, data.genre, data.system, id);
+    stmt.run(data.name, data.genre ?? null, data.system ?? null, id);
     return true;
   });
   ipcMain.handle('delete-campaign', (_, id: number) => {
@@ -58,12 +58,12 @@ function setupIpc() {
   });
   ipcMain.handle('create-entry', (_, data: any) => {
     const stmt = db.prepare('INSERT INTO entries (campaign_id, title, content, creation_date) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(data.campaign_id, data.title, data.content, data.creation_date);
+    const info = stmt.run(data.campaign_id, data.title, data.content ?? null, data.creation_date);
     return info.lastInsertRowid;
   });
   ipcMain.handle('update-entry', (_, id: number, data: any) => {
     const stmt = db.prepare('UPDATE entries SET title = ?, content = ? WHERE id = ?');
-    stmt.run(data.title, data.content, id);
+    stmt.run(data.title, data.content ?? null, id);
     return true;
   });
   ipcMain.handle('delete-entry', (_, id: number) => {
@@ -86,8 +86,8 @@ function setupIpc() {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
-      data.campaign_id, data.name, data.race, data.status, data.age,
-      data.faction, data.lore, data.bonds, data.personal_notes, data.image_url
+      data.campaign_id, data.name, data.race ?? null, data.status ?? null, data.age ?? null,
+      data.faction ?? null, data.lore ?? null, data.bonds ?? null, data.personal_notes ?? null, data.image_url ?? null
     );
     return info.lastInsertRowid;
   });
@@ -99,8 +99,8 @@ function setupIpc() {
       WHERE id = ?
     `);
     stmt.run(
-      data.name, data.race, data.status, data.age,
-      data.faction, data.lore, data.bonds, data.personal_notes, data.image_url, id
+      data.name, data.race ?? null, data.status ?? null, data.age ?? null,
+      data.faction ?? null, data.lore ?? null, data.bonds ?? null, data.personal_notes ?? null, data.image_url ?? null, id
     );
     return true;
   });
@@ -124,8 +124,8 @@ function setupIpc() {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
-      data.campaign_id, data.name, data.region, data.type, data.description,
-      data.lore, data.present_npcs, data.atmosphere, data.image_url
+      data.campaign_id, data.name, data.region ?? null, data.type ?? null, data.description ?? null,
+      data.lore ?? null, data.present_npcs ?? null, data.atmosphere ?? null, data.image_url ?? null
     );
     return info.lastInsertRowid;
   });
@@ -137,8 +137,8 @@ function setupIpc() {
       WHERE id = ?
     `);
     stmt.run(
-      data.name, data.region, data.type, data.description,
-      data.lore, data.present_npcs, data.atmosphere, data.image_url, id
+      data.name, data.region ?? null, data.type ?? null, data.description ?? null,
+      data.lore ?? null, data.present_npcs ?? null, data.atmosphere ?? null, data.image_url ?? null, id
     );
     return true;
   });
