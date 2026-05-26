@@ -1,6 +1,6 @@
 import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
-import { openDB } from 'idb';
+import { openDB, IDBPDatabase } from 'idb';
 import { IDataService } from '../../shared/dataService';
 import { Campaign, Entry, Character, Location } from '../../shared/types';
 
@@ -11,12 +11,61 @@ const DB_KEY = 'sqlite-binary';
 export class WebDataService implements IDataService {
   private db: Database | null = null;
   private SQL: SqlJsStatic | null = null;
-  private idbConn: any = null;
+  private idbConn: IDBPDatabase | null = null;
   private initPromise: Promise<void>;
   public initError: string | null = null;
+  private dirty: boolean = false;
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.initPromise = this.init();
+    this.setupLifecycleListeners();
+  }
+
+  /**
+   * Register lifecycle event listeners to ensure data is persisted
+   * when the app is backgrounded or closed on Android/mobile.
+   * 
+   * On Android WebView (Capacitor), the OS can kill the process at any time
+   * after the page becomes hidden. We MUST flush to IndexedDB at that point.
+   */
+  private setupLifecycleListeners() {
+    // visibilitychange fires when user switches apps or locks screen
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        this.flushToIndexedDB();
+      }
+    });
+
+    // pagehide fires when the page is being unloaded (more reliable on some Android versions)
+    window.addEventListener('pagehide', () => {
+      this.flushToIndexedDB();
+    });
+
+    // beforeunload as additional safety net
+    window.addEventListener('beforeunload', () => {
+      this.flushToIndexedDB();
+    });
+  }
+
+  /**
+   * Synchronous-style flush: we can't truly await in pagehide/visibilitychange,
+   * so we start the save and hope the microtask completes before kill.
+   * This is the best we can do given browser constraints.
+   */
+  private flushToIndexedDB() {
+    if (!this.dirty || !this.db || !this.idbConn) return;
+    try {
+      const data = this.db.export();
+      // Fire and forget — the browser will try to complete this before killing the process
+      this.idbConn.put(STORE_NAME, data, DB_KEY).then(() => {
+        this.dirty = false;
+      }).catch((err) => {
+        console.error('[Requiem DB] flush failed:', err);
+      });
+    } catch (err) {
+      console.error('[Requiem DB] export failed during flush:', err);
+    }
   }
 
   private async init() {
@@ -123,8 +172,30 @@ export class WebDataService implements IDataService {
 
   private async saveToIndexedDB() {
     if (!this.db || !this.idbConn) return;
-    const data = this.db.export();
-    await this.idbConn.put(STORE_NAME, data, DB_KEY);
+    try {
+      const data = this.db.export();
+      await this.idbConn.put(STORE_NAME, data, DB_KEY);
+      this.dirty = false;
+    } catch (err) {
+      console.error('[Requiem DB] saveToIndexedDB failed:', err);
+      // Mark as dirty so lifecycle listeners will retry
+      this.dirty = true;
+    }
+  }
+
+  /**
+   * Schedule a debounced save — if multiple operations happen quickly,
+   * we only save once at the end. This is a safety net on top of
+   * the immediate save in execute().
+   */
+  private scheduleSave() {
+    this.dirty = true;
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+    }
+    this.saveTimer = setTimeout(() => {
+      this.saveToIndexedDB();
+    }, 500);
   }
 
   private async getDb(): Promise<Database> {
@@ -148,13 +219,22 @@ export class WebDataService implements IDataService {
   private async execute(sql: string, params: any[] = []): Promise<number | null> {
     const db = await this.getDb();
     db.run(sql, params);
+    
+    // Get last_insert_rowid BEFORE saving — so the snapshot includes
+    // the same state that was just written
+    const res = db.exec("SELECT last_insert_rowid() as id");
+    let lastId: number | null = null;
+    if (res && res[0] && res[0].values && res[0].values[0]) {
+       lastId = res[0].values[0][0] as number;
+    }
+    
+    // Immediately persist to IndexedDB
     await this.saveToIndexedDB();
     
-    const res = db.exec("SELECT last_insert_rowid() as id");
-    if (res && res[0] && res[0].values && res[0].values[0]) {
-       return res[0].values[0][0] as number;
-    }
-    return null;
+    // Also schedule a debounced backup save as safety net
+    this.scheduleSave();
+    
+    return lastId;
   }
 
   // Campaigns
