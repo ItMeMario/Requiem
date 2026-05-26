@@ -11,6 +11,7 @@ const DB_KEY = 'sqlite-binary';
 export class WebDataService implements IDataService {
   private db: Database | null = null;
   private SQL: SqlJsStatic | null = null;
+  private idbConn: any = null;
   private initPromise: Promise<void>;
   public initError: string | null = null;
 
@@ -36,13 +37,13 @@ export class WebDataService implements IDataService {
       throw e;
     }
 
-    const idb = await openDB(DB_NAME, 1, {
+    this.idbConn = await openDB(DB_NAME, 1, {
       upgrade(db) {
         db.createObjectStore(STORE_NAME);
       },
     });
 
-    const savedData = await idb.get(STORE_NAME, DB_KEY);
+    const savedData = await this.idbConn.get(STORE_NAME, DB_KEY);
     if (savedData) {
       this.db = new this.SQL.Database(savedData);
     } else {
@@ -121,10 +122,9 @@ export class WebDataService implements IDataService {
   }
 
   private async saveToIndexedDB() {
-    if (!this.db) return;
+    if (!this.db || !this.idbConn) return;
     const data = this.db.export();
-    const idb = await openDB(DB_NAME, 1);
-    await idb.put(STORE_NAME, data, DB_KEY);
+    await this.idbConn.put(STORE_NAME, data, DB_KEY);
   }
 
   private async getDb(): Promise<Database> {

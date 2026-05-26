@@ -213,3 +213,11 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+app.on('will-quit', () => {
+  try {
+    db.close();
+  } catch (err) {
+    console.error('Error closing database:', err);
+  }
+});
