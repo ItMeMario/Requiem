@@ -153,7 +153,10 @@ function setupIpc() {
     const { canceled, filePath } = await dialog.showSaveDialog({
       title: 'Export Database Backup',
       defaultPath: 'requiem_backup.db',
-      filters: [{ name: 'SQLite Database', extensions: ['db', 'sqlite'] }]
+      filters: [
+        { name: 'SQLite Database', extensions: ['db', 'sqlite'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
     });
     if (canceled || !filePath) return false;
     
@@ -170,7 +173,10 @@ function setupIpc() {
     const { canceled, filePaths } = await dialog.showOpenDialog({
       title: 'Import Database Backup',
       properties: ['openFile'],
-      filters: [{ name: 'SQLite Database', extensions: ['db', 'sqlite'] }]
+      filters: [
+        { name: 'SQLite Database', extensions: ['db', 'sqlite'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
     });
     
     if (canceled || filePaths.length === 0) return false;
@@ -179,6 +185,25 @@ function setupIpc() {
     const dbPath = currentDbPath;
     
     try {
+      // Validate that source file is a valid SQLite database
+      const buffer = Buffer.alloc(16);
+      const fd = fs.openSync(sourcePath, 'r');
+      fs.readSync(fd, buffer, 0, 16, 0);
+      fs.closeSync(fd);
+      
+      const expectedHeader = "SQLite format 3\0";
+      let isValid = true;
+      for (let i = 0; i < expectedHeader.length; i++) {
+        if (buffer[i] !== expectedHeader.charCodeAt(i)) {
+          isValid = false;
+          break;
+        }
+      }
+      
+      if (!isValid) {
+        throw new Error("The selected file is not a valid SQLite database.");
+      }
+
       db.close();
       const walPath = `${dbPath}-wal`;
       const shmPath = `${dbPath}-shm`;

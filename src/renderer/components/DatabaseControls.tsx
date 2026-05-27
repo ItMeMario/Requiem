@@ -6,6 +6,22 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 
+function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
+  if (typeof file.arrayBuffer === 'function') {
+    return file.arrayBuffer();
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result as ArrayBuffer);
+    };
+    reader.onerror = () => {
+      reject(reader.error || new Error("Failed to read file"));
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 export function DatabaseControls() {
   const { theme } = useTheme();
   const [isExporting, setIsExporting] = useState(false);
@@ -67,9 +83,9 @@ export function DatabaseControls() {
           setIsExporting(false);
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Error exporting database.");
+      alert(`Error exporting database: ${e?.message || e}`);
       setIsExporting(false);
     }
   };
@@ -88,9 +104,9 @@ export function DatabaseControls() {
         setIsImporting(true);
         const success = await getDataService().importDatabase();
         if (!success) setIsImporting(false);
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
-        alert("Error importing database.");
+        alert(`Error importing database: ${e?.message || e}`);
         setIsImporting(false);
       }
     }
@@ -103,8 +119,28 @@ export function DatabaseControls() {
     if (confirm("Importing a backup will replace your current database. Are you sure you want to continue?")) {
       try {
         setIsImporting(true);
-        const buffer = await file.arrayBuffer();
+        const buffer = await readFileAsArrayBuffer(file);
         const data = new Uint8Array(buffer);
+
+        // Validate SQLite magic header: "SQLite format 3\0"
+        const expectedHeader = "SQLite format 3\0";
+        let isValid = data.length >= 16;
+        if (isValid) {
+          for (let i = 0; i < expectedHeader.length; i++) {
+            if (data[i] !== expectedHeader.charCodeAt(i)) {
+              isValid = false;
+              break;
+            }
+          }
+        }
+
+        if (!isValid) {
+          alert("The selected file is not a valid SQLite database backup.");
+          setIsImporting(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+          return;
+        }
+
         const success = await getDataService().importDatabase(data);
         if (success) {
            alert("Database imported successfully. Please reload the page.");
@@ -112,9 +148,9 @@ export function DatabaseControls() {
         } else {
            setIsImporting(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        alert("Error importing database.");
+        alert(`Error importing database: ${err?.message || err}`);
         setIsImporting(false);
       }
     }
@@ -125,7 +161,7 @@ export function DatabaseControls() {
     <div className={containerClass}>
       <input 
         type="file" 
-        accept=".db,.sqlite" 
+        accept=".db,.sqlite,application/x-sqlite3,application/vnd.sqlite3,application/octet-stream" 
         ref={fileInputRef} 
         onChange={handleFileChange} 
         style={{ display: 'none' }} 
