@@ -2,6 +2,9 @@ import React, { useState, useRef } from 'react';
 import { Download, Upload } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { getDataService } from '../services';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 export function DatabaseControls() {
   const { theme } = useTheme();
@@ -20,22 +23,53 @@ export function DatabaseControls() {
       const result = await getDataService().exportDatabase();
       if (typeof result === 'boolean') {
         if (result) alert("Database backup exported successfully!");
+        setIsExporting(false);
       } else if (result instanceof Uint8Array) {
-        const blob = new Blob([result.buffer as ArrayBuffer], { type: 'application/x-sqlite3' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `requiem_backup_${new Date().toISOString().split('T')[0]}.db`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert("Database backup exported successfully!");
+        if (Capacitor.isNativePlatform()) {
+          const blob = new Blob([result.buffer as ArrayBuffer], { type: 'application/x-sqlite3' });
+          const reader = new FileReader();
+          
+          const base64data = await new Promise<string>((resolve, reject) => {
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+          });
+          
+          const base64 = base64data.split(',')[1];
+          const fileName = `requiem_backup_${new Date().toISOString().split('T')[0]}.db`;
+          
+          const writeResult = await Filesystem.writeFile({
+            path: fileName,
+            data: base64,
+            directory: Directory.Cache
+          });
+          
+          await Share.share({
+            title: 'Requiem Database Backup',
+            text: 'Backup file for Requiem Campaign Manager',
+            url: writeResult.uri,
+            dialogTitle: 'Save or Share Database Backup',
+          });
+          
+          alert("Database backup exported successfully!");
+          setIsExporting(false);
+        } else {
+          const blob = new Blob([result.buffer as ArrayBuffer], { type: 'application/x-sqlite3' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `requiem_backup_${new Date().toISOString().split('T')[0]}.db`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          alert("Database backup exported successfully!");
+          setIsExporting(false);
+        }
       }
     } catch (e) {
       console.error(e);
       alert("Error exporting database.");
-    } finally {
       setIsExporting(false);
     }
   };
