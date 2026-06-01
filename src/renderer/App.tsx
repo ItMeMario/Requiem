@@ -20,6 +20,8 @@ import { CreateCampaignModal } from './components/modals/CreateCampaignModal';
 import { CharacterModal } from './components/modals/CharacterModal';
 import { LocationModal } from './components/modals/LocationModal';
 import { EntryModal } from './components/modals/EntryModal';
+import { CharacterViewModal } from './components/modals/CharacterViewModal';
+import { LocationViewModal } from './components/modals/LocationViewModal';
 import { MedievalIntro } from './themes/medieval/MedievalIntro';
 import { CyberpunkIntro } from './themes/cyberpunk/CyberpunkIntro';
 import { VampireIntro } from './themes/vampire/VampireIntro';
@@ -59,6 +61,11 @@ function App() {
   const [showLocModal, setShowLocModal] = useState(false);
   const [showEntryModal, setShowEntryModal] = useState(false);
   const [isViewingEntry, setIsViewingEntry] = useState(false);
+
+  const [showCharViewModal, setShowCharViewModal] = useState(false);
+  const [showLocViewModal, setShowLocViewModal] = useState(false);
+  const [selectedCharForView, setSelectedCharForView] = useState<any>(null);
+  const [selectedLocForView, setSelectedLocForView] = useState<any>(null);
 
   const [editingCharId, setEditingCharId] = useState<number | null>(null);
   const [editingLocId, setEditingLocId] = useState<number | null>(null);
@@ -145,6 +152,26 @@ function App() {
     setShowCharModal(true);
   };
 
+  const handleViewChar = (char: any) => {
+    setSelectedCharForView(char);
+    setShowCharViewModal(true);
+  };
+
+  const handleCloseCharViewModal = () => {
+    setShowCharViewModal(false);
+    setSelectedCharForView(null);
+    if (returnToJournalEntryId !== null) {
+      setActiveTab('journal');
+      setShowEntryModal(true);
+      setReturnToJournalEntryId(null);
+    }
+  };
+
+  const handleEditCharFromView = (char: any) => {
+    setShowCharViewModal(false);
+    handleEditChar(char);
+  };
+
   const handleDeleteChar = async (id: number) => {
     setConfirmDialog({
       isOpen: true,
@@ -203,6 +230,26 @@ function App() {
     setEditingLocId(loc.id);
     setNewLoc(loc);
     setShowLocModal(true);
+  };
+
+  const handleViewLoc = (loc: any) => {
+    setSelectedLocForView(loc);
+    setShowLocViewModal(true);
+  };
+
+  const handleCloseLocViewModal = () => {
+    setShowLocViewModal(false);
+    setSelectedLocForView(null);
+    if (returnToJournalEntryId !== null) {
+      setActiveTab('journal');
+      setShowEntryModal(true);
+      setReturnToJournalEntryId(null);
+    }
+  };
+
+  const handleEditLocFromView = (loc: any) => {
+    setShowLocViewModal(false);
+    handleEditLoc(loc);
   };
 
   const handleDeleteLoc = async (id: number) => {
@@ -321,7 +368,7 @@ function App() {
           setReturnToJournalEntryId(editingEntryId);
           setShowEntryModal(false);
           setActiveTab('characters');
-          handleEditChar(char);
+          handleViewChar(char);
         }
       } else if (type === 'location') {
         const loc = locations.find(l => l.id === id);
@@ -329,7 +376,7 @@ function App() {
           setReturnToJournalEntryId(editingEntryId);
           setShowEntryModal(false);
           setActiveTab('locations');
-          handleEditLoc(loc);
+          handleViewLoc(loc);
         }
       }
     }
@@ -766,6 +813,7 @@ function App() {
                 handleDeleteChar={handleDeleteChar} 
                 handleEditChar={handleEditChar} 
                 openNewCharModal={openNewCharModal} 
+                handleViewChar={handleViewChar}
               />
             )}
             {activeTab === 'locations' && (
@@ -774,6 +822,7 @@ function App() {
                 handleDeleteLoc={handleDeleteLoc} 
                 handleEditLoc={handleEditLoc} 
                 openNewLocModal={openNewLocModal} 
+                handleViewLoc={handleViewLoc}
               />
             )}
             {activeTab === 'journal' && (
@@ -831,6 +880,18 @@ function App() {
         handleMentionClick={handleMentionClick} 
         characters={characters} 
         locations={locations} 
+      />
+      <CharacterViewModal 
+        showCharViewModal={showCharViewModal}
+        handleCloseCharViewModal={handleCloseCharViewModal}
+        char={selectedCharForView}
+        handleEditChar={handleEditCharFromView}
+      />
+      <LocationViewModal 
+        showLocViewModal={showLocViewModal}
+        handleCloseLocViewModal={handleCloseLocViewModal}
+        loc={selectedLocForView}
+        handleEditLoc={handleEditLocFromView}
       />
       <ConfirmDialog {...confirmDialog} />
 

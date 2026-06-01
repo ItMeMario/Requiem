@@ -6,9 +6,10 @@ interface LocationListProps {
   handleEditLoc: (loc: any) => void;
   handleDeleteLoc: (id: number) => void;
   openNewLocModal: () => void;
+  handleViewLoc: (loc: any) => void;
 }
 
-export const LocationList: React.FC<LocationListProps> = ({ locations, handleEditLoc, handleDeleteLoc, openNewLocModal }) => {
+export const LocationList: React.FC<LocationListProps> = ({ locations, handleEditLoc, handleDeleteLoc, openNewLocModal, handleViewLoc }) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -29,12 +30,16 @@ export const LocationList: React.FC<LocationListProps> = ({ locations, handleEdi
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {locations.map(loc => (
-            <div key={loc.id} className="bg-surface-card border border-border-default rounded-lg overflow-hidden flex flex-col sm:flex-row hover:border-border-hover transition-colors group relative">
+            <div 
+              key={loc.id} 
+              onClick={() => handleViewLoc(loc)}
+              className="bg-surface-card border border-border-default rounded-lg overflow-hidden flex flex-col sm:flex-row hover:border-border-hover transition-colors group relative cursor-pointer"
+            >
               <div className="absolute top-2 right-2 flex space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
-                <button onClick={() => handleEditLoc(loc)} className="p-2 bg-surface-card/80 hover:bg-accent2 rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                <button onClick={(e) => { e.stopPropagation(); handleEditLoc(loc); }} className="p-2 bg-surface-card/80 hover:bg-accent2 rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={() => handleDeleteLoc(loc.id)} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                <button onClick={(e) => { e.stopPropagation(); handleDeleteLoc(loc.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
                   <Trash2 size={16} />
                 </button>
               </div>
