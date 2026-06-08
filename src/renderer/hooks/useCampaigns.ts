@@ -42,11 +42,25 @@ export const useCampaigns = () => {
     }
   };
 
+  const updateCampaign = async (id: number, updatedData: any) => {
+    try {
+      await getDataService().updateCampaign(id, updatedData);
+      setCampaigns(campaigns.map(c => c.id === id ? { ...c, ...updatedData } : c));
+      if (selectedCampaign?.id === id) {
+        setSelectedCampaign({ ...selectedCampaign, ...updatedData });
+      }
+    } catch (error) {
+      console.error('Error updating campaign:', error);
+      throw error;
+    }
+  };
+
   return { 
     campaigns, 
     selectedCampaign, 
     setSelectedCampaign, 
     createCampaign,
+    updateCampaign,
     deleteCampaign
   };
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Map as MapIcon, Book, Plus, ArrowLeft, Trash2, Play } from 'lucide-react';
+import { Users, Map as MapIcon, Book, Plus, ArrowLeft, Trash2, Play, Edit2 } from 'lucide-react';
 
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
@@ -32,7 +32,7 @@ const initLocState = { name: '', region: '', type: '', description: '', lore: ''
 const initEntryState = { title: '', content: '' };
 
 function App() {
-  const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign, deleteCampaign } = useCampaigns();
+  const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign, updateCampaign, deleteCampaign } = useCampaigns();
   const { characters, locations, entries, loadEntities, crud } = useEntities();
   const { theme, setTheme } = useTheme();
 
@@ -115,14 +115,26 @@ function App() {
     e.preventDefault();
     if (!newCampaign.name.trim()) return;
     try {
-      const camp = await createCampaign(newCampaign);
-      setShowCreateModal(false);
-      setNewCampaign({ name: '', genre: '', system: '' });
-      if (camp) handleSelectCampaign(camp);
+      if ((newCampaign as any).id) {
+        await updateCampaign((newCampaign as any).id, newCampaign);
+        setShowCreateModal(false);
+        setNewCampaign({ name: '', genre: '', system: '' });
+      } else {
+        const camp = await createCampaign(newCampaign);
+        setShowCreateModal(false);
+        setNewCampaign({ name: '', genre: '', system: '' });
+        if (camp) handleSelectCampaign(camp);
+      }
     } catch (error) {
-      console.error('Failed to create campaign:', error);
-      alert('Houve um erro ao criar a campanha. Verifique o console para mais detalhes.');
+      console.error('Failed to save campaign:', error);
+      alert('Houve um erro ao salvar a campanha. Verifique o console para mais detalhes.');
     }
+  };
+
+  const handleEditCampaign = (e: React.MouseEvent, camp: any) => {
+    e.stopPropagation();
+    setNewCampaign(camp);
+    setShowCreateModal(true);
   };
 
   // --- Character Handlers ---
@@ -606,7 +618,10 @@ function App() {
               {/* Cards Grid */}
               {theme === 'cyberpunk' ? (
                 <button 
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => {
+                    setNewCampaign({ name: '', genre: '', system: '' });
+                    setShowCreateModal(true);
+                  }}
                   className="h-48 rounded-xl cyber-smoked-glass flex flex-col items-center justify-center text-[#0ff] hover:text-white hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-all group overflow-hidden relative"
                 >
                   <div className="micro-circuit-pattern" />
@@ -624,7 +639,10 @@ function App() {
                 </button>
               ) : theme === 'vampire' ? (
                 <button 
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => {
+                    setNewCampaign({ name: '', genre: '', system: '' });
+                    setShowCreateModal(true);
+                  }}
                   className="h-48 rounded-xl bg-[#0d0d12] border border-[#1f1f2e] flex flex-col items-center justify-center text-[#555566] hover:text-[#d1d1d6] hover:border-[#3d3d4a] hover:shadow-[0_0_20px_rgba(0,0,0,0.6)] transition-all group relative overflow-hidden"
                 >
                   <Plus size={48} strokeWidth={1.5} className="mb-4 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(255,0,0,0.5)] z-10" />
@@ -632,7 +650,10 @@ function App() {
                 </button>
               ) : theme === 'medieval' ? (
                 <button 
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => {
+                    setNewCampaign({ name: '', genre: '', system: '' });
+                    setShowCreateModal(true);
+                  }}
                   className="h-48 relative bg-[#f4eacc] border transition-all text-[#3e2723] flex flex-col items-center justify-center hover:-translate-y-1 hover:shadow-lg cursor-pointer group"
                   style={{
                     boxShadow: 'inset 0 0 0 2px #f4eacc, inset 0 0 0 4px rgba(139, 69, 19, 0.4)',
@@ -650,7 +671,10 @@ function App() {
                 </button>
               ) : (
                 <button 
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => {
+                    setNewCampaign({ name: '', genre: '', system: '' });
+                    setShowCreateModal(true);
+                  }}
                   className="h-48 rounded-xl border-2 border-dashed border-border-default flex flex-col items-center justify-center text-muted hover:text-accent-text hover:border-accent hover:bg-surface-hover transition-all group"
                 >
                   <Plus size={36} className="mb-4 text-accent2-text group-hover:text-accent-text transition-colors" />
@@ -691,8 +715,20 @@ function App() {
                       </>
                     )}
                     
-                    {/* Delete Button */}
-                    <div className={`absolute ${isMed ? 'top-3 right-3' : 'top-4 right-4'} z-20 transition-opacity opacity-0 group-hover:opacity-100`}>
+                    {/* Actions Container */}
+                    <div className={`absolute ${isMed ? 'top-3 right-3' : 'top-4 right-4'} z-20 transition-opacity opacity-0 group-hover:opacity-100 flex gap-1`}>
+                      <button
+                        onClick={(e) => handleEditCampaign(e, camp)}
+                        className={`p-1.5 rounded-md transition-colors ${
+                          isCyber ? 'text-[#0ff] hover:bg-[#0ff]/20' : 
+                          isVamp ? 'text-[#555566] hover:text-[#d1d1d6] hover:bg-[#ffffff]/10' : 
+                          isMed ? 'text-[#3e2723]/60 hover:text-[#3e2723] hover:bg-[#8b4513]/10' : 
+                          'text-muted hover:text-accent-text hover:bg-surface-hover'
+                        }`}
+                        title="Edit Campaign"
+                      >
+                        <Edit2 size={16} />
+                      </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
