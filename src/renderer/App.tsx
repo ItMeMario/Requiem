@@ -801,7 +801,7 @@ function App() {
                 className="text-muted hover:text-heading flex items-center space-x-1 sm:space-x-2 transition-colors shrink-0 sm:pr-6 sm:border-r border-border-subtle"
               >
                 <ArrowLeft size={20} />
-                <span className="hidden sm:inline">Dashboard</span>
+                <span className="hidden sm:inline">{getThemeLabels(theme).dashboardName}</span>
               </button>
               <div className="min-w-0 overflow-hidden">
                 <h2 className="text-xl sm:text-2xl font-bold text-heading tracking-wide flex items-center space-x-2 truncate">
