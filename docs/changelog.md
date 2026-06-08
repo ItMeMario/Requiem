@@ -20,6 +20,7 @@
 - Fixed database export and backups on Android using Capacitor Filesystem and Share APIs.
 - Resolved database import failures on Android by introducing FileReader fallbacks, MIME type alternatives, and strict SQLite magic header validation.
 - Fixed layout overlaps on mobile screens and the medieval theme by rendering the medieval spine behind content text.
+- Resolved block and file locks during app update by killing all related processes and recreating the installation directory.
 
 📅 Release Date: 06/08/2026
 
