@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { storage } from '../utils/storage';
 
 type Theme = 'medieval' | 'cyberpunk' | 'vampire';
 
@@ -11,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('app-theme') as Theme;
+    const saved = storage.getItem('app-theme') as Theme;
     if (saved === 'medieval' || saved === 'cyberpunk' || saved === 'vampire') {
       return saved;
     }
@@ -19,7 +20,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   useEffect(() => {
-    localStorage.setItem('app-theme', theme);
+    storage.setItem('app-theme', theme);
     document.documentElement.classList.remove('theme-medieval', 'theme-cyberpunk', 'theme-vampire');
     document.documentElement.classList.add(`theme-${theme}`);
     document.documentElement.setAttribute('data-theme', theme);

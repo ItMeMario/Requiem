@@ -11,6 +11,7 @@ import { DatabaseControls } from './components/DatabaseControls';
 import { ThemeLayout } from './components/layout/ThemeLayout';
 import { useIntroGate } from './hooks/useIntroGate';
 import { getThemeLabels } from './utils/themeLabels';
+import { storage } from './utils/storage';
 
 import { CharacterList } from './components/characters/CharacterList';
 import { LocationList } from './components/locations/LocationList';
@@ -84,12 +85,12 @@ function App() {
     onCancel: () => {}
   });
 
-  const lastOpenedIdStr = localStorage.getItem('lastOpenedCampaignId');
+  const lastOpenedIdStr = storage.getItem('lastOpenedCampaignId');
   const lastOpenedId = lastOpenedIdStr ? parseInt(lastOpenedIdStr, 10) : null;
   const lastOpenedCampaign = campaigns.find(c => c.id === lastOpenedId) || (campaigns.length > 0 ? campaigns[campaigns.length - 1] : null);
 
   const handleSelectCampaign = async (camp: any) => {
-    localStorage.setItem('lastOpenedCampaignId', camp.id.toString());
+    storage.setItem('lastOpenedCampaignId', camp.id.toString());
     setSelectedCampaign(camp);
     await loadEntities(camp.id);
   };
