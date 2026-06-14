@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getDataService } from '../services';
 
-export const useCampaigns = () => {
+export const useCampaigns = (user?: any) => {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<any | null>(null);
 
@@ -15,7 +15,7 @@ export const useCampaigns = () => {
       }
     };
     fetchCampaigns();
-  }, []);
+  }, [user]);
 
   const createCampaign = async (newCampaign: any) => {
     try {

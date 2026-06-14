@@ -4,10 +4,12 @@ import { Users, Map as MapIcon, Book, Plus, ArrowLeft, Trash2, Play, Edit2 } fro
 import { useCampaigns } from './hooks/useCampaigns';
 import { useEntities } from './hooks/useEntities';
 import { useTheme } from './context/ThemeContext';
+import { useAuth } from './context/AuthContext';
 import { getDataService } from './services';
 
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { DatabaseControls } from './components/DatabaseControls';
+import { AuthControls } from './components/AuthControls';
 import { ThemeLayout } from './components/layout/ThemeLayout';
 import { useIntroGate } from './hooks/useIntroGate';
 import { getThemeLabels } from './utils/themeLabels';
@@ -33,9 +35,14 @@ const initLocState = { name: '', region: '', type: '', description: '', lore: ''
 const initEntryState = { title: '', content: '' };
 
 function App() {
-  const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign, updateCampaign, deleteCampaign } = useCampaigns();
+  const { user } = useAuth();
+  const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign, updateCampaign, deleteCampaign } = useCampaigns(user);
   const { characters, locations, entries, loadEntities, crud } = useEntities();
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    setSelectedCampaign(null);
+  }, [user, setSelectedCampaign]);
 
   const { showIntro, dismissIntro } = useIntroGate();
 
@@ -425,6 +432,9 @@ function App() {
         <>
           {!selectedCampaign ? (
         <main className={`flex-1 flex flex-col overflow-y-auto w-full relative ${theme === 'medieval' ? 'text-primary' : theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
+          <div className="absolute top-4 right-4 md:right-8 z-[60]">
+            <AuthControls />
+          </div>
           <header className={`px-4 md:px-8 py-4 md:py-6 border-b flex items-center justify-between z-10 ${theme === 'medieval' ? 'relative' : 'sticky top-0'} ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : theme === 'vampire' ? 'bg-[#08080b]/90 backdrop-blur-md border-[#1f1f2e] shadow-[0_4px_20px_rgba(0,0,0,0.4)]' : theme === 'medieval' ? 'border-[#d9c596]/40' : 'bg-surface-app border-border-default'}`}>
             {theme === 'medieval' ? (
               <div className="flex w-full items-center justify-center relative py-4">
@@ -814,6 +824,9 @@ function App() {
                   {selectedCampaign.system && <span className="truncate">System: <span className="text-secondary">{selectedCampaign.system}</span></span>}
                 </div>
               </div>
+            </div>
+            <div className="hidden sm:block">
+              <AuthControls />
             </div>
           </header>
 
