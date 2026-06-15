@@ -1,4 +1,4 @@
-package com.mario.requiem;
+package com.mario.requiemapp;
 
 import com.getcapacitor.BridgeActivity;
 

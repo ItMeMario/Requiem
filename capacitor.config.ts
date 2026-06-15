@@ -18,7 +18,7 @@ try {
 }
 
 const config: CapacitorConfig = {
-  appId: 'com.mario.requiem',
+  appId: 'com.mario.requiemapp',
   appName: 'Requiem',
   webDir: 'dist/web',
   server: {

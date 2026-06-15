@@ -31,6 +31,27 @@ if (isFirebaseConfigured) {
 
 export { auth };
 
+let isGoogleSignInInitialized = false;
+
+async function ensureGoogleSignInInitialized() {
+  if (isGoogleSignInInitialized) return;
+  if (!Capacitor.isNativePlatform()) return;
+
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID_WEB;
+  if (!clientId || clientId.startsWith('your_')) {
+    throw new Error('Google Web Client ID is not configured in .env file.');
+  }
+
+  try {
+    await GoogleSignIn.initialize({ clientId });
+    isGoogleSignInInitialized = true;
+  } catch (err: any) {
+    console.warn('[Requiem Auth] GoogleSignIn.initialize failed:', err);
+    // Assume it is already initialized if it threw an error
+    isGoogleSignInInitialized = true;
+  }
+}
+
 export async function loginWithGoogleWeb(): Promise<User | null> {
   if (!auth) {
     throw new Error('Firebase Auth is not configured. Please check your environment variables.');
@@ -38,8 +59,9 @@ export async function loginWithGoogleWeb(): Promise<User | null> {
 
   // 1. Mobile Native Flow (Capacitor)
   if (Capacitor.isNativePlatform()) {
+    await ensureGoogleSignInInitialized();
     const result = await GoogleSignIn.signIn();
-    const idToken = result.user?.idToken;
+    const idToken = result.idToken;
     if (!idToken) {
       throw new Error('Failed to retrieve Google ID Token.');
     }
@@ -75,6 +97,7 @@ export async function logoutUser(): Promise<void> {
   
   if (Capacitor.isNativePlatform()) {
     try {
+      await ensureGoogleSignInInitialized();
       await GoogleSignIn.signOut();
     } catch (err) {
       console.warn('[Requiem Auth] Native Google sign out failed, continuing sign out:', err);

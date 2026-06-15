@@ -33,6 +33,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:978584939689:android:d08cd7d22f0817f91d4db8",
+        "android_client_info": {
+          "package_name": "com.mario.requiemapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "978584939689-0lh0r3fj4qsgrqimm3bue2amsnpf3nop.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_W8tl7BgrNJmScMuSUuF4_RY9cbV4V54"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "978584939689-0lh0r3fj4qsgrqimm3bue2amsnpf3nop.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

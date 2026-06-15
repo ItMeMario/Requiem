@@ -35,7 +35,7 @@ const initLocState = { name: '', region: '', type: '', description: '', lore: ''
 const initEntryState = { title: '', content: '' };
 
 function App() {
-  const { user } = useAuth();
+  const { user, isConfigured } = useAuth();
   const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign, updateCampaign, deleteCampaign } = useCampaigns(user);
   const { characters, locations, entries, loadEntities, crud } = useEntities();
   const { theme, setTheme } = useTheme();
@@ -423,6 +423,11 @@ function App() {
     <>
       <ThemeSwitcher size="md" />
       <DatabaseControls />
+      {isConfigured && (
+        <div className={`block sm:hidden fixed bottom-36 right-4 z-[100] p-1.5 ${theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`}>
+          <AuthControls />
+        </div>
+      )}
       {dbError && (
         <div className="fixed top-0 left-0 right-0 z-[10000] bg-red-900 text-white p-3 text-xs font-mono break-all">
           <strong>DB Error:</strong> {dbError}
@@ -432,7 +437,7 @@ function App() {
         <>
           {!selectedCampaign ? (
         <main className={`flex-1 flex flex-col overflow-y-auto w-full relative ${theme === 'medieval' ? 'text-primary' : theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
-          <div className="absolute top-4 right-4 md:right-8 z-[60]">
+          <div className="hidden sm:block absolute top-4 right-4 md:right-8 z-[60]">
             <AuthControls />
           </div>
           <header className={`px-4 md:px-8 py-4 md:py-6 border-b flex items-center justify-between z-10 ${theme === 'medieval' ? 'relative' : 'sticky top-0'} ${theme === 'cyberpunk' ? 'cyber-metallic-panel border-[#0ff]/50 shadow-[0_4px_20px_rgba(0,255,255,0.15)]' : theme === 'vampire' ? 'bg-[#08080b]/90 backdrop-blur-md border-[#1f1f2e] shadow-[0_4px_20px_rgba(0,0,0,0.4)]' : theme === 'medieval' ? 'border-[#d9c596]/40' : 'bg-surface-app border-border-default'}`}>
