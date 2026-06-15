@@ -27,6 +27,7 @@
     "@capacitor/filesystem": "^8.1.2",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/share": "^8.0.1",
+    "@capawesome/capacitor-google-sign-in": "^0.1.2",
     "better-sqlite3": "^12.6.2",
     "firebase": "^12.14.0",
     "idb": "^8.0.3",

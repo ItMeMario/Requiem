@@ -1,5 +1,7 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, User } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut, User } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { GoogleSignIn } from '@capawesome/capacitor-google-sign-in';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -33,8 +35,36 @@ export async function loginWithGoogleWeb(): Promise<User | null> {
   if (!auth) {
     throw new Error('Firebase Auth is not configured. Please check your environment variables.');
   }
+
+  // 1. Mobile Native Flow (Capacitor)
+  if (Capacitor.isNativePlatform()) {
+    const result = await GoogleSignIn.signIn();
+    const idToken = result.user?.idToken;
+    if (!idToken) {
+      throw new Error('Failed to retrieve Google ID Token.');
+    }
+    const credential = GoogleAuthProvider.credential(idToken);
+    const userCredential = await signInWithCredential(auth, credential);
+    return userCredential.user;
+  }
+
+  // 2. Desktop Flow (Electron Loopback)
+  if (typeof window !== 'undefined' && (window as any).api && (window as any).api.googleSignIn) {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID_WEB;
+    if (!clientId || clientId.startsWith('your_')) {
+      throw new Error('Google Web Client ID is not configured in .env file.');
+    }
+    const idToken = await (window as any).api.googleSignIn(clientId);
+    if (!idToken) {
+      throw new Error('Failed to retrieve Google ID Token from desktop login.');
+    }
+    const credential = GoogleAuthProvider.credential(idToken);
+    const userCredential = await signInWithCredential(auth, credential);
+    return userCredential.user;
+  }
+
+  // 3. Web Flow (Fallback)
   const provider = new GoogleAuthProvider();
-  // Optional: prompt selection of account
   provider.setCustomParameters({ prompt: 'select_account' });
   const result = await signInWithPopup(auth, provider);
   return result.user;
@@ -42,5 +72,15 @@ export async function loginWithGoogleWeb(): Promise<User | null> {
 
 export async function logoutUser(): Promise<void> {
   if (!auth) return;
+  
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await GoogleSignIn.signOut();
+    } catch (err) {
+      console.warn('[Requiem Auth] Native Google sign out failed, continuing sign out:', err);
+    }
+  }
+  
   await signOut(auth);
 }
+

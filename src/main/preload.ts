@@ -32,6 +32,9 @@ export const api = {
   // Backups
   exportDatabase: () => ipcRenderer.invoke('export-database'),
   importDatabase: () => ipcRenderer.invoke('import-database'),
+
+  // Native Auth (Electron Loopback)
+  googleSignIn: (clientId: string) => ipcRenderer.invoke('google-sign-in', clientId),
 };
 
 contextBridge.exposeInMainWorld('api', api);
