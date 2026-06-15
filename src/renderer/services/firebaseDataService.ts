@@ -36,14 +36,24 @@ export class FirebaseDataService implements IDataService {
   async getCampaigns(): Promise<Campaign[]> {
     const colRef = collection(this.db, 'users', this.userId, 'campaigns');
     const snapshot = await getDocs(colRef);
-    return snapshot.docs.map(doc => doc.data() as Campaign);
+    return snapshot.docs.map(doc => {
+      const data = doc.data() as Campaign;
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
   }
 
   async getCampaign(id: number): Promise<Campaign> {
     const docRef = doc(this.db, 'users', this.userId, 'campaigns', id.toString());
     const snap = await getDoc(docRef);
     if (!snap.exists()) throw new Error(`Campaign with ID ${id} not found.`);
-    return snap.data() as Campaign;
+    const data = snap.data() as Campaign;
+    return {
+      ...data,
+      id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
+    };
   }
 
   async createCampaign(data: Omit<Campaign, 'id'>): Promise<number> {
@@ -64,16 +74,47 @@ export class FirebaseDataService implements IDataService {
   }
 
   async deleteCampaign(id: number): Promise<boolean> {
-    const docRef = doc(this.db, 'users', this.userId, 'campaigns', id.toString());
+    const numericId = Number(id);
+
+    // 1. Try to delete the campaign document directly by its ID
+    const docRef = doc(this.db, 'users', this.userId, 'campaigns', numericId.toString());
     await deleteDoc(docRef);
 
-    // Clean up related data scope-wide
+    // 2. Just in case the document ID is an auto-generated string (like "ABcd123"),
+    // search for the document with the 'id' field matching the campaign id and delete it.
+    try {
+      const q = query(
+        collection(this.db, 'users', this.userId, 'campaigns'),
+        where('id', '==', numericId)
+      );
+      const snap = await getDocs(q);
+      const deletePromises = snap.docs.map(d => deleteDoc(d.ref));
+      await Promise.all(deletePromises);
+    } catch (err) {
+      console.error('[FirebaseDataService] Failed to delete campaign by field query:', err);
+    }
+
+    // 3. Clean up related data (entries, characters, locations) scope-wide.
+    // Query using both numeric campaign_id and string campaign_id to be safe.
     const cleanup = async (subcol: string) => {
       try {
-        const q = query(collection(this.db, 'users', this.userId, subcol), where('campaign_id', '==', id));
-        const snap = await getDocs(q);
-        const batchPromises = snap.docs.map(d => deleteDoc(d.ref));
-        await Promise.all(batchPromises);
+        // Query by numeric ID
+        const qNum = query(
+          collection(this.db, 'users', this.userId, subcol), 
+          where('campaign_id', '==', numericId)
+        );
+        const snapNum = await getDocs(qNum);
+        const batchPromisesNum = snapNum.docs.map(d => deleteDoc(d.ref));
+        await Promise.all(batchPromisesNum);
+
+        // Query by string ID
+        const qStr = query(
+          collection(this.db, 'users', this.userId, subcol), 
+          where('campaign_id', '==', numericId.toString())
+        );
+        const snapStr = await getDocs(qStr);
+        const batchPromisesStr = snapStr.docs.map(d => deleteDoc(d.ref));
+        await Promise.all(batchPromisesStr);
       } catch (err) {
         console.error(`[FirebaseDataService] Failed to cleanup subcollection ${subcol}:`, err);
       }
@@ -85,6 +126,19 @@ export class FirebaseDataService implements IDataService {
       cleanup('locations')
     ]);
 
+    // 4. Delete from the local database (SQLite/IndexedDB) so it doesn't reappear on app restart/offline state
+    try {
+      if (typeof window !== 'undefined' && (window as any).api) {
+        await (window as any).api.deleteCampaign(numericId);
+      } else {
+        const { WebDataService } = await import('./webDataService');
+        const localService = new WebDataService();
+        await localService.deleteCampaign(numericId);
+      }
+    } catch (localErr) {
+      console.warn('[FirebaseDataService] Failed to delete campaign from local storage:', localErr);
+    }
+
     return true;
   }
 
@@ -95,7 +149,13 @@ export class FirebaseDataService implements IDataService {
       where('campaign_id', '==', campaignId)
     );
     const snapshot = await getDocs(q);
-    const results = snapshot.docs.map(doc => doc.data() as Entry);
+    const results = snapshot.docs.map(doc => {
+      const data = doc.data() as Entry;
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
     // Match SQLite ordering: ORDER BY creation_date DESC
     return results.sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
   }
@@ -104,7 +164,11 @@ export class FirebaseDataService implements IDataService {
     const docRef = doc(this.db, 'users', this.userId, 'entries', id.toString());
     const snap = await getDoc(docRef);
     if (!snap.exists()) throw new Error(`Entry with ID ${id} not found.`);
-    return snap.data() as Entry;
+    const data = snap.data() as Entry;
+    return {
+      ...data,
+      id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
+    };
   }
 
   async createEntry(data: Omit<Entry, 'id'>): Promise<number> {
@@ -134,14 +198,24 @@ export class FirebaseDataService implements IDataService {
   async getCharacters(campaignId: number): Promise<Character[]> {
     const q = query(collection(this.db, 'users', this.userId, 'characters'), where('campaign_id', '==', campaignId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as Character);
+    return snapshot.docs.map(doc => {
+      const data = doc.data() as Character;
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
   }
 
   async getCharacter(id: number): Promise<Character> {
     const docRef = doc(this.db, 'users', this.userId, 'characters', id.toString());
     const snap = await getDoc(docRef);
     if (!snap.exists()) throw new Error(`Character with ID ${id} not found.`);
-    return snap.data() as Character;
+    const data = snap.data() as Character;
+    return {
+      ...data,
+      id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
+    };
   }
 
   async createCharacter(data: Omit<Character, 'id'>): Promise<number> {
@@ -171,14 +245,24 @@ export class FirebaseDataService implements IDataService {
   async getLocations(campaignId: number): Promise<Location[]> {
     const q = query(collection(this.db, 'users', this.userId, 'locations'), where('campaign_id', '==', campaignId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as Location);
+    return snapshot.docs.map(doc => {
+      const data = doc.data() as Location;
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
   }
 
   async getLocation(id: number): Promise<Location> {
     const docRef = doc(this.db, 'users', this.userId, 'locations', id.toString());
     const snap = await getDoc(docRef);
     if (!snap.exists()) throw new Error(`Location with ID ${id} not found.`);
-    return snap.data() as Location;
+    const data = snap.data() as Location;
+    return {
+      ...data,
+      id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
+    };
   }
 
   async createLocation(data: Omit<Location, 'id'>): Promise<number> {
@@ -218,10 +302,34 @@ export class FirebaseDataService implements IDataService {
       getDocs(entriesRef)
     ]);
     
-    const campaigns = campsSnap.docs.map(doc => doc.data());
-    const characters = charsSnap.docs.map(doc => doc.data());
-    const locations = locsSnap.docs.map(doc => doc.data());
-    const entries = entriesSnap.docs.map(doc => doc.data());
+    const campaigns = campsSnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
+    const characters = charsSnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
+    const locations = locsSnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
+    const entries = entriesSnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+      };
+    });
     
     return { campaigns, characters, locations, entries };
   }
