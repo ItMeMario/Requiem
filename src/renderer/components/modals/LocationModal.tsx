@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Map as MapIcon, X } from 'lucide-react';
 import { InputField } from '../InputField';
 import { TextAreaField } from '../TextAreaField';
+import { compressBase64Image } from '../../utils/imageCompressor';
 
 interface LocationModalProps {
   showLocModal: boolean;
@@ -38,8 +39,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                     const file = e.target.files?.[0];
                     if (file) {
                       const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setNewLoc({...newLoc, image_url: reader.result as string});
+                      reader.onloadend = async () => {
+                        const compressed = await compressBase64Image(reader.result as string);
+                        setNewLoc({...newLoc, image_url: compressed});
                       };
                       reader.readAsDataURL(file);
                     }

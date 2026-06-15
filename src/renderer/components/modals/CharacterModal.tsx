@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { User, X } from 'lucide-react';
 import { InputField } from '../InputField';
 import { TextAreaField } from '../TextAreaField';
+import { compressBase64Image } from '../../utils/imageCompressor';
 
 interface CharacterModalProps {
   showCharModal: boolean;
@@ -40,8 +41,9 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                     const file = e.target.files?.[0];
                     if (file) {
                       const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setNewChar({...newChar, image_url: reader.result as string});
+                      reader.onloadend = async () => {
+                        const compressed = await compressBase64Image(reader.result as string);
+                        setNewChar({...newChar, image_url: compressed});
                       };
                       reader.readAsDataURL(file);
                     }

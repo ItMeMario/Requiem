@@ -2,6 +2,7 @@ import { IDataService } from '../../shared/dataService';
 import { Campaign, Entry, Character, Location } from '../../shared/types';
 import { auth } from '../utils/auth';
 import { exportToSQLite, importFromSQLite } from '../utils/sqliteParser';
+import { compressBase64Image } from '../utils/imageCompressor';
 import { 
   getFirestore, 
   collection, 
@@ -249,6 +250,7 @@ export class FirebaseDataService implements IDataService {
       for (const char of data.characters) {
         const newCampId = campaignIdMap.get(char.campaign_id);
         if (newCampId !== undefined) {
+          const compressedImg = char.image_url ? await compressBase64Image(char.image_url) : null;
           await this.createCharacter({
             campaign_id: newCampId,
             name: char.name,
@@ -259,7 +261,7 @@ export class FirebaseDataService implements IDataService {
             lore: char.lore ?? null,
             bonds: char.bonds ?? null,
             personal_notes: char.personal_notes ?? null,
-            image_url: char.image_url ?? null
+            image_url: compressedImg
           });
         }
       }
@@ -270,6 +272,7 @@ export class FirebaseDataService implements IDataService {
       for (const loc of data.locations) {
         const newCampId = campaignIdMap.get(loc.campaign_id);
         if (newCampId !== undefined) {
+          const compressedImg = loc.image_url ? await compressBase64Image(loc.image_url) : null;
           await this.createLocation({
             campaign_id: newCampId,
             name: loc.name,
@@ -279,7 +282,7 @@ export class FirebaseDataService implements IDataService {
             lore: loc.lore ?? null,
             present_npcs: loc.present_npcs ?? null,
             atmosphere: loc.atmosphere ?? null,
-            image_url: loc.image_url ?? null
+            image_url: compressedImg
           });
         }
       }
