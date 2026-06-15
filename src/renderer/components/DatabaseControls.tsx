@@ -5,6 +5,7 @@ import { getDataService } from '../services';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { useAuth } from '../context/AuthContext';
 
 function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   if (typeof file.arrayBuffer === 'function') {
@@ -24,6 +25,7 @@ function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
 
 export function DatabaseControls() {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -99,11 +101,21 @@ export function DatabaseControls() {
   };
 
   const handleElectronImport = async () => {
-    if (confirm("Importing a backup will replace your current database and the application will restart. Are you sure you want to continue?")) {
+    const confirmMsg = user
+      ? "Deseja importar as campanhas deste backup para a sua conta na nuvem? Suas campanhas atuais não serão apagadas."
+      : "Importing a backup will replace your current database and the application will restart. Are you sure you want to continue?";
+    if (confirm(confirmMsg)) {
       try {
         setIsImporting(true);
         const success = await getDataService().importDatabase();
-        if (!success) setIsImporting(false);
+        if (success) {
+          if (user) {
+            alert("Backup importado com sucesso para a nuvem! A página será recarregada.");
+            window.location.reload();
+          }
+        } else {
+          setIsImporting(false);
+        }
       } catch (e: any) {
         console.error(e);
         alert(`Error importing database: ${e?.message || e}`);
@@ -116,7 +128,11 @@ export function DatabaseControls() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (confirm("Importing a backup will replace your current database. Are you sure you want to continue?")) {
+    const confirmMsg = user
+      ? "Deseja importar as campanhas deste backup para a sua conta na nuvem? Suas campanhas atuais não serão apagadas."
+      : "Importing a backup will replace your current database. Are you sure you want to continue?";
+
+    if (confirm(confirmMsg)) {
       try {
         setIsImporting(true);
         const buffer = await readFileAsArrayBuffer(file);
@@ -143,7 +159,7 @@ export function DatabaseControls() {
 
         const success = await getDataService().importDatabase(data);
         if (success) {
-           alert("Database imported successfully. Please reload the page.");
+           alert(user ? "Backup importado com sucesso para a nuvem! A página será recarregada." : "Database imported successfully. Please reload the page.");
            window.location.reload();
         } else {
            setIsImporting(false);

@@ -1,6 +1,7 @@
 import { IDataService } from '../../shared/dataService';
 import { Campaign, Entry, Character, Location } from '../../shared/types';
 import { auth } from '../utils/auth';
+import { exportToSQLite, importFromSQLite } from '../utils/sqliteParser';
 import { 
   getFirestore, 
   collection, 
@@ -202,14 +203,125 @@ export class FirebaseDataService implements IDataService {
     return true;
   }
 
+  // Helper to fetch all data from Firestore for backups
+  private async getAllUserData() {
+    const campaignsRef = collection(this.db, 'users', this.userId, 'campaigns');
+    const charactersRef = collection(this.db, 'users', this.userId, 'characters');
+    const locationsRef = collection(this.db, 'users', this.userId, 'locations');
+    const entriesRef = collection(this.db, 'users', this.userId, 'entries');
+    
+    const [campsSnap, charsSnap, locsSnap, entriesSnap] = await Promise.all([
+      getDocs(campaignsRef),
+      getDocs(charactersRef),
+      getDocs(locationsRef),
+      getDocs(entriesRef)
+    ]);
+    
+    const campaigns = campsSnap.docs.map(doc => doc.data());
+    const characters = charsSnap.docs.map(doc => doc.data());
+    const locations = locsSnap.docs.map(doc => doc.data());
+    const entries = entriesSnap.docs.map(doc => doc.data());
+    
+    return { campaigns, characters, locations, entries };
+  }
+
+  private async uploadImportedData(data: { campaigns: any[], characters: any[], locations: any[], entries: any[] }): Promise<boolean> {
+    if (!data.campaigns || data.campaigns.length === 0) {
+      alert("Nenhuma campanha encontrada no backup.");
+      return false;
+    }
+    
+    // Map of old campaign ID -> new campaign ID
+    const campaignIdMap = new Map<number, number>();
+    
+    for (const camp of data.campaigns) {
+      // Create campaign in Firestore
+      const newCampId = await this.createCampaign({
+        name: camp.name,
+        genre: camp.genre ?? null,
+        system: camp.system ?? null
+      });
+      campaignIdMap.set(camp.id, newCampId);
+    }
+    
+    // Upload characters
+    if (data.characters) {
+      for (const char of data.characters) {
+        const newCampId = campaignIdMap.get(char.campaign_id);
+        if (newCampId !== undefined) {
+          await this.createCharacter({
+            campaign_id: newCampId,
+            name: char.name,
+            race: char.race ?? null,
+            status: char.status ?? null,
+            age: char.age ?? null,
+            faction: char.faction ?? null,
+            lore: char.lore ?? null,
+            bonds: char.bonds ?? null,
+            personal_notes: char.personal_notes ?? null,
+            image_url: char.image_url ?? null
+          });
+        }
+      }
+    }
+    
+    // Upload locations
+    if (data.locations) {
+      for (const loc of data.locations) {
+        const newCampId = campaignIdMap.get(loc.campaign_id);
+        if (newCampId !== undefined) {
+          await this.createLocation({
+            campaign_id: newCampId,
+            name: loc.name,
+            region: loc.region ?? null,
+            type: loc.type ?? null,
+            description: loc.description ?? null,
+            lore: loc.lore ?? null,
+            present_npcs: loc.present_npcs ?? null,
+            atmosphere: loc.atmosphere ?? null,
+            image_url: loc.image_url ?? null
+          });
+        }
+      }
+    }
+    
+    // Upload entries
+    if (data.entries) {
+      for (const entry of data.entries) {
+        const newCampId = campaignIdMap.get(entry.campaign_id);
+        if (newCampId !== undefined) {
+          await this.createEntry({
+            campaign_id: newCampId,
+            title: entry.title,
+            content: entry.content ?? null,
+            creation_date: entry.creation_date || new Date().toISOString()
+          });
+        }
+      }
+    }
+    
+    return true;
+  }
+
   // Backups
   async exportDatabase(): Promise<Uint8Array | boolean> {
-    console.warn("[FirebaseDataService] Export database not supported in cloud mode.");
-    return false;
+    const data = await this.getAllUserData();
+    if (typeof window !== 'undefined' && (window as any).api && (window as any).api.exportCloudDatabase) {
+      return (window as any).api.exportCloudDatabase(data);
+    } else {
+      return exportToSQLite(data);
+    }
   }
 
   async importDatabase(data?: Uint8Array): Promise<boolean> {
-    console.warn("[FirebaseDataService] Import database not supported in cloud mode.");
-    return false;
+    if (typeof window !== 'undefined' && (window as any).api && (window as any).api.importCloudDatabase) {
+      const importedData = await (window as any).api.importCloudDatabase();
+      if (!importedData) return false;
+      return this.uploadImportedData(importedData);
+    } else {
+      if (!data) return false;
+      const importedData = await importFromSQLite(data);
+      return this.uploadImportedData(importedData);
+    }
   }
 }

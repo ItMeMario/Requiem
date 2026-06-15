@@ -32,6 +32,8 @@ export const api = {
   // Backups
   exportDatabase: () => ipcRenderer.invoke('export-database'),
   importDatabase: () => ipcRenderer.invoke('import-database'),
+  exportCloudDatabase: (data: any) => ipcRenderer.invoke('export-cloud-database', data),
+  importCloudDatabase: () => ipcRenderer.invoke('import-cloud-database'),
 
   // Native Auth (Electron Loopback)
   googleSignIn: (clientId: string) => ipcRenderer.invoke('google-sign-in', clientId),
