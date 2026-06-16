@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, RefreshCw, X, AlertTriangle, Play, CheckCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import packageInfo from '../../../package.json';
 
 export function UpdaterControls() {
   const { theme } = useTheme();
@@ -11,7 +12,7 @@ export function UpdaterControls() {
   
   // Status states
   const [status, setStatus] = useState<'idle' | 'checking' | 'update-available' | 'update-not-available' | 'updating' | 'downloaded' | 'error'>('idle');
-  const [currentVersion, setCurrentVersion] = useState<string>('');
+  const [currentVersion, setCurrentVersion] = useState<string>(packageInfo.version);
   const [latestVersion, setLatestVersion] = useState<string>('');
   const [progress, setProgress] = useState<number>(0);
   const [logs, setLogs] = useState<string>('');
@@ -177,7 +178,7 @@ export function UpdaterControls() {
             {/* Version Info */}
             <div className="grid grid-cols-2 gap-4 mb-4 bg-[#050c18] border border-[#0ff]/20 p-3 rounded-sm text-xs">
               <div>
-                <span className="text-[#0ff]/50">LOCAL_SYS:</span> v{currentVersion || '1.0.4'}
+                <span className="text-[#0ff]/50">LOCAL_SYS:</span> v{currentVersion}
               </div>
               <div>
                 <span className="text-[#0ff]/50">REMOTE_SRV:</span> {checking ? 'CONNECTING...' : `v${latestVersion || '?'}`}
@@ -310,7 +311,7 @@ export function UpdaterControls() {
             {/* Version Info */}
             <div className="grid grid-cols-2 gap-4 mb-4 bg-[#e8d8b0] border border-[#8b4513]/30 p-3 rounded font-serif text-xs">
               <div>
-                <span className="font-bold">Current Parchment:</span> v{currentVersion || '1.0.4'}
+                <span className="font-bold">Current Parchment:</span> v{currentVersion}
               </div>
               <div>
                 <span className="font-bold">Latest Discovery:</span> {checking ? 'Inquiring...' : `v${latestVersion || '?'}`}
@@ -438,7 +439,7 @@ export function UpdaterControls() {
             {/* Version Info */}
             <div className="grid grid-cols-2 gap-4 mb-4 bg-[#0d0d12] border border-[#ff3333]/15 p-3 rounded-md text-xs">
               <div>
-                <span className="text-gray-500 font-serif">Current Vessel:</span> v{currentVersion || '1.0.4'}
+                <span className="text-gray-500 font-serif">Current Vessel:</span> v{currentVersion}
               </div>
               <div>
                 <span className="text-gray-500 font-serif">Deep Secrets:</span> {checking ? 'Awakening...' : `v${latestVersion || '?'}`}
