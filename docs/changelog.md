@@ -1,3 +1,29 @@
+📌 Patch Notes - Version 1.0.5
+
+✨ New Features
+
+- No new features in this release.
+
+🛠️ Improvements
+
+- Modularized the React frontend by extracting domain state logic into dedicated custom hooks (`useCampaignManager`, `useCharacterManager`, `useLocationManager`, `useEntryManager`, and `useAppNavigation`) and splitting UI rendering from `App.tsx` into modular view components (`DashboardView`, `DashboardHeader`, and `ActiveCampaignView`).
+- Refactored the Electron main process by grouping and isolating IPC handlers into dedicated modules under `src/main/ipc/` (`campaign`, `entry`, `character`, `location`, `backup`, `auth`, and `ipcRegistry`), keeping `index.ts` focused only on app lifecycle and window management.
+- Modularized application stylesheets by splitting the large `vampire.css` and `cyberpunk.css` files into structured CSS sub-modules (variables, animations, layout, responsive, etc.), which also resolved PostCSS import ordering build warnings.
+- Simplified the main updater system by removing redundant development-mode git update commands, child process spawns, and dev log consoles from both `updater.ts` and `UpdaterControls.tsx`.
+
+🐛 Bug Fixes
+
+- Fixed a critical security vulnerability by sanitizing all rendered journal entry HTML with DOMPurify to prevent potential Stored XSS (Cross-Site Scripting) attacks.
+- Enforced native OS-level process sandboxing on Electron renderers by explicitly setting `sandbox: true` under `webPreferences` when creating the main browser window.
+- Hardened authentication security by adding strict validation for the `state` query parameter in the Google OAuth loopback redirect flow to prevent CSRF (Cross-Site Request Forgery) attacks.
+- Prevented unauthorized navigation and new window popups in Electron by implementing `will-navigate` and `setWindowOpenHandler` overrides in the main process, routing allowed external links directly to the OS default browser.
+- Added a restrictive Content Security Policy (CSP) meta tag to the application shell (`index.html`) to control allowed script execution, style sources, and connection endpoints.
+- Resolved a critical Windows installation and update lock error (where the installer failed to rename or move files to the Temp directory due to exceeding the 260-character MAX_PATH limit) by optimization of production dependencies in `package.json` (moving build-time packages like Capacitor and Firebase to devDependencies) and restricting `asarUnpack` to target only the native `better_sqlite3.node` binary.
+
+📅 Release Date: 06/16/2026
+
+---
+
 📌 Patch Notes - Version 1.0.4
 
 ✨ New Features
