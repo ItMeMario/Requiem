@@ -5,6 +5,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { InputField } from '../InputField';
 import { parseMentions } from '../../utils/mentionParser';
+import DOMPurify from 'dompurify';
 
 interface EntryModalProps {
   showEntryModal: boolean;
@@ -147,7 +148,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 <div 
                   className="quill-content text-lg text-secondary"
                   onClick={handleMentionClick}
-                  dangerouslySetInnerHTML={{ __html: parseMentions(newEntry.content, characters, locations) }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseMentions(newEntry.content, characters, locations)) }}
                 />
               </div>
             ) : (

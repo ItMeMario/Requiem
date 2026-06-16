@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { parseMentions } from '../../utils/mentionParser';
+import DOMPurify from 'dompurify';
 
 interface JournalListProps {
   entries: any[];
@@ -48,7 +49,7 @@ export const JournalList: React.FC<JournalListProps> = ({
               <div className="text-xs text-accent-text mb-4">{new Date(entry.creation_date).toLocaleString()}</div>
               <div 
                 className="text-secondary quill-content line-clamp-3 overflow-hidden pointer-events-none"
-                dangerouslySetInnerHTML={{ __html: parseMentions(entry.content, characters, locations) }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseMentions(entry.content, characters, locations)) }}
               />
             </div>
           ))}
