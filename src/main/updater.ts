@@ -214,8 +214,25 @@ export function setupUpdaterIpc() {
   });
 
   ipcMain.handle('updater-restart', () => {
-    // Gracefully relaunch and exit
-    app.relaunch();
-    app.exit();
+    if (isDev && hasGit) {
+      // Gracefully relaunch and exit in dev mode
+      app.relaunch();
+      app.exit();
+    } else {
+      // Production Mode: destroy all windows first, then quit and install silently.
+      // isSilent=true makes NSIS run with /S flag, bypassing all UI dialogs
+      // (including the "app cannot be closed" popup).
+      // isForceRunAfter=true ensures the app restarts after the update completes.
+      const allWindows = BrowserWindow.getAllWindows();
+      allWindows.forEach(w => {
+        w.removeAllListeners('close');
+        w.destroy();
+      });
+
+      // Small delay to allow windows to fully close before launching installer
+      setTimeout(() => {
+        autoUpdater.quitAndInstall(true, true);
+      }, 1000);
+    }
   });
 }

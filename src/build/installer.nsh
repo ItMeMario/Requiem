@@ -1,10 +1,11 @@
-!macro customInit
-  nsExec::Exec `taskkill /F /T /IM Requiem.exe`
-  nsExec::Exec `powershell -NoProfile -WindowStyle Hidden -Command "Get-Process | Where-Object { $$_.Path -like '$INSTDIR\*' } | Stop-Process -Force"`
+!macro customCheckAppRunning
+  nsExec::Exec `"$SYSDIR\taskkill.exe" /F /T /IM "Requiem.exe"`
+  Sleep 3000
+  nsExec::Exec `"$SYSDIR\taskkill.exe" /F /T /IM "Requiem.exe"`
+  Sleep 2000
 !macroend
 
-!macro customCheckAppRunning
-  nsExec::Exec `taskkill /F /T /IM Requiem.exe`
-  nsExec::Exec `powershell -NoProfile -WindowStyle Hidden -Command "Get-Process | Where-Object { $$_.Path -like '$INSTDIR\*' } | Stop-Process -Force"`
+!macro customInit
+  nsExec::Exec `"$SYSDIR\taskkill.exe" /F /T /IM "Requiem.exe"`
   Sleep 2000
 !macroend
