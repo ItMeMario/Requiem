@@ -1,0 +1,72 @@
+.theme-cyberpunk {
+  /* ---- Surfaces / Backgrounds ---- */
+  --surface-app:       #02050a; /* Deepest screen background */
+  --surface-sidebar:   #040a12;
+  --surface-card:      #050c18; /* Dark carbon area */
+  --surface-input:     #08121f;
+  --surface-hover:     #0b1828;
+  --surface-active:    rgba(0, 255, 255, 0.15);
+  --surface-elevated:  rgba(0, 255, 255, 0.05); /* Subtle glow */
+  --surface-elevated2: rgba(0, 255, 255, 0.08);
+  --surface-overlay:   rgba(2, 5, 10, 0.85);
+  --surface-deep:      rgba(0, 255, 255, 0.02);
+
+  /* ---- Text ---- */
+  --text-heading:   #00ffff; /* Glowing cyan */
+  --text-primary:   #d0f0ff; /* Bright readable ice blue */
+  --text-secondary: #88c0d0; /* Brighter steel cyan */
+  --text-muted:     #6787a4; /* Brighter muted blue */
+  --text-faint:     #4a6782; /* Much brighter faint blue */
+  --text-icon:      #00ffff;
+
+  /* ---- Borders ---- */
+  --border-default:  #152535; /* Dark steel border */
+  --border-subtle:   rgba(0, 255, 255, 0.15); /* Neon subtle */
+  --border-hover:    #00ffff; /* Neon highlight */
+
+  /* ---- Accent (Neon Cyan) ---- */
+  --accent:          #00ffff;
+  --accent-hover:    #00cccc;
+  --accent-text:     #00ffff;
+  --accent-glow:     rgba(0, 255, 255, 0.4);
+  --accent-muted-bg: rgba(0, 255, 255, 0.1);
+  --accent-grad-from:#00ffff;
+  --accent-grad-to:  #0055ff;
+
+  /* ---- Accent 2 (Purple/Pink Neon) ---- */
+  --accent2:         #ff00ff;
+  --accent2-hover:   #cc00cc;
+  --accent2-text:    #ff00ff;
+  --accent2-heading: #ff00ff;
+  --accent2-muted-bg:rgba(255, 0, 255, 0.1);
+
+  /* ---- Danger (Neon Red) ---- */
+  --danger:            #ff003c;
+  --danger-hover:      #cc0030;
+  --danger-text:       #ff003c;
+  --danger-muted-bg:   rgba(255, 0, 60, 0.1);
+  --danger-muted-hover:rgba(255, 0, 60, 0.2);
+  --danger-border:     rgba(255, 0, 60, 0.5);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-track: #040a12;
+  --scrollbar-thumb: #152535;
+  --scrollbar-thumb-hover: #00ffff;
+
+  /* ---- Misc ---- */
+  --font-family-base: "Inter", "Roboto", "Courier New", sans-serif;
+  --quill-editor-bg: #050c18;
+  --quill-editor-text: #d0f0ff;
+}
+
+/* Base definitions for pure theme targeting */
+:root[data-theme='cyberpunk'] {
+  --neon-cyan: #0ff;
+  --neon-blue: #0088ff;
+  --dark-bg: #02050a;
+}
+
+[data-theme='cyberpunk'] {
+  background-color: var(--dark-bg);
+  color: var(--neon-cyan);
+}

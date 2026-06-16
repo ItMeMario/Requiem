@@ -1,0 +1,237 @@
+/* ============================================================
+   NEW: METALLIC & CARBON FIBER UTILITIES FOR CARDS / UI
+   ============================================================ */
+
+/* Metallic Box for Start Campaign */
+.cyber-metallic-panel {
+  background: radial-gradient(circle at 50% 50%, #2a3b4e 0%, #172433 70%, #0d1520 100%);
+  border: 4px solid #304a63;
+  box-shadow: 
+    inset 0 0 20px rgba(0,0,0,0.8),
+    inset 0 0 5px rgba(0, 255, 255, 0.2),
+    0 10px 20px rgba(0,0,0,0.7);
+  position: relative;
+}
+
+.cyber-metallic-panel::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.cyber-metallic-panel::after {
+  content: '';
+  position: absolute;
+  inset: 15px;
+  border: 1px dashed rgba(0, 255, 255, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+}
+
+.cyber-metallic-screw {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 30% 30%, #5a7b9e, #1a2b3c);
+  border-radius: 50%;
+  box-shadow: inset -1px -1px 3px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.2);
+  border: 1px solid #111;
+}
+
+/* Carbon Fiber background for playing cards */
+.cyber-carbon-card {
+  background: 
+    linear-gradient(27deg, #151515 5px, transparent 5px) 0 5px,
+    linear-gradient(207deg, #151515 5px, transparent 5px) 10px 0px,
+    linear-gradient(27deg, #222 5px, transparent 5px) 0px 10px,
+    linear-gradient(207deg, #222 5px, transparent 5px) 10px 5px,
+    linear-gradient(90deg, #1b1b1b 10px, transparent 10px),
+    linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #242424 75%, #242424 100%),
+    #131313;
+  background-size: 20px 20px;
+  border: 3px solid #1d2b38;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+}
+
+.cyber-carbon-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: #0ff;
+  box-shadow: 0 0 10px #0ff;
+}
+
+.cyber-glowing-pill {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+  color: #0ff;
+}
+
+.cyber-enter-btn {
+  background: linear-gradient(to bottom, #112233, #0a1522);
+  border: 1px solid #0ff;
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2), 0 0 5px rgba(0, 255, 255, 0.3);
+  color: #0ff;
+  text-shadow: 0 0 5px rgba(0,255,255,0.5);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.cyber-enter-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: #0ff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.cyber-enter-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 2px;
+  background: #0ff;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.cyber-enter-btn:hover {
+  background: rgba(0, 255, 255, 0.15);
+  box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.4), 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+.cyber-enter-btn:hover::before, .cyber-enter-btn:hover::after {
+  transform: scaleX(1);
+}
+
+/* Smoked Glass Panel */
+.cyber-smoked-glass {
+  background: rgba(2, 5, 10, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Micro Circuit Background */
+.micro-circuit-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: 
+    radial-gradient(circle at 10% 20%, #0ff 1px, transparent 1px),
+    linear-gradient(90deg, #0ff 1px, transparent 1px),
+    linear-gradient(0deg, #0ff 1px, transparent 1px);
+  background-size: 10px 10px, 30px 30px, 30px 30px;
+  background-position: 0 0, 10px 10px, 10px 10px;
+  pointer-events: none;
+}
+
+.micro-circuit-pattern::after {
+  content: '';
+  position: absolute;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, #0ff, transparent);
+  animation: scanline 4s linear infinite;
+}
+
+@keyframes scanline {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Neon Pulse Effect */
+.neon-ring-pulse {
+  position: relative;
+}
+
+.neon-ring-pulse::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #0ff;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.neon-ring-pulse:hover::before {
+  animation: cyberPulse 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes cyberPulse {
+  0% { transform: scale(0.8); opacity: 0.8; box-shadow: 0 0 10px #0ff; }
+  100% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 30px #0ff; }
+}
+
+/* EEG Waveform Animation */
+.eeg-waveform {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  gap: 2px;
+}
+
+.eeg-bar {
+  width: 2px;
+  background-color: #0ff;
+  border-radius: 1px;
+  animation: eegJump 1.2s ease-in-out infinite;
+  box-shadow: 0 0 5px #0ff;
+}
+
+.eeg-bar:nth-child(even) {
+  background-color: #b400ff;
+  box-shadow: 0 0 5px #b400ff;
+}
+
+@keyframes eegJump {
+  0%, 100% { height: 10%; }
+  50% { height: 100%; }
+}
+
+.eeg-particles {
+  display: flex;
+  margin-left: 8px;
+  gap: 4px;
+  opacity: 0.6;
+}
+
+.eeg-particle {
+  width: 3px; height: 3px;
+  background: #0ff;
+  border-radius: 50%;
+  animation: particleFloat 2s infinite alternate;
+}
+
+@keyframes particleFloat {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(10px, -15px) scale(0); opacity: 0; }
+}
+
+.text-cyan-glitch {
+  position: relative;
+  color: #0ff;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.4);
+}
+
+.text-cyan-glitch:hover {
+  animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
