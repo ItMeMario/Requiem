@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, RefreshCw, X, AlertTriangle, Play, CheckCircle } from 'lucide-react';
+import { Sparkles, RefreshCw, X, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import packageInfo from '../../../package.json';
 
@@ -15,12 +15,8 @@ export function UpdaterControls() {
   const [currentVersion, setCurrentVersion] = useState<string>(packageInfo.version);
   const [latestVersion, setLatestVersion] = useState<string>('');
   const [progress, setProgress] = useState<number>(0);
-  const [logs, setLogs] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isDevMode, setIsDevMode] = useState<boolean>(false);
-  const [branch, setBranch] = useState<string>('');
 
-  const logEndRef = useRef<HTMLDivElement>(null);
   const updater = (window as any).api?.updater;
 
   // Auto-check for updates on mount
@@ -34,8 +30,6 @@ export function UpdaterControls() {
         setCurrentVersion(res.currentVersion || '');
         setLatestVersion(res.latestVersion || '');
         setHasUpdate(res.available);
-        setIsDevMode(res.devMode);
-        setBranch(res.branch || '');
         if (res.available) {
           setStatus('update-available');
         } else {
@@ -62,9 +56,6 @@ export function UpdaterControls() {
       if (info.latestVersion) {
         setLatestVersion(info.latestVersion);
       }
-      if (info.log) {
-        setLogs((prev) => prev + info.log);
-      }
     });
 
     const cleanupProgress = updater.onProgress((percent: number) => {
@@ -82,11 +73,6 @@ export function UpdaterControls() {
       cleanupError();
     };
   }, [updater, isOpen]);
-
-  // Auto-scroll logs to bottom
-  useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
 
   if (!updater) return null;
 
@@ -110,15 +96,12 @@ export function UpdaterControls() {
   const handleCheck = async () => {
     setChecking(true);
     setErrorMsg(null);
-    setLogs('');
     setProgress(0);
     try {
       const res = await updater.check();
       setCurrentVersion(res.currentVersion || '');
       setLatestVersion(res.latestVersion || '');
       setHasUpdate(res.available);
-      setIsDevMode(res.devMode);
-      setBranch(res.branch || '');
       if (res.available) {
         setStatus('update-available');
       } else {
@@ -134,7 +117,6 @@ export function UpdaterControls() {
 
   const handleUpdate = async () => {
     setErrorMsg(null);
-    setLogs('');
     setProgress(0);
     setStatus('updating');
     try {
@@ -183,11 +165,6 @@ export function UpdaterControls() {
               <div>
                 <span className="text-[#0ff]/50">REMOTE_SRV:</span> {checking ? 'CONNECTING...' : `v${latestVersion || '?'}`}
               </div>
-              {isDevMode && (
-                <div className="col-span-2 text-[#b400ff]">
-                  <span className="text-[#b400ff]/60">DEV_BRANCH:</span> git://origin/{branch || 'develop'}
-                </div>
-              )}
             </div>
 
             {/* Main Status */}
@@ -267,18 +244,6 @@ export function UpdaterControls() {
                 </div>
               )}
             </div>
-
-            {/* Dev Logs Console */}
-            {isDevMode && logs && (
-              <div className="mt-4 border border-[#0ff]/30 rounded bg-[#050c18] p-3 text-[11px] leading-tight font-mono max-h-40 overflow-y-auto scrollbar-thin">
-                <div className="text-[#0ff]/50 mb-1 border-b border-[#0ff]/20 pb-1 flex items-center justify-between">
-                  <span>LOG CONSOLE: git_update_daemon</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                </div>
-                <pre className="whitespace-pre-wrap font-mono text-[#0ff]/80 font-normal m-0">{logs}</pre>
-                <div ref={logEndRef} />
-              </div>
-            )}
           </div>
         </div>
       );
@@ -316,11 +281,6 @@ export function UpdaterControls() {
               <div>
                 <span className="font-bold">Latest Discovery:</span> {checking ? 'Inquiring...' : `v${latestVersion || '?'}`}
               </div>
-              {isDevMode && (
-                <div className="col-span-2 text-[#8b4513]/80 italic">
-                  <span className="font-bold">Library Branch:</span> {branch || 'develop'} (Development Mode)
-                </div>
-              )}
             </div>
 
             {/* Main Status */}
@@ -400,18 +360,6 @@ export function UpdaterControls() {
                 </div>
               )}
             </div>
-
-            {/* Dev Logs Console */}
-            {isDevMode && logs && (
-              <div className="mt-4 border border-[#8b4513]/40 rounded bg-[#e8d8b0]/40 p-3 text-[11px] leading-tight font-serif max-h-40 overflow-y-auto">
-                <div className="text-[#8b4513]/80 mb-1 border-b border-[#8b4513]/20 pb-1 flex items-center justify-between font-bold">
-                  <span>Scribe Transcriptions</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-800" />
-                </div>
-                <pre className="whitespace-pre-wrap font-serif text-[#5c3a21] m-0 text-left">{logs}</pre>
-                <div ref={logEndRef} />
-              </div>
-            )}
           </div>
         </div>
       );
@@ -444,11 +392,6 @@ export function UpdaterControls() {
               <div>
                 <span className="text-gray-500 font-serif">Deep Secrets:</span> {checking ? 'Awakening...' : `v${latestVersion || '?'}`}
               </div>
-              {isDevMode && (
-                <div className="col-span-2 text-[#ff3333]/80 italic">
-                  <span className="text-gray-500 font-serif font-normal">Git Vein:</span> origin/{branch || 'develop'}
-                </div>
-              )}
             </div>
 
             {/* Main Status */}
@@ -528,18 +471,6 @@ export function UpdaterControls() {
                 </div>
               )}
             </div>
-
-            {/* Dev Logs Console */}
-            {isDevMode && logs && (
-              <div className="mt-4 border border-[#ff3333]/20 rounded bg-[#0a0a0f] p-3 text-[11px] leading-tight font-serif max-h-40 overflow-y-auto">
-                <div className="text-[#ff3333]/80 mb-1 border-b border-[#ff3333]/15 pb-1 flex items-center justify-between font-bold">
-                  <span>Ritual Incantations</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff3333] animate-pulse" />
-                </div>
-                <pre className="whitespace-pre-wrap font-serif text-gray-400 m-0 text-left">{logs}</pre>
-                <div ref={logEndRef} />
-              </div>
-            )}
           </div>
         </div>
       );
@@ -564,3 +495,4 @@ export function UpdaterControls() {
     </>
   );
 }
+
