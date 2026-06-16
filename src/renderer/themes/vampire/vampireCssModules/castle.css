@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════
+   HEAVY GOTHIC CASTLE ROOM (FOREGROUND)
+   ═══════════════════════════════════════════ */
+
+/* Castle Ceiling */
+.castle-ceiling {
+  background-color: #050202;
+  border-bottom: 6px solid #1a0505;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M0 100 Q 50 0 100 100' fill='none' stroke='%23110202' stroke-width='4'/%3E%3C/svg%3E");
+  background-size: 200px 100px;
+  box-shadow: 0 30px 60px rgba(0,0,0,1);
+}
+
+.castle-arch {
+  position: absolute;
+  top: 100%;
+  width: 500px;
+  height: 60px;
+  background: transparent;
+  border: 15px solid #050202;
+  border-bottom: none;
+  border-top-left-radius: 500px 100px;
+  border-top-right-radius: 500px 100px;
+  box-shadow: inset 0 20px 40px rgba(0,0,0,1), 0 -10px 30px rgba(0,0,0,1);
+  transform: translateY(-15px);
+}
+
+.gothic-moon-symbol-top {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #8b0000;
+  font-size: 32px;
+  text-shadow: 0 0 20px #ff0000;
+}
+
+/* Base Stone Texture for Walls */
+.castle-wall-side, .castle-wall-floor {
+  background-color: #070303;
+  background-image: 
+    linear-gradient(335deg, rgba(0,0,0,0.8) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(0,0,0,0.8) 23px, transparent 23px),
+    linear-gradient(335deg, rgba(0,0,0,0.8) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(0,0,0,0.8) 23px, transparent 23px);
+  background-size: 58px 58px;
+  background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
+}
+
+.castle-wall-side {
+  border-left: 4px solid #1a0505;
+  border-right: 4px solid #1a0505;
+}
+
+.castle-wall-floor {
+  border-top: 6px solid #2a0505;
+}
+
+/* Thick Pillars */
+.castle-pillar {
+  width: 80px;
+  background: linear-gradient(to right, #000 0%, #1a0505 50%, #000 100%);
+  box-shadow: 15px 0 30px rgba(0,0,0,0.9), -15px 0 30px rgba(0,0,0,0.9);
+  border-left: 2px solid #330505;
+  border-right: 2px solid #330505;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.pillar-right { right: 80px; }
