@@ -6,6 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { useAuth } from '../context/AuthContext';
+import { UpdaterControls } from './UpdaterControls';
 
 function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   if (typeof file.arrayBuffer === 'function') {
@@ -182,6 +183,7 @@ export function DatabaseControls() {
         onChange={handleFileChange} 
         style={{ display: 'none' }} 
       />
+      <UpdaterControls />
       <button
         onClick={handleExport}
         disabled={isExporting}

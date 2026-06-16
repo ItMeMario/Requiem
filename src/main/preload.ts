@@ -37,6 +37,34 @@ export const api = {
 
   // Native Auth (Electron Loopback)
   googleSignIn: (clientId: string) => ipcRenderer.invoke('google-sign-in', clientId),
+
+  // Updater
+  updater: {
+    check: () => ipcRenderer.invoke('updater-check'),
+    start: () => ipcRenderer.invoke('updater-start'),
+    restart: () => ipcRenderer.invoke('updater-restart'),
+    onStatus: (callback: (info: any) => void) => {
+      const handler = (_event: any, info: any) => callback(info);
+      ipcRenderer.on('updater-status', handler);
+      return () => {
+        ipcRenderer.removeListener('updater-status', handler);
+      };
+    },
+    onProgress: (callback: (percent: number) => void) => {
+      const handler = (_event: any, percent: number) => callback(percent);
+      ipcRenderer.on('updater-progress', handler);
+      return () => {
+        ipcRenderer.removeListener('updater-progress', handler);
+      };
+    },
+    onError: (callback: (err: string) => void) => {
+      const handler = (_event: any, err: string) => callback(err);
+      ipcRenderer.on('updater-error', handler);
+      return () => {
+        ipcRenderer.removeListener('updater-error', handler);
+      };
+    }
+  }
 };
 
 contextBridge.exposeInMainWorld('api', api);

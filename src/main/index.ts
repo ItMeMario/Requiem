@@ -5,6 +5,7 @@ import http from 'http';
 import url from 'url';
 import crypto from 'crypto';
 import { db, initDb, dbPath as currentDbPath } from './database';
+import { setMainWindow, setupUpdaterIpc } from './updater';
 
 const isDev = !app.isPackaged;
 
@@ -26,6 +27,7 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
+  setMainWindow(win);
 }
 
 function setupIpc() {
@@ -530,6 +532,7 @@ function setupIpc() {
 app.whenReady().then(() => {
   initDb();
   setupIpc();
+  setupUpdaterIpc();
   createWindow();
 
   app.on('activate', () => {
