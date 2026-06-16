@@ -1,3 +1,30 @@
+📌 Patch Notes - Version 1.0.4
+
+✨ New Features
+
+- Integrated Firebase Authentication and Firestore to support cloud database mode alongside the local SQLite/IndexedDB modes.
+- Implemented cross-platform native authentication, utilizing Capawesome Google Sign-In for mobile (Android) and a loopback HTTP server in Electron for desktop OAuth redirects.
+- Added support for full SQLite database import and export in Cloud Mode, compiling Firestore collections into local SQLite binaries and merging SQLite backups (with parent ID remapping) into the cloud.
+- Developed a hybrid auto-updater system supporting Git-based updates in development and automatic production updates via `electron-updater` and GitHub releases.
+- Created an interactive local SQLite-to-Cloud migration flow that prompts users to upload local databases into Firestore upon first login.
+- Built a custom-themed `UpdaterControls` React modal (Medieval, Cyberpunk, and Vampire) using React Portals to avoid layout conflicts, showing real-time download progress and logs.
+
+🛠️ Improvements
+
+- Implemented an HTML5 Canvas-based `imageCompressor` utility to compress and resize character and location base64 images before upload/import, preventing Firestore size limit issues.
+- Integrated a theme-customized AuthControls toolbar component for easy user sign-in, sign-out, and profile viewing.
+
+🐛 Bug Fixes
+
+- Resolved state and theme persistence issues on mobile by migrating WebView localStorage to native `@capacitor/preferences` (supporting SharedPreferences/UserDefaults).
+- Fixed campaign deletion to permanently remove all campaign data and nested subcollections (entries, characters, locations) from both Firestore and local databases.
+- Resolved Android Google Sign-In issues by adding plugin initialization, fixing `idToken` retrieval from the sign-in result, and renaming the Android package to `com.mario.requiemapp` to prevent SHA-1 credential conflicts.
+- Fixed environment variable loading on Vite configurations by aligning the root paths in `vite.config.ts` and `vite.config.web.ts`.
+
+📅 Release Date: 06/15/2026
+
+---
+
 📌 Patch Notes - Version 1.0.3
 
 ✨ New Features

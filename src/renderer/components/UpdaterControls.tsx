@@ -177,7 +177,7 @@ export function UpdaterControls() {
             {/* Version Info */}
             <div className="grid grid-cols-2 gap-4 mb-4 bg-[#050c18] border border-[#0ff]/20 p-3 rounded-sm text-xs">
               <div>
-                <span className="text-[#0ff]/50">LOCAL_SYS:</span> v{currentVersion || '1.0.3'}
+                <span className="text-[#0ff]/50">LOCAL_SYS:</span> v{currentVersion || '1.0.4'}
               </div>
               <div>
                 <span className="text-[#0ff]/50">REMOTE_SRV:</span> {checking ? 'CONNECTING...' : `v${latestVersion || '?'}`}
@@ -310,7 +310,7 @@ export function UpdaterControls() {
             {/* Version Info */}
             <div className="grid grid-cols-2 gap-4 mb-4 bg-[#e8d8b0] border border-[#8b4513]/30 p-3 rounded font-serif text-xs">
               <div>
-                <span className="font-bold">Current Parchment:</span> v{currentVersion || '1.0.3'}
+                <span className="font-bold">Current Parchment:</span> v{currentVersion || '1.0.4'}
               </div>
               <div>
                 <span className="font-bold">Latest Discovery:</span> {checking ? 'Inquiring...' : `v${latestVersion || '?'}`}
@@ -438,7 +438,7 @@ export function UpdaterControls() {
             {/* Version Info */}
             <div className="grid grid-cols-2 gap-4 mb-4 bg-[#0d0d12] border border-[#ff3333]/15 p-3 rounded-md text-xs">
               <div>
-                <span className="text-gray-500 font-serif">Current Vessel:</span> v{currentVersion || '1.0.3'}
+                <span className="text-gray-500 font-serif">Current Vessel:</span> v{currentVersion || '1.0.4'}
               </div>
               <div>
                 <span className="text-gray-500 font-serif">Deep Secrets:</span> {checking ? 'Awakening...' : `v${latestVersion || '?'}`}
