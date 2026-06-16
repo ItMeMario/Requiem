@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import path from 'path';
 import { initDb, db } from './database';
 import { setMainWindow, setupUpdaterIpc } from './updater';
@@ -24,6 +24,29 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
+
+  // Bloquear navegações não-intencionais no frame principal
+  win.webContents.on('will-navigate', (event, navigationUrl) => {
+    const parsedUrl = new URL(navigationUrl);
+    const allowedHost = isDev ? 'localhost:5173' : '';
+    
+    if (isDev && parsedUrl.host !== allowedHost) {
+      event.preventDefault();
+      shell.openExternal(navigationUrl);
+    } else if (!isDev && parsedUrl.protocol !== 'file:') {
+      event.preventDefault();
+      shell.openExternal(navigationUrl);
+    }
+  });
+
+  // Interceptar abertura de novas janelas (ex: target="_blank") e abrir no navegador padrão
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+
   setMainWindow(win);
 }
 
