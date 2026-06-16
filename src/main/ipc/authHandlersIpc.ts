@@ -84,6 +84,40 @@ export function setupAuthHandlersIpc() {
           `);
         } else if (pathname === '/token') {
           const idToken = parsedUrl.query.id_token as string;
+          const returnedState = parsedUrl.query.state as string;
+          
+          if (returnedState !== state) {
+            res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>Erro de Segurança</title>
+                <style>
+                  body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    background-color: #0a0a0f;
+                    color: #d1d1d6;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    margin: 0;
+                  }
+                  h1 { color: #ff3333; font-weight: 300; }
+                </style>
+              </head>
+              <body>
+                <h1>Erro de Segurança</h1>
+                <p>Falha na validação do estado de login (CSRF detectado). Tente novamente.</p>
+              </body>
+              </html>
+            `);
+            reject(new Error("Invalid state parameter. Possible CSRF attack."));
+            cleanup();
+            return;
+          }
           
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
           if (idToken) {
