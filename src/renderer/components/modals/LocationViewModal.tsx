@@ -1,6 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { Map as MapIcon, X, Edit2 } from 'lucide-react';
+import { Map as MapIcon, X, Edit2, Download, Eye } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 interface LocationViewModalProps {
   showLocViewModal: boolean;
@@ -15,10 +18,43 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
   loc,
   handleEditLoc,
 }) => {
+  const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
+
   if (!showLocViewModal || !loc) return null;
 
+  const handleDownloadPortrait = async () => {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const base64Parts = loc.image_url.split(',');
+        const base64Data = base64Parts[1] || base64Parts[0];
+        const name = `${loc.name.toLowerCase().replace(/\s+/g, '_')}_location.png`;
+        const writeResult = await Filesystem.writeFile({
+          path: name,
+          data: base64Data,
+          directory: Directory.Cache
+        });
+        await Share.share({
+          title: name,
+          url: writeResult.uri,
+          dialogTitle: `Open/Share ${name}`,
+        });
+      } else {
+        const a = document.createElement('a');
+        a.href = loc.image_url;
+        a.download = `${loc.name.toLowerCase().replace(/\s+/g, '_')}_location.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch (error) {
+      console.error('Error downloading location image:', error);
+      alert('Erro ao baixar imagem');
+    }
+  };
+
   return createPortal(
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
+    <>
+      <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
       <div className="bg-surface-card sm:border border-border-default sm:rounded-xl p-4 sm:p-6 w-full max-w-4xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center pb-4 border-b border-border-default mb-4 shrink-0">
@@ -52,9 +88,28 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
                   <img
                     src={loc.image_url}
                     alt={loc.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover cursor-zoom-in"
+                    onClick={() => setActivePreviewImage(loc.image_url)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setActivePreviewImage(loc.image_url)}
+                      className="p-3 bg-surface-card hover:bg-surface-hover rounded-full text-heading transition-colors shadow-lg"
+                      title="Visualizar Imagem"
+                    >
+                      <Eye size={20} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadPortrait}
+                      className="p-3 bg-surface-card hover:bg-surface-hover rounded-full text-heading transition-colors shadow-lg"
+                      title="Baixar Imagem"
+                    >
+                      <Download size={20} />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="w-full aspect-[4/3] md:aspect-[3/4] max-h-[250px] md:max-h-[480px] bg-surface-hover/30 rounded-lg border-2 border-dashed border-border-subtle flex flex-col items-center justify-center text-faint py-12">
@@ -150,7 +205,38 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
           </button>
         </div>
       </div>
-    </div>,
+    </div>
+    
+    {/* Lightbox Preview */}
+    {activePreviewImage && (
+      <div 
+        className="fixed inset-0 bg-black/95 z-[10000] flex items-center justify-center p-4 cursor-zoom-out"
+        onClick={() => setActivePreviewImage(null)}
+      >
+        <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <button 
+            className="text-white/70 hover:text-white bg-black/50 p-2 rounded-full hover:bg-black/80 transition-colors flex items-center justify-center"
+            onClick={handleDownloadPortrait}
+            title="Baixar imagem"
+          >
+            <Download size={20} />
+          </button>
+          <button 
+            className="text-white/70 hover:text-white bg-black/50 p-2 rounded-full hover:bg-black/80 transition-colors"
+            onClick={() => setActivePreviewImage(null)}
+          >
+            <X size={24} />
+          </button>
+        </div>
+        <img 
+          src={activePreviewImage} 
+          className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" 
+          alt="Preview"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    )}
+    </>,
     document.body
   );
 };

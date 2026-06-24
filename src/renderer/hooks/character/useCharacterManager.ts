@@ -11,7 +11,7 @@ const initCharState = {
   bonds: '',
   personal_notes: '',
   image_url: '',
-  attachments: []
+  attachments: [] as any[]
 };
 
 interface UseCharacterManagerProps {
@@ -49,8 +49,24 @@ export function useCharacterManager({
     e.preventDefault();
     if (!newChar.name.trim() || !selectedCampaign) return;
     try {
-      const data = { ...newChar, campaign_id: selectedCampaign.id };
+      let data = { ...newChar, campaign_id: selectedCampaign.id };
       if (editingCharId !== null) {
+        try {
+          const originalChar = await getDataService().getCharacter(editingCharId);
+          if (originalChar && originalChar.image_url && originalChar.image_url !== newChar.image_url) {
+            const dateStr = new Date().toLocaleString('pt-BR').replace(/[\/\:]/g, '-');
+            const oldAttachment = {
+              id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
+              name: `Retrato Antigo - ${dateStr}.png`,
+              type: 'image/png',
+              url: originalChar.image_url,
+              size: Math.round(originalChar.image_url.length * 0.75)
+            };
+            data.attachments = [...(data.attachments || []), oldAttachment];
+          }
+        } catch (err) {
+          console.error('Error archiving previous character portrait:', err);
+        }
         await getDataService().updateCharacter(editingCharId, data);
         crud.editCharacter(editingCharId, data);
       } else {

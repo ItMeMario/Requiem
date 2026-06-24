@@ -51,6 +51,19 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
     }
   };
 
+  const handleDownloadPortrait = async () => {
+    try {
+      const portraitAttachment = {
+        name: `${char.name.toLowerCase().replace(/\s+/g, '_')}_portrait.png`,
+        url: char.image_url
+      };
+      await handleDownloadAttachment(portraitAttachment);
+    } catch (error) {
+      console.error('Error downloading portrait:', error);
+      alert('Erro ao baixar retrato');
+    }
+  };
+
   return createPortal(
     <>
       <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
@@ -87,9 +100,28 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
                   <img
                     src={char.image_url}
                     alt={char.name}
-                    className="w-full h-full object-cover object-top"
+                    className="w-full h-full object-cover object-top cursor-zoom-in"
+                    onClick={() => setActivePreviewImage(char.image_url)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setActivePreviewImage(char.image_url)}
+                      className="p-3 bg-surface-card hover:bg-surface-hover rounded-full text-heading transition-colors shadow-lg"
+                      title="Visualizar Retrato"
+                    >
+                      <Eye size={20} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadPortrait}
+                      className="p-3 bg-surface-card hover:bg-surface-hover rounded-full text-heading transition-colors shadow-lg"
+                      title="Baixar Retrato"
+                    >
+                      <Download size={20} />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="w-full aspect-[3/4] max-h-[250px] md:max-h-[480px] bg-surface-hover/30 rounded-lg border-2 border-dashed border-border-subtle flex flex-col items-center justify-center text-faint py-12">
@@ -261,12 +293,50 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
         className="fixed inset-0 bg-black/95 z-[10000] flex items-center justify-center p-4 cursor-zoom-out"
         onClick={() => setActivePreviewImage(null)}
       >
-        <button 
-          className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/50 p-2 rounded-full hover:bg-black/80 transition-colors"
-          onClick={() => setActivePreviewImage(null)}
-        >
-          <X size={24} />
-        </button>
+        <div className="absolute top-4 right-4 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <button 
+            className="text-white/70 hover:text-white bg-black/50 p-2 rounded-full hover:bg-black/80 transition-colors flex items-center justify-center"
+            onClick={async () => {
+              const attachment = char.attachments?.find((a: any) => a.url === activePreviewImage);
+              const name = attachment ? attachment.name : `${char.name.toLowerCase().replace(/\s+/g, '_')}_portrait.png`;
+              try {
+                if (Capacitor.isNativePlatform()) {
+                  const base64Parts = activePreviewImage.split(',');
+                  const base64Data = base64Parts[1] || base64Parts[0];
+                  const writeResult = await Filesystem.writeFile({
+                    path: name,
+                    data: base64Data,
+                    directory: Directory.Cache
+                  });
+                  await Share.share({
+                    title: name,
+                    url: writeResult.uri,
+                    dialogTitle: `Open/Share ${name}`,
+                  });
+                } else {
+                  const a = document.createElement('a');
+                  a.href = activePreviewImage;
+                  a.download = name;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                }
+              } catch (error) {
+                console.error('Error downloading in preview:', error);
+                alert('Erro ao baixar imagem');
+              }
+            }}
+            title="Baixar imagem"
+          >
+            <Download size={20} />
+          </button>
+          <button 
+            className="text-white/70 hover:text-white bg-black/50 p-2 rounded-full hover:bg-black/80 transition-colors"
+            onClick={() => setActivePreviewImage(null)}
+          >
+            <X size={24} />
+          </button>
+        </div>
         <img 
           src={activePreviewImage} 
           className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" 
