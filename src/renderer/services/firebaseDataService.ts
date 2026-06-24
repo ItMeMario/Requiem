@@ -202,6 +202,7 @@ export class FirebaseDataService implements IDataService {
       const data = doc.data() as Character;
       return {
         ...data,
+        attachments: data.attachments || [],
         id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
       };
     });
@@ -214,6 +215,7 @@ export class FirebaseDataService implements IDataService {
     const data = snap.data() as Character;
     return {
       ...data,
+      attachments: data.attachments || [],
       id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
     };
   }
@@ -359,6 +361,16 @@ export class FirebaseDataService implements IDataService {
         const newCampId = campaignIdMap.get(char.campaign_id);
         if (newCampId !== undefined) {
           const compressedImg = char.image_url ? await compressBase64Image(char.image_url) : null;
+          let parsedAttachments = [];
+          if (char.attachments) {
+            try {
+              parsedAttachments = typeof char.attachments === 'string'
+                ? JSON.parse(char.attachments)
+                : char.attachments;
+            } catch (e) {
+              console.error('Error parsing attachments during import:', e);
+            }
+          }
           await this.createCharacter({
             campaign_id: newCampId,
             name: char.name,
@@ -369,7 +381,8 @@ export class FirebaseDataService implements IDataService {
             lore: char.lore ?? null,
             bonds: char.bonds ?? null,
             personal_notes: char.personal_notes ?? null,
-            image_url: compressedImg
+            image_url: compressedImg,
+            attachments: parsedAttachments
           });
         }
       }

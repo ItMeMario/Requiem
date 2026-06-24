@@ -1,6 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { User, X, Edit2 } from 'lucide-react';
+import { User, X, Edit2, Paperclip, FileText, Download, Eye } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 interface CharacterViewModalProps {
   showCharViewModal: boolean;
@@ -15,10 +18,42 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
   char,
   handleEditChar,
 }) => {
+  const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
+
   if (!showCharViewModal || !char) return null;
 
+  const handleDownloadAttachment = async (attachment: any) => {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const base64Parts = attachment.url.split(',');
+        const base64Data = base64Parts[1] || base64Parts[0];
+        const writeResult = await Filesystem.writeFile({
+          path: attachment.name,
+          data: base64Data,
+          directory: Directory.Cache
+        });
+        await Share.share({
+          title: attachment.name,
+          url: writeResult.uri,
+          dialogTitle: `Open/Share ${attachment.name}`,
+        });
+      } else {
+        const a = document.createElement('a');
+        a.href = attachment.url;
+        a.download = attachment.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch (error) {
+      console.error('Error downloading attachment:', error);
+      alert('Erro ao baixar anexo');
+    }
+  };
+
   return createPortal(
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
+    <>
+      <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
       <div className="bg-surface-card sm:border border-border-default sm:rounded-xl p-4 sm:p-6 w-full max-w-4xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center pb-4 border-b border-border-default mb-4 shrink-0">
@@ -134,6 +169,69 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
                     </p>
                   </div>
                 )}
+
+                {/* Attachments Section */}
+                {char.attachments && char.attachments.length > 0 && (
+                  <div className="space-y-2 mt-6">
+                    <h4 className="text-xs uppercase font-bold text-accent-text tracking-wider flex items-center gap-1.5">
+                      <Paperclip size={14} /> Anexos / Arquivos
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {char.attachments.map((att: any) => {
+                        const isImage = att.type.startsWith('image/');
+                        return (
+                          <div key={att.id} className="bg-surface-hover/30 border border-border-subtle rounded-lg p-3 flex flex-col justify-between hover:border-border-hover transition-colors">
+                            <div className="flex items-start gap-2.5 mb-3">
+                              {isImage ? (
+                                <div 
+                                  className="w-12 h-12 rounded overflow-hidden border border-border-subtle bg-surface-hover shrink-0 cursor-pointer"
+                                  onClick={() => setActivePreviewImage(att.url)}
+                                  title="Clique para ver imagem"
+                                >
+                                  <img src={att.url} className="w-full h-full object-cover" alt="" />
+                                </div>
+                              ) : (
+                                <div className="w-12 h-12 rounded bg-accent-muted-bg border border-accent/20 flex items-center justify-center text-accent-text shrink-0">
+                                  <FileText size={24} />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <p 
+                                  className="text-sm font-semibold text-heading truncate cursor-pointer hover:text-accent-text transition-colors" 
+                                  title={att.name}
+                                  onClick={() => handleDownloadAttachment(att)}
+                                >
+                                  {att.name}
+                                </p>
+                                <p className="text-xs text-muted">
+                                  {att.size ? `${(att.size / 1024).toFixed(1)} KB` : 'Tamanho desconhecido'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleDownloadAttachment(att)}
+                                className="flex-1 py-1.5 bg-surface-hover hover:bg-surface-elevated2 border border-border-hover text-secondary hover:text-heading text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1"
+                              >
+                                <Download size={12} />
+                                <span>Baixar</span>
+                              </button>
+                              {isImage && (
+                                <button
+                                  onClick={() => setActivePreviewImage(att.url)}
+                                  className="px-2.5 py-1.5 bg-surface-hover hover:bg-surface-elevated2 border border-border-hover text-secondary hover:text-heading text-xs font-semibold rounded transition-colors flex items-center justify-center"
+                                  title="Ver imagem"
+                                >
+                                  <Eye size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 
                 {!char.lore && !char.bonds && !char.personal_notes && (
                   <div className="text-sm italic text-faint py-4">
@@ -155,7 +253,29 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
           </button>
         </div>
       </div>
-    </div>,
-    document.body
-  );
+    </div>
+
+    {/* Lightbox Preview */}
+    {activePreviewImage && (
+      <div 
+        className="fixed inset-0 bg-black/95 z-[10000] flex items-center justify-center p-4 cursor-zoom-out"
+        onClick={() => setActivePreviewImage(null)}
+      >
+        <button 
+          className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/50 p-2 rounded-full hover:bg-black/80 transition-colors"
+          onClick={() => setActivePreviewImage(null)}
+        >
+          <X size={24} />
+        </button>
+        <img 
+          src={activePreviewImage} 
+          className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" 
+          alt="Preview"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    )}
+  </>,
+  document.body
+);
 };

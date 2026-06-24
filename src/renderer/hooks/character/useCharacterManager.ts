@@ -10,7 +10,8 @@ const initCharState = {
   lore: '',
   bonds: '',
   personal_notes: '',
-  image_url: ''
+  image_url: '',
+  attachments: []
 };
 
 interface UseCharacterManagerProps {
@@ -66,7 +67,10 @@ export function useCharacterManager({
 
   const handleEditChar = (char: any) => {
     setEditingCharId(char.id);
-    setNewChar(char);
+    setNewChar({
+      ...char,
+      attachments: char.attachments || []
+    });
     setShowCharModal(true);
   };
 

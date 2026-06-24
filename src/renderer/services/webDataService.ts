@@ -143,11 +143,13 @@ export class WebDataService implements IDataService {
         bonds TEXT,
         personal_notes TEXT,
         image_url TEXT,
+        attachments TEXT,
         FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
       );
     `);
 
     try { this.db.run("ALTER TABLE characters ADD COLUMN image_url TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE characters ADD COLUMN attachments TEXT;"); } catch (e) {}
 
     this.db.run(`
       CREATE TABLE IF NOT EXISTS locations (
@@ -281,27 +283,60 @@ export class WebDataService implements IDataService {
 
   // Characters
   async getCharacters(campaignId: number): Promise<Character[]> {
-    return this.query<Character>('SELECT * FROM characters WHERE campaign_id = ?', [campaignId]);
+    const rows = await this.query<any>('SELECT * FROM characters WHERE campaign_id = ?', [campaignId]);
+    return rows.map(row => ({
+      ...row,
+      attachments: row.attachments ? JSON.parse(row.attachments) : []
+    }));
   }
   async getCharacter(id: number): Promise<Character> {
-    const res = await this.query<Character>('SELECT * FROM characters WHERE id = ?', [id]);
-    return res[0];
+    const res = await this.query<any>('SELECT * FROM characters WHERE id = ?', [id]);
+    const row = res[0];
+    if (!row) return row;
+    return {
+      ...row,
+      attachments: row.attachments ? JSON.parse(row.attachments) : []
+    };
   }
   async createCharacter(data: Omit<Character, 'id'>): Promise<number> {
     const id = await this.execute(`
       INSERT INTO characters (
-        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [data.campaign_id, data.name, data.race ?? null, data.status ?? null, data.age ?? null, data.faction ?? null, data.lore ?? null, data.bonds ?? null, data.personal_notes ?? null, data.image_url ?? null]);
+        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      data.campaign_id,
+      data.name,
+      data.race ?? null,
+      data.status ?? null,
+      data.age ?? null,
+      data.faction ?? null,
+      data.lore ?? null,
+      data.bonds ?? null,
+      data.personal_notes ?? null,
+      data.image_url ?? null,
+      data.attachments ? JSON.stringify(data.attachments) : null
+    ]);
     return id || 0;
   }
   async updateCharacter(id: number, data: Partial<Character>): Promise<boolean> {
     await this.execute(`
       UPDATE characters SET 
         name = ?, race = ?, status = ?, age = ?, 
-        faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?
+        faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?, attachments = ?
       WHERE id = ?
-    `, [data.name, data.race ?? null, data.status ?? null, data.age ?? null, data.faction ?? null, data.lore ?? null, data.bonds ?? null, data.personal_notes ?? null, data.image_url ?? null, id]);
+    `, [
+      data.name,
+      data.race ?? null,
+      data.status ?? null,
+      data.age ?? null,
+      data.faction ?? null,
+      data.lore ?? null,
+      data.bonds ?? null,
+      data.personal_notes ?? null,
+      data.image_url ?? null,
+      data.attachments ? JSON.stringify(data.attachments) : null,
+      id
+    ]);
     return true;
   }
   async deleteCharacter(id: number): Promise<boolean> {

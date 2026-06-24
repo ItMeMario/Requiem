@@ -47,7 +47,8 @@ export async function exportToSQLite(data: { campaigns: any[], characters: any[]
       lore TEXT,
       bonds TEXT,
       personal_notes TEXT,
-      image_url TEXT
+      image_url TEXT,
+      attachments TEXT
     );
     CREATE TABLE IF NOT EXISTS locations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,11 +83,12 @@ export async function exportToSQLite(data: { campaigns: any[], characters: any[]
   // Insert characters
   for (const char of data.characters) {
     db.run(
-      'INSERT INTO characters (id, campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO characters (id, campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         char.id, char.campaign_id, char.name, char.race ?? null, char.status ?? null,
         char.age ?? null, char.faction ?? null, char.lore ?? null, char.bonds ?? null,
-        char.personal_notes ?? null, char.image_url ?? null
+        char.personal_notes ?? null, char.image_url ?? null,
+        char.attachments ? (typeof char.attachments === 'string' ? char.attachments : JSON.stringify(char.attachments)) : null
       ]
     );
   }
@@ -131,7 +133,10 @@ export async function importFromSQLite(fileData: Uint8Array): Promise<{ campaign
   
   const campaigns = getTableRows('campaigns');
   const entries = getTableRows('entries');
-  const characters = getTableRows('characters');
+  const characters = getTableRows('characters').map(char => ({
+    ...char,
+    attachments: char.attachments ? (typeof char.attachments === 'string' ? JSON.parse(char.attachments) : char.attachments) : []
+  }));
   const locations = getTableRows('locations');
   
   db.close();

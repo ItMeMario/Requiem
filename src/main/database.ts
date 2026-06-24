@@ -54,6 +54,7 @@ export function initDb() {
       bonds TEXT,
       personal_notes TEXT,
       image_url TEXT,
+      attachments TEXT,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
     );
   `;
@@ -78,4 +79,10 @@ export function initDb() {
   db.exec(createEntriesTable);
   db.exec(createCharactersTable);
   db.exec(createLocationsTable);
+
+  try {
+    db.exec("ALTER TABLE characters ADD COLUMN attachments TEXT;");
+  } catch (e) {
+    // Column already exists
+  }
 }
