@@ -246,6 +246,7 @@ function App() {
         handleCloseCharViewModal={charMgr.handleCloseCharViewModal}
         char={charMgr.selectedCharForView}
         handleEditChar={charMgr.handleEditCharFromView}
+        handleDeleteAttachment={charMgr.handleDeleteAttachment}
       />
       <LocationViewModal 
         showLocViewModal={nav.showLocViewModal}

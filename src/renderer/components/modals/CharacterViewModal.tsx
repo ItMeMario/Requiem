@@ -1,6 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { User, X, Edit2, Paperclip, FileText, Download, Eye } from 'lucide-react';
+import { User, X, Edit2, Paperclip, FileText, Download, Eye, Trash2 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -10,6 +10,7 @@ interface CharacterViewModalProps {
   handleCloseCharViewModal: () => void;
   char: any;
   handleEditChar: (char: any) => void;
+  handleDeleteAttachment: (charId: number, attachmentId: string) => void;
 }
 
 export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
@@ -17,6 +18,7 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
   handleCloseCharViewModal,
   char,
   handleEditChar,
+  handleDeleteAttachment,
 }) => {
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
@@ -240,7 +242,7 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
                                 </p>
                               </div>
                             </div>
-                            <div className="flex gap-2">
+                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleDownloadAttachment(att)}
                                 className="flex-1 py-1.5 bg-surface-hover hover:bg-surface-elevated2 border border-border-hover text-secondary hover:text-heading text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1"
@@ -257,6 +259,13 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
                                   <Eye size={12} />
                                 </button>
                               )}
+                              <button
+                                onClick={() => handleDeleteAttachment(char.id, att.id)}
+                                className="px-2.5 py-1.5 bg-surface-hover hover:bg-danger/10 border border-border-hover hover:border-danger/30 text-secondary hover:text-danger text-xs font-semibold rounded transition-colors flex items-center justify-center"
+                                title="Deletar anexo"
+                              >
+                                <Trash2 size={12} />
+                              </button>
                             </div>
                           </div>
                         );

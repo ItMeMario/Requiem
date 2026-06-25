@@ -128,6 +128,35 @@ export function useCharacterManager({
     });
   };
 
+  const handleDeleteAttachment = async (charId: number, attachmentId: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Remover Anexo',
+      message: 'Tem certeza de que deseja remover este anexo? Esta ação não pode ser desfeita.',
+      onConfirm: async () => {
+        try {
+          const charToUpdate = selectedCharForView || await getDataService().getCharacter(charId);
+          if (!charToUpdate) return;
+          const updatedAttachments = (charToUpdate.attachments || []).filter((a: any) => a.id !== attachmentId);
+          const updatedChar = { ...charToUpdate, attachments: updatedAttachments };
+          
+          await getDataService().updateCharacter(charId, updatedChar);
+          crud.editCharacter(charId, updatedChar);
+          
+          if (selectedCharForView && selectedCharForView.id === charId) {
+            setSelectedCharForView(updatedChar);
+          }
+          
+          setConfirmDialog((prev: any) => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Error deleting attachment:', error);
+          alert('Erro ao deletar anexo');
+        }
+      },
+      onCancel: () => setConfirmDialog((prev: any) => ({ ...prev, isOpen: false }))
+    });
+  };
+
   const handleCloseCharModal = () => {
     setShowCharModal(false);
     if (returnToJournalEntryId !== null) {
@@ -160,6 +189,7 @@ export function useCharacterManager({
     handleCloseCharViewModal,
     handleEditCharFromView,
     handleDeleteChar,
+    handleDeleteAttachment,
     handleCloseCharModal,
     openNewCharModal
   };
