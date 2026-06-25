@@ -27,8 +27,8 @@ try {
     }
   } else {
     console.log('Building Desktop application...');
-    // Build vite and electron, then run electron-builder
-    execSync('npm run build:vite && npm run build:electron && electron-builder', { stdio: 'inherit', cwd: rootDir });
+    // Build desktop app using the npm build script (which sets up local path dependencies correctly)
+    execSync('npm run build', { stdio: 'inherit', cwd: rootDir });
     console.log('\n✅ Desktop build completed in dist/desktop');
   }
 } catch (error) {

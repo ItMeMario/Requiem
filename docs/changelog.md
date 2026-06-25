@@ -1,3 +1,28 @@
+📌 Patch Notes - Version 1.0.6
+
+✨ New Features
+
+- Added support for attaching multiple files (such as images, PDFs, and character sheets) to registered characters. Files are stored as Base64 strings in the local SQLite database and Firestore, featuring automatic image compression and a 1MB limit check.
+- Integrated multiple attachments UI in `CharacterModal` for easy uploading, listing, compressing, and removing, and updated `CharacterViewModal` to display attachments by file type, including an HD lightbox overlay for images.
+- Implemented a cross-platform file download system supporting Capacitor plugins on mobile and HTML5 anchor tags on desktop/web.
+- Added character and location portrait recovery and auto-archiving logic: when a character's portrait is updated or removed, the previous portrait is automatically saved as an attachment named "Retrato Antigo - [Date-Time].png".
+
+🛠️ Improvements
+
+- Added interactive hover actions (View and Download) to character and location portraits inside their respective detail modals.
+- Integrated full-screen Lightbox support for location images, including a quick download button inside the lightbox preview modal for easy image export.
+- Display a 48x48px preview thumbnail with quick View, Download, and Remove buttons in the Edit modal for characters and locations before replacing or removing images.
+- Implemented automated database migrations: updates local Electron and Web/WASM database structures to include the `attachments` column, ensuring smooth backwards compatibility.
+- Synchronized multiple attachment support with Firebase Firestore, including full integration with local backup imports and exports.
+
+🐛 Bug Fixes
+
+- Cast attachments state to `any[]` in `useCharacterManager` to resolve TypeScript compilation warnings.
+
+📅 Release Date: 06/24/2026
+
+---
+
 📌 Patch Notes - Version 1.0.5
 
 ✨ New Features
