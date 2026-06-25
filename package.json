@@ -83,7 +83,8 @@
       }
     ],
     "nsis": {
-      "include": "src/build/installer.nsh"
+      "include": "src/build/installer.nsh",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "directories": {
       "buildResources": "src/build",
