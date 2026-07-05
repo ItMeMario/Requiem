@@ -1,17 +1,18 @@
 import React from 'react';
-import { ArrowLeft, Users, Map as MapIcon, Book } from 'lucide-react';
+import { ArrowLeft, Users, Map as MapIcon, Book, Skull } from 'lucide-react';
 import { getThemeLabels } from '../../utils/themeLabels';
 import { AuthControls } from '../AuthControls';
 import { CharacterList } from '../characters/CharacterList';
 import { LocationList } from '../locations/LocationList';
 import { JournalList } from '../journal/JournalList';
+import { MonsterList } from '../monsters/MonsterList';
 
 interface ActiveCampaignViewProps {
   theme: string;
   selectedCampaign: any;
   setSelectedCampaign: (camp: any) => void;
-  activeTab: 'characters' | 'locations' | 'journal';
-  setActiveTab: (tab: 'characters' | 'locations' | 'journal') => void;
+  activeTab: 'characters' | 'locations' | 'journal' | 'monsters';
+  setActiveTab: (tab: 'characters' | 'locations' | 'journal' | 'monsters') => void;
   characters: any[];
   locations: any[];
   entries: any[];
@@ -102,6 +103,13 @@ export function ActiveCampaignView({
           <Book size={18} />
           <span className="sm:inline">Journal</span>
         </button>
+        <button 
+          onClick={() => setActiveTab('monsters')}
+          className={`flex shrink-0 items-center space-x-2 py-3 px-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'monsters' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+        >
+          <Skull size={18} />
+          <span className="sm:inline">Bestiary</span>
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -134,6 +142,9 @@ export function ActiveCampaignView({
             handleViewEntry={handleViewEntry} 
             openNewEntryModal={openNewEntryModal} 
           />
+        )}
+        {activeTab === 'monsters' && (
+          <MonsterList theme={theme} />
         )}
       </div>
     </main>
