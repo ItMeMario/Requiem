@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Search, SlidersHorizontal, X, Shield, Heart, Swords, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info } from 'lucide-react';
-import monstersDataRaw from '../../../monsters/5e_monsters.json';
 import { MonsterDetailModal } from '../modals/MonsterDetailModal';
 
 // Type definition for Monster
@@ -30,11 +29,186 @@ interface Monster {
   Traits?: string;
   Actions?: string;
   "Legendary Actions"?: string;
+  Reactions?: string;
+  "Damage Resistances"?: string;
+  "Damage Vulnerabilities"?: string;
+  "Damage Immunities"?: string;
+  "Condition Immunities"?: string;
   img_url?: string;
 }
 
-// Statically typed array of monsters
-const monstersData = monstersDataRaw as Monster[];
+// Dynamically load all XML bestiary files in the monsters directory
+const xmlModules = import.meta.glob('../../../monsters/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+
+// XML parsing function to map XML elements into standard Monster interface
+const parseVolosXml = (xmlStr: string): Monster[] => {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlStr, 'text/xml');
+    const monsterEls = doc.getElementsByTagName('monster');
+    const monsters: Monster[] = [];
+
+    const sizeMap: Record<string, string> = {
+      T: 'Tiny',
+      S: 'Small',
+      M: 'Medium',
+      L: 'Large',
+      H: 'Huge',
+      G: 'Gargantuan'
+    };
+
+    const xpMap: Record<string, string> = {
+      '0': '10 XP', '1/8': '25 XP', '1/4': '50 XP', '1/2': '100 XP',
+      '1': '200 XP', '2': '450 XP', '3': '700 XP', '4': '1,100 XP',
+      '5': '1,800 XP', '6': '2,300 XP', '7': '2,900 XP', '8': '3,900 XP',
+      '9': '5,000 XP', '10': '5,900 XP', '11': '7,200 XP', '12': '8,400 XP',
+      '13': '10,000 XP', '14': '11,500 XP', '15': '13,000 XP', '16': '15,000 XP',
+      '17': '18,000 XP', '18': '20,000 XP', '19': '22,000 XP', '20': '25,000 XP',
+      '21': '33,000 XP', '22': '41,000 XP', '23': '50,000 XP', '24': '62,000 XP',
+      '25': '75,000 XP', '26': '90,000 XP', '27': '105,000 XP', '28': '120,000 XP',
+      '29': '135,000 XP', '30': '155,000 XP'
+    };
+
+    const calculateMod = (valStr: string): string => {
+      const val = parseInt(valStr, 10);
+      if (isNaN(val)) return '(+0)';
+      const mod = Math.floor((val - 10) / 2);
+      return mod >= 0 ? `(+${mod})` : `(${mod})`;
+    };
+
+    const getElementText = (el: Element, tagName: string): string => {
+      const target = el.getElementsByTagName(tagName)[0];
+      return target ? target.textContent || '' : '';
+    };
+
+    const formatBlocks = (el: Element, tagName: string): string => {
+      const blocks = el.getElementsByTagName(tagName);
+      if (blocks.length === 0) return '';
+      
+      let html = '';
+      for (let i = 0; i < blocks.length; i++) {
+        const block = blocks[i];
+        const blockName = block.getElementsByTagName('name')[0]?.textContent || '';
+        const texts = block.getElementsByTagName('text');
+        
+        let blockHtml = '';
+        const textParagraphs: string[] = [];
+        for (let j = 0; j < texts.length; j++) {
+          const t = texts[j].textContent;
+          if (t && t.trim() !== '') {
+            textParagraphs.push(t.trim());
+          }
+        }
+
+        if (textParagraphs.length > 0) {
+          if (blockName) {
+            blockHtml += `<p><em><strong>${blockName}.</strong></em> ${textParagraphs[0]}</p>`;
+            for (let j = 1; j < textParagraphs.length; j++) {
+              blockHtml += `<p>${textParagraphs[j]}</p>`;
+            }
+          } else {
+            for (let j = 0; j < textParagraphs.length; j++) {
+              blockHtml += `<p>${textParagraphs[j]}</p>`;
+            }
+          }
+        }
+        html += blockHtml;
+      }
+      return html;
+    };
+
+    for (let i = 0; i < monsterEls.length; i++) {
+      const el = monsterEls[i];
+      const name = getElementText(el, 'name');
+      if (!name) continue;
+
+      const size = getElementText(el, 'size');
+      const sizeStr = sizeMap[size.toUpperCase()] || size;
+      const type = getElementText(el, 'type');
+      const alignment = getElementText(el, 'alignment');
+      const meta = `${sizeStr} ${type}${alignment ? `, ${alignment}` : ''}`;
+
+      const ac = getElementText(el, 'ac');
+      const hp = getElementText(el, 'hp');
+      const speed = getElementText(el, 'speed');
+
+      const str = getElementText(el, 'str') || '10';
+      const dex = getElementText(el, 'dex') || '10';
+      const con = getElementText(el, 'con') || '10';
+      const int = getElementText(el, 'int') || '10';
+      const wis = getElementText(el, 'wis') || '10';
+      const cha = getElementText(el, 'cha') || '10';
+
+      const save = getElementText(el, 'save');
+      const skill = getElementText(el, 'skill');
+      const senses = getElementText(el, 'senses');
+      const passive = getElementText(el, 'passive');
+      const languages = getElementText(el, 'languages');
+      const cr = getElementText(el, 'cr');
+
+      const formattedCR = cr ? `${cr} (${xpMap[cr] || '0 XP'})` : '';
+
+      let sensesStr = senses;
+      if (passive) {
+        sensesStr = sensesStr ? `${sensesStr}, passive Perception ${passive}` : `passive Perception ${passive}`;
+      }
+
+      const resist = getElementText(el, 'resist');
+      const vulnerable = getElementText(el, 'vulnerable');
+      const immune = getElementText(el, 'immune');
+      const conditionImmune = getElementText(el, 'conditionImmune');
+
+      const traitsHtml = formatBlocks(el, 'trait');
+      const actionsHtml = formatBlocks(el, 'action');
+      const legendaryHtml = formatBlocks(el, 'legendary');
+      const reactionsHtml = formatBlocks(el, 'reaction');
+
+      const monster: Monster = {
+        name,
+        meta,
+        "Armor Class": ac,
+        "Hit Points": hp,
+        Speed: speed,
+        STR: str,
+        STR_mod: calculateMod(str),
+        DEX: dex,
+        DEX_mod: calculateMod(dex),
+        CON: con,
+        CON_mod: calculateMod(con),
+        INT: int,
+        INT_mod: calculateMod(int),
+        WIS: wis,
+        WIS_mod: calculateMod(wis),
+        CHA: cha,
+        CHA_mod: calculateMod(cha),
+        "Saving Throws": save || undefined,
+        Skills: skill || undefined,
+        Senses: sensesStr || undefined,
+        Languages: languages || undefined,
+        Challenge: formattedCR,
+        Traits: traitsHtml || undefined,
+        Actions: actionsHtml || undefined,
+        "Legendary Actions": legendaryHtml || undefined,
+        Reactions: reactionsHtml || undefined,
+        "Damage Resistances": resist || undefined,
+        "Damage Vulnerabilities": vulnerable || undefined,
+        "Damage Immunities": immune || undefined,
+        "Condition Immunities": conditionImmune || undefined,
+      };
+
+      monsters.push(monster);
+    }
+    return monsters;
+  } catch (err) {
+    console.error("Error parsing XML compendium:", err);
+    return [];
+  }
+};
+
+// Compile and sort all loaded XML monsters alphabetically
+const monstersData: Monster[] = Object.values(xmlModules).flatMap((xmlStr) => {
+  return parseVolosXml(xmlStr);
+}).sort((a, b) => a.name.localeCompare(b.name));
 
 interface MonsterListProps {
   theme: string;

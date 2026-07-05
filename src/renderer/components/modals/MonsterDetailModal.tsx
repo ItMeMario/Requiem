@@ -33,6 +33,11 @@ interface Monster {
   Traits?: string;
   Actions?: string;
   "Legendary Actions"?: string;
+  Reactions?: string;
+  "Damage Resistances"?: string;
+  "Damage Vulnerabilities"?: string;
+  "Damage Immunities"?: string;
+  "Condition Immunities"?: string;
   img_url?: string;
 }
 
@@ -276,6 +281,26 @@ export const MonsterDetailModal: React.FC<MonsterDetailModalProps> = ({
                       <span className={style.statLabel}>Skills:</span> {monster.Skills}
                     </div>
                   )}
+                  {monster["Damage Vulnerabilities"] && (
+                    <div className={style.statText}>
+                      <span className={style.statLabel}>Damage Vulnerabilities:</span> {monster["Damage Vulnerabilities"]}
+                    </div>
+                  )}
+                  {monster["Damage Resistances"] && (
+                    <div className={style.statText}>
+                      <span className={style.statLabel}>Damage Resistances:</span> {monster["Damage Resistances"]}
+                    </div>
+                  )}
+                  {monster["Damage Immunities"] && (
+                    <div className={style.statText}>
+                      <span className={style.statLabel}>Damage Immunities:</span> {monster["Damage Immunities"]}
+                    </div>
+                  )}
+                  {monster["Condition Immunities"] && (
+                    <div className={style.statText}>
+                      <span className={style.statLabel}>Condition Immunities:</span> {monster["Condition Immunities"]}
+                    </div>
+                  )}
                   {monster.Senses && (
                     <div className={style.statText}>
                       <span className={style.statLabel}>Senses:</span> {monster.Senses}
@@ -313,6 +338,14 @@ export const MonsterDetailModal: React.FC<MonsterDetailModalProps> = ({
                   <div className="mt-4">
                     <h4 className={style.sectionHeader}>Legendary Actions</h4>
                     <div dangerouslySetInnerHTML={renderHTMLContent(monster["Legendary Actions"])} className={style.htmlClass} />
+                  </div>
+                )}
+
+                {/* Reactions */}
+                {monster.Reactions && monster.Reactions.trim() !== "" && (
+                  <div className="mt-4">
+                    <h4 className={style.sectionHeader}>Reactions</h4>
+                    <div dangerouslySetInnerHTML={renderHTMLContent(monster.Reactions)} className={style.htmlClass} />
                   </div>
                 )}
                 
