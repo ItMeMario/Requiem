@@ -1,8 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { Map as MapIcon, X, Eye, Download } from 'lucide-react';
-import { InputField } from '../InputField';
-import { TextAreaField } from '../TextAreaField';
+import { InputField } from '../ui/InputField';
+import { TextAreaField } from '../ui/TextAreaField';
+import { Checkbox } from '../ui/Checkbox';
 import { compressBase64Image } from '../../utils/imageCompressor';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -72,17 +73,13 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             <InputField label="Region (Região)" value={newLoc.region} onChange={(e:any) => setNewLoc({...newLoc, region: e.target.value})} />
             <InputField label="Type (Tipo)" value={newLoc.type} onChange={(e:any) => setNewLoc({...newLoc, type: e.target.value})} />
             {user && (
-              <div className="flex items-center space-x-2 pb-2 h-full sm:pt-6">
-                <input 
-                  type="checkbox" 
+              <div className="flex items-center pb-2 h-full sm:pt-6">
+                <Checkbox
                   id="loc-shared-checkbox"
                   checked={newLoc.shared !== false}
-                  onChange={(e) => setNewLoc({...newLoc, shared: e.target.checked})}
-                  className="w-4 h-4 rounded text-accent border-border-default focus:ring-accent bg-surface-elevated cursor-pointer"
+                  onChange={(checked) => setNewLoc({...newLoc, shared: checked})}
+                  label="Compartilhar com o grupo (Lugar)"
                 />
-                <label htmlFor="loc-shared-checkbox" className="text-sm font-medium text-secondary cursor-pointer">
-                  Compartilhar com o grupo (Lugar)
-                </label>
               </div>
             )}
             <div className="flex flex-col space-y-1">

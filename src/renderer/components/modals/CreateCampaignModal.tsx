@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { InputField } from '../InputField';
+import { InputField } from '../ui/InputField';
 
 interface CreateCampaignModalProps {
   showCreateModal: boolean;

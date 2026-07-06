@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { Book, X, Edit2, Users, Map as MapIcon, Link as LinkIcon } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { InputField } from '../InputField';
+import { InputField } from '../ui/InputField';
+import { Checkbox } from '../ui/Checkbox';
 import { parseMentions } from '../../utils/mentionParser';
 import DOMPurify from 'dompurify';
 import { useAuth } from '../../context/AuthContext';
@@ -180,17 +181,13 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                   <InputField label="Title *" value={newEntry.title} onChange={(e:any) => setNewEntry({...newEntry, title: e.target.value})} placeholder="Day 1: The Journey Begins..." />
                   {user && (
-                    <div className="flex items-center space-x-2 pb-2">
-                      <input 
-                        type="checkbox" 
+                    <div className="flex items-center pb-2">
+                      <Checkbox
                         id="entry-shared-checkbox"
                         checked={newEntry.shared !== false}
-                        onChange={(e) => setNewEntry({...newEntry, shared: e.target.checked})}
-                        className="w-4 h-4 rounded text-accent border-border-default focus:ring-accent bg-surface-elevated cursor-pointer"
+                        onChange={(checked) => setNewEntry({...newEntry, shared: checked})}
+                        label="Compartilhar com o grupo (Nota de Grupo)"
                       />
-                      <label htmlFor="entry-shared-checkbox" className="text-sm font-medium text-secondary cursor-pointer">
-                        Compartilhar com o grupo (Nota de Grupo)
-                      </label>
                     </div>
                   )}
                 </div>

@@ -1,8 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { User, X, Plus, Trash2, FileText, Eye, Download } from 'lucide-react';
-import { InputField } from '../InputField';
-import { TextAreaField } from '../TextAreaField';
+import { InputField } from '../ui/InputField';
+import { TextAreaField } from '../ui/TextAreaField';
+import { Checkbox } from '../ui/Checkbox';
 import { compressBase64Image } from '../../utils/imageCompressor';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -108,17 +109,13 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
             <InputField label="Age (Idade)" value={newChar.age} onChange={(e:any) => setNewChar({...newChar, age: e.target.value})} />
             <InputField label="Faction (Facção)" value={newChar.faction} onChange={(e:any) => setNewChar({...newChar, faction: e.target.value})} />
             {user && (
-              <div className="flex items-center space-x-2 pb-2 h-full sm:pt-6">
-                <input 
-                  type="checkbox" 
+              <div className="flex items-center pb-2 h-full sm:pt-6">
+                <Checkbox
                   id="char-shared-checkbox"
                   checked={newChar.shared !== false}
-                  onChange={(e) => setNewChar({...newChar, shared: e.target.checked})}
-                  className="w-4 h-4 rounded text-accent border-border-default focus:ring-accent bg-surface-elevated cursor-pointer"
+                  onChange={(checked) => setNewChar({...newChar, shared: checked})}
+                  label="Compartilhar com o grupo (Personagem)"
                 />
-                <label htmlFor="char-shared-checkbox" className="text-sm font-medium text-secondary cursor-pointer">
-                  Compartilhar com o grupo (Personagem)
-                </label>
               </div>
             )}
             <div className="flex flex-col space-y-1">
