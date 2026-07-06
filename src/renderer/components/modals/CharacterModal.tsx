@@ -133,7 +133,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                       alt="Thumbnail" 
                       onClick={() => setActivePreviewImage(newChar.image_url)}
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center gap-1">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-150 flex items-center justify-center gap-1">
                       <button 
                         type="button" 
                         onClick={() => setActivePreviewImage(newChar.image_url)}

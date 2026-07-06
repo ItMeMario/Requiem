@@ -217,7 +217,7 @@ export const MonsterDetailModal: React.FC<MonsterDetailModalProps> = ({
                       onClick={() => setActivePreviewImage(monster.img_url || null)}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 flex items-center justify-center gap-3">
                       <button
                         type="button"
                         onClick={() => setActivePreviewImage(monster.img_url || null)}

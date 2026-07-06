@@ -216,7 +216,7 @@ export function DashboardView({
                 )}
                 
                 {/* Actions Container */}
-                <div className={`absolute ${isMed ? 'top-3 right-3' : 'top-4 right-4'} z-20 transition-opacity opacity-0 group-hover:opacity-100 flex gap-1`}>
+                <div className={`absolute ${isMed ? 'top-3 right-3' : 'top-4 right-4'} z-20 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex gap-1`}>
                   <button
                     onClick={(e) => handleEditCampaign(e, camp)}
                     className={`p-1.5 rounded-md transition-colors ${
