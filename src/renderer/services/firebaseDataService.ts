@@ -264,12 +264,26 @@ export class FirebaseDataService implements IDataService {
     }
 
     const snapshot = await getDocs(q);
+
+    // Fetch personal notes from users/{userId}/personal_notes
+    let personalNotesMap: Record<string, string> = {};
+    try {
+      const notesRef = collection(this.db, 'users', this.userId, 'personal_notes');
+      const notesSnap = await getDocs(notesRef);
+      notesSnap.docs.forEach(doc => {
+        personalNotesMap[doc.id] = doc.data().notes || '';
+      });
+    } catch (err) {
+      console.warn('[FirebaseDataService] Failed to load personal notes:', err);
+    }
+
     return snapshot.docs.map(doc => {
       const data = doc.data() as Character;
       const charId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
       this.characterCampaignMap.set(charId, campaignId);
       return {
         ...data,
+        personal_notes: personalNotesMap[charId.toString()] || '',
         attachments: data.attachments || [],
         id: charId
       };
@@ -281,8 +295,22 @@ export class FirebaseDataService implements IDataService {
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error(`Character with ID ${id} not found.`);
     const data = snap.data() as Character;
+
+    // Fetch user-specific personal notes
+    let personalNotes = '';
+    try {
+      const noteRef = doc(this.db, 'users', this.userId, 'personal_notes', id.toString());
+      const noteSnap = await getDoc(noteRef);
+      if (noteSnap.exists()) {
+        personalNotes = noteSnap.data().notes || '';
+      }
+    } catch (err) {
+      console.warn('[FirebaseDataService] Failed to load personal notes for character:', err);
+    }
+
     return {
       ...data,
+      personal_notes: personalNotes,
       attachments: data.attachments || [],
       id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
     };
@@ -291,15 +319,33 @@ export class FirebaseDataService implements IDataService {
   async createCharacter(data: Omit<Character, 'id'>): Promise<number> {
     const id = this.generateNumericId();
     const userName = auth?.currentUser?.displayName || auth?.currentUser?.email || '';
+
+    // Save personal notes separately and delete them from the shared character data
+    const personalNotes = data.personal_notes || '';
+    const charData = { ...data };
+    delete charData.personal_notes;
+
     const char: Character = { 
-      ...data, 
+      ...charData, 
       id,
       authorId: this.userId,
       authorName: userName,
       shared: data.shared === true
     };
+
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'characters', id.toString());
     await setDoc(docRef, char);
+
+    // Save personal notes to user's private subcollection
+    if (personalNotes.trim()) {
+      try {
+        const noteRef = doc(this.db, 'users', this.userId, 'personal_notes', id.toString());
+        await setDoc(noteRef, { notes: personalNotes });
+      } catch (err) {
+        console.error('[FirebaseDataService] Failed to save personal notes:', err);
+      }
+    }
+
     this.characterCampaignMap.set(id, data.campaign_id);
     return id;
   }
@@ -309,13 +355,68 @@ export class FirebaseDataService implements IDataService {
     const snap = await getDoc(ref);
     if (!snap.exists()) return false;
     const existing = snap.data() as Character;
-    await setDoc(ref, { ...existing, ...data });
+
+    // 1. Handle personal notes update
+    if (data.personal_notes !== undefined) {
+      try {
+        const noteRef = doc(this.db, 'users', this.userId, 'personal_notes', id.toString());
+        if (data.personal_notes === null || data.personal_notes.trim() === '') {
+          await deleteDoc(noteRef);
+        } else {
+          await setDoc(noteRef, { notes: data.personal_notes });
+        }
+      } catch (err) {
+        console.error('[FirebaseDataService] Failed to update personal notes:', err);
+      }
+    }
+
+    // 2. Handle character document update (omit personal_notes if writing)
+    const charData = { ...data };
+    delete charData.personal_notes;
+
+    // Check if the user is the author or owner before saving main character doc
+    const campaignId = data.campaign_id || this.characterCampaignMap.get(id);
+    let canUpdateMainDoc = true;
+    if (campaignId) {
+      try {
+        const campaignDoc = await getDoc(doc(this.db, 'campaigns', campaignId.toString()));
+        if (campaignDoc.exists()) {
+          const campaign = campaignDoc.data() as Campaign;
+          const isOwner = campaign.ownerId === this.userId;
+          const isAuthor = existing.authorId === this.userId;
+          if (!isOwner && !isAuthor) {
+            canUpdateMainDoc = false;
+          }
+        }
+      } catch (err) {
+        console.warn('[FirebaseDataService] Failed to verify character write permissions:', err);
+      }
+    }
+
+    if (canUpdateMainDoc) {
+      // Remove personal_notes from the existing doc if it is stored there
+      const existingClean = { ...existing };
+      delete existingClean.personal_notes;
+      await setDoc(ref, { ...existingClean, ...charData });
+    } else {
+      console.log('[FirebaseDataService] Skipping main character update (insufficient permissions), only saved personal notes.');
+    }
+
     return true;
   }
 
   async deleteCharacter(id: number): Promise<boolean> {
     const ref = await this.getCharacterDocRef(id);
     await deleteDoc(ref);
+    
+    // Also delete user's private personal notes doc
+    try {
+      const noteRef = doc(this.db, 'users', this.userId, 'personal_notes', id.toString());
+      await deleteDoc(noteRef);
+    } catch (err) {
+      console.warn('[FirebaseDataService] Failed to delete personal notes for character:', err);
+    }
+
     return true;
   }
 

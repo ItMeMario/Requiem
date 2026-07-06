@@ -217,6 +217,7 @@ function App() {
         newChar={charMgr.newChar} 
         setNewChar={charMgr.setNewChar} 
         handleCreateChar={charMgr.handleCreateChar} 
+        selectedCampaign={selectedCampaign}
       />
 
       <LocationModal 
@@ -249,6 +250,7 @@ function App() {
         char={charMgr.selectedCharForView}
         handleEditChar={charMgr.handleEditCharFromView}
         handleDeleteAttachment={charMgr.handleDeleteAttachment}
+        selectedCampaign={selectedCampaign}
       />
       <LocationViewModal 
         showLocViewModal={nav.showLocViewModal}

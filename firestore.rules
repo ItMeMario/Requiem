@@ -31,6 +31,11 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       // Apenas o próprio dono do perfil pode editar seus dados
       allow write: if isAuthenticated() && request.auth.uid == userId;
+
+      // Subcoleção de notas pessoais (para cada personagem)
+      match /personal_notes/{charId} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      }
     }
 
     // Regras para Campanhas

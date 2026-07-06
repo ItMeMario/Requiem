@@ -5,22 +5,31 @@ interface CheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: string;
+  disabled?: boolean;
 }
 
-export const Checkbox: React.FC<CheckboxProps> = ({ id, checked, onChange, label }) => {
+export const Checkbox: React.FC<CheckboxProps> = ({ id, checked, onChange, label, disabled }) => {
   return (
-    <label htmlFor={id} className="flex items-center space-x-3 select-none py-1 cursor-pointer group">
+    <label 
+      htmlFor={id} 
+      className={`flex items-center space-x-3 select-none py-1 transition-opacity ${
+        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer group'
+      }`}
+    >
       <div className="relative flex items-center justify-center">
         <input
           type="checkbox"
           id={id}
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
+          disabled={disabled}
           className="peer sr-only"
         />
         {/* Custom checkbox box */}
         <div 
-          className="w-5 h-5 rounded border border-border-default bg-surface-input group-hover:border-border-hover transition-colors flex items-center justify-center peer-checked:bg-accent peer-checked:border-accent peer-focus-visible:ring-2 peer-focus-visible:ring-accent/50"
+          className={`w-5 h-5 rounded border border-border-default bg-surface-input transition-colors flex items-center justify-center peer-checked:bg-accent peer-checked:border-accent peer-focus-visible:ring-2 peer-focus-visible:ring-accent/50 ${
+            !disabled ? 'group-hover:border-border-hover' : ''
+          }`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -37,7 +46,9 @@ export const Checkbox: React.FC<CheckboxProps> = ({ id, checked, onChange, label
         </div>
       </div>
       <span
-        className="text-sm font-medium text-secondary group-hover:text-heading transition-colors"
+        className={`text-sm font-medium text-secondary transition-colors ${
+          !disabled ? 'group-hover:text-heading' : ''
+        }`}
       >
         {label}
       </span>

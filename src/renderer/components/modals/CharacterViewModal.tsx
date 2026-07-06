@@ -12,6 +12,7 @@ interface CharacterViewModalProps {
   char: any;
   handleEditChar: (char: any) => void;
   handleDeleteAttachment: (charId: number, attachmentId: string) => void;
+  selectedCampaign?: any;
 }
 
 export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
@@ -20,11 +21,14 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
   char,
   handleEditChar,
   handleDeleteAttachment,
+  selectedCampaign,
 }) => {
   const { user } = useAuth();
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
   if (!showCharViewModal || !char) return null;
+
+  const canEditCore = !user || !selectedCampaign || char.authorId === user.uid || selectedCampaign.ownerId === user.uid;
 
   const handleDownloadAttachment = async (attachment: any) => {
     try {
@@ -277,13 +281,15 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
                                   <Eye size={12} />
                                 </button>
                               )}
-                              <button
-                                onClick={() => handleDeleteAttachment(char.id, att.id)}
-                                className="px-2.5 py-1.5 bg-surface-hover hover:bg-danger/10 border border-border-hover hover:border-danger/30 text-secondary hover:text-danger text-xs font-semibold rounded transition-colors flex items-center justify-center"
-                                title="Deletar anexo"
-                              >
-                                <Trash2 size={12} />
-                              </button>
+                              {canEditCore && (
+                                <button
+                                  onClick={() => handleDeleteAttachment(char.id, att.id)}
+                                  className="px-2.5 py-1.5 bg-surface-hover hover:bg-danger/10 border border-border-hover hover:border-danger/30 text-secondary hover:text-danger text-xs font-semibold rounded transition-colors flex items-center justify-center"
+                                  title="Deletar anexo"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              )}
                             </div>
                           </div>
                         );

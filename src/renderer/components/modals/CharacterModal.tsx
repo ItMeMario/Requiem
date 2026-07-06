@@ -17,15 +17,18 @@ interface CharacterModalProps {
   newChar: any;
   setNewChar: (char: any) => void;
   handleCreateChar: (e: React.FormEvent) => void;
+  selectedCampaign?: any;
 }
 
 export const CharacterModal: React.FC<CharacterModalProps> = ({ 
-  showCharModal, handleCloseCharModal, editingCharId, newChar, setNewChar, handleCreateChar 
+  showCharModal, handleCloseCharModal, editingCharId, newChar, setNewChar, handleCreateChar, selectedCampaign 
 }) => {
   const { user } = useAuth();
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
   if (!showCharModal) return null;
+
+  const canEditCore = !user || !selectedCampaign || !editingCharId || newChar?.authorId === user.uid || selectedCampaign.ownerId === user.uid;
 
   const handleAddAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -103,11 +106,11 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
           <form onSubmit={handleCreateChar} className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField label="Name *" value={newChar.name} onChange={(e:any) => setNewChar({...newChar, name: e.target.value})} />
-            <InputField label="Race (Raça)" value={newChar.race} onChange={(e:any) => setNewChar({...newChar, race: e.target.value})} />
-            <InputField label="Status" value={newChar.status} onChange={(e:any) => setNewChar({...newChar, status: e.target.value})} />
-            <InputField label="Age (Idade)" value={newChar.age} onChange={(e:any) => setNewChar({...newChar, age: e.target.value})} />
-            <InputField label="Faction (Facção)" value={newChar.faction} onChange={(e:any) => setNewChar({...newChar, faction: e.target.value})} />
+            <InputField label="Name *" value={newChar.name} onChange={(e:any) => setNewChar({...newChar, name: e.target.value})} disabled={!canEditCore} />
+            <InputField label="Race (Raça)" value={newChar.race} onChange={(e:any) => setNewChar({...newChar, race: e.target.value})} disabled={!canEditCore} />
+            <InputField label="Status" value={newChar.status} onChange={(e:any) => setNewChar({...newChar, status: e.target.value})} disabled={!canEditCore} />
+            <InputField label="Age (Idade)" value={newChar.age} onChange={(e:any) => setNewChar({...newChar, age: e.target.value})} disabled={!canEditCore} />
+            <InputField label="Faction (Facção)" value={newChar.faction} onChange={(e:any) => setNewChar({...newChar, faction: e.target.value})} disabled={!canEditCore} />
             {user && (
               <div className="flex items-center pb-2 h-full sm:pt-6">
                 <Checkbox
@@ -115,6 +118,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                   checked={newChar.shared === true}
                   onChange={(checked) => setNewChar({...newChar, shared: checked})}
                   label="Compartilhar com o grupo (Personagem)"
+                  disabled={!canEditCore}
                 />
               </div>
             )}
@@ -153,6 +157,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                   <input 
                     type="file" 
                     accept="image/*"
+                    disabled={!canEditCore}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -164,9 +169,9 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="block w-full text-sm text-secondary file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-hover file:text-heading hover:file:bg-surface-elevated2 transition-colors cursor-pointer"
+                    className="block w-full text-sm text-secondary file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-hover file:text-heading hover:file:bg-surface-elevated2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   />
-                  {newChar.image_url && (
+                  {newChar.image_url && canEditCore && (
                     <button 
                       type="button" 
                       onClick={() => setNewChar({...newChar, image_url: ''})}
@@ -180,8 +185,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               </div>
             </div>
           </div>
-          <TextAreaField label="Lore" value={newChar.lore} onChange={(e:any) => setNewChar({...newChar, lore: e.target.value})} />
-          <TextAreaField label="Bonds (Vínculos)" value={newChar.bonds} onChange={(e:any) => setNewChar({...newChar, bonds: e.target.value})} />
+          <TextAreaField label="Lore" value={newChar.lore} onChange={(e:any) => setNewChar({...newChar, lore: e.target.value})} disabled={!canEditCore} />
+          <TextAreaField label="Bonds (Vínculos)" value={newChar.bonds} onChange={(e:any) => setNewChar({...newChar, bonds: e.target.value})} disabled={!canEditCore} />
           <TextAreaField label="Personal Notes (Notas pessoais)" value={newChar.personal_notes} onChange={(e:any) => setNewChar({...newChar, personal_notes: e.target.value})} />
           
           {/* Attachments Section */}
@@ -202,39 +207,43 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                       <p className="text-xs text-muted">{(att.size / 1024).toFixed(1)} KB</p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNewChar((prev: any) => ({
-                        ...prev,
-                        attachments: prev.attachments.filter((a: any) => a.id !== att.id)
-                      }));
-                    }}
-                    className="p-1 text-danger hover:bg-danger/10 rounded transition-colors shrink-0"
-                    title="Remover Anexo"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {canEditCore && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewChar((prev: any) => ({
+                          ...prev,
+                          attachments: prev.attachments.filter((a: any) => a.id !== att.id)
+                        }));
+                      }}
+                      className="p-1 text-danger hover:bg-danger/10 rounded transition-colors shrink-0"
+                      title="Remover Anexo"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center gap-2">
-              <label htmlFor="char-attachments-upload" className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-hover hover:bg-surface-elevated2 border border-border-hover text-secondary hover:text-heading rounded text-sm font-medium transition-colors cursor-pointer">
-                <Plus size={16} />
-                <span>Adicionar Anexo</span>
-              </label>
-              <input 
-                type="file" 
-                id="char-attachments-upload" 
-                multiple 
-                onChange={handleAddAttachment} 
-                className="hidden" 
-              />
-              <span className="text-xs text-muted">Max 1MB por arquivo</span>
-            </div>
-            </div>
-            </div>
+            {canEditCore && (
+              <div className="flex items-center gap-2">
+                <label htmlFor="char-attachments-upload" className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-hover hover:bg-surface-elevated2 border border-border-hover text-secondary hover:text-heading rounded text-sm font-medium transition-colors cursor-pointer">
+                  <Plus size={16} />
+                  <span>Adicionar Anexo</span>
+                </label>
+                <input 
+                  type="file" 
+                  id="char-attachments-upload" 
+                  multiple 
+                  onChange={handleAddAttachment} 
+                  className="hidden" 
+                />
+                <span className="text-xs text-muted">Max 1MB por arquivo</span>
+              </div>
+            )}
+          </div>
+        </div>
 
             <div className="p-4 sm:p-6 pt-4 flex justify-end bg-surface-card border-t border-border-default shrink-0">
               <button type="button" onClick={handleCloseCharModal} className="px-4 py-2 text-muted hover:text-heading transition-colors mr-2">Cancel</button>
