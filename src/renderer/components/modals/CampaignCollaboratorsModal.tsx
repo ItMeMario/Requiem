@@ -146,12 +146,12 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
     : "flex-1 bg-surface-elevated border border-border-subtle text-heading placeholder-muted px-3 py-2 text-sm rounded focus:outline-none focus:border-accent";
 
   const buttonAddClass = isCyber
-    ? "px-4 py-2 border border-[#0ff] bg-[#0ff]/20 text-[#0ff] hover:bg-[#0ff]/40 flex items-center gap-1.5 transition-all text-xs font-bold uppercase tracking-wider"
+    ? "px-4 py-2 border border-[#0ff] bg-[#0ff]/20 text-[#0ff] hover:bg-[#0ff]/40 flex items-center justify-center gap-1.5 transition-all text-xs font-bold uppercase tracking-wider shrink-0 w-full sm:w-auto"
     : isMed
-    ? "px-4 py-2 bg-[#8b4513] text-[#f4eacc] border border-[#5c2e0b] hover:bg-[#a0522d] flex items-center gap-1.5 transition-all text-sm font-medium"
+    ? "px-4 py-2 bg-[#8b4513] text-[#f4eacc] border border-[#5c2e0b] hover:bg-[#a0522d] flex items-center justify-center gap-1.5 transition-all text-sm font-medium shrink-0 w-full sm:w-auto"
     : isVamp
-    ? "px-4 py-2 bg-[#500000] text-[#e0e0e0] border border-[#8b0000] hover:bg-[#8b0000] flex items-center gap-1.5 transition-all text-sm font-medium"
-    : "px-4 py-2 bg-accent text-accent-text hover:bg-accent-hover rounded flex items-center gap-1.5 transition-all text-sm font-medium";
+    ? "px-4 py-2 bg-[#500000] text-[#e0e0e0] border border-[#8b0000] hover:bg-[#8b0000] flex items-center justify-center gap-1.5 transition-all text-sm font-medium shrink-0 w-full sm:w-auto"
+    : "px-4 py-2 bg-accent text-accent-text hover:bg-accent-hover rounded flex items-center justify-center gap-1.5 transition-all text-sm font-medium shrink-0 w-full sm:w-auto";
 
   return createPortal(
     <>
@@ -171,7 +171,7 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
           <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isCyber ? "text-[#0ff]/70" : isVamp ? "text-[#a0a0b0]" : isMed ? "text-[#d9c596]" : "text-muted"}`}>
             Convidar Jogador por E-mail
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="email"
               required
