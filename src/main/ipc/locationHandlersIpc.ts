@@ -11,7 +11,7 @@ export function setupLocationHandlersIpc() {
   });
 
   ipcMain.handle('get-location', (_, id: number) => {
-    const row = db.prepare('SELECT * FROM locations WHERE id = ?').get(id);
+    const row = db.prepare('SELECT * FROM locations WHERE id = ?').get(id) as any;
     if (!row) return row;
     return {
       ...row,

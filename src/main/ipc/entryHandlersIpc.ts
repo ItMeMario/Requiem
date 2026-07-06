@@ -11,7 +11,7 @@ export function setupEntryHandlersIpc() {
   });
 
   ipcMain.handle('get-entry', (_, id: number) => {
-    const row = db.prepare('SELECT * FROM entries WHERE id = ?').get(id);
+    const row = db.prepare('SELECT * FROM entries WHERE id = ?').get(id) as any;
     if (!row) return row;
     return {
       ...row,

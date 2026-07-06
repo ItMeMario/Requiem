@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface ConfirmDialogProps {
@@ -12,8 +13,8 @@ interface ConfirmDialogProps {
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, title, message, onConfirm, onCancel }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[10000] p-4">
       <div className="bg-surface-card border border-border-default rounded-xl p-6 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
         <button 
           onClick={onCancel} 
@@ -47,6 +48,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ isOpen, title, mes
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

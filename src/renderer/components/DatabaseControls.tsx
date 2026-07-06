@@ -7,6 +7,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { useAuth } from '../context/AuthContext';
 import { UpdaterControls } from './UpdaterControls';
+import { ConfirmDialog } from '../resources/ConfirmDialog';
 
 function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   if (typeof file.arrayBuffer === 'function') {
@@ -30,6 +31,13 @@ export function DatabaseControls() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    onCancel: () => {}
+  });
 
   const isCyber = theme === 'cyberpunk';
   const containerClass = `fixed bottom-4 right-4 z-[100] flex gap-1.5 p-1.5 ${isCyber ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`;
@@ -101,31 +109,39 @@ export function DatabaseControls() {
     }
   };
 
-  const handleElectronImport = async () => {
+  const handleElectronImport = () => {
     const confirmMsg = user
       ? "Deseja importar as campanhas deste backup para a sua conta na nuvem? Suas campanhas atuais não serão apagadas."
       : "Importing a backup will replace your current database and the application will restart. Are you sure you want to continue?";
-    if (confirm(confirmMsg)) {
-      try {
-        setIsImporting(true);
-        const success = await getDataService().importDatabase();
-        if (success) {
-          if (user) {
-            alert("Backup importado com sucesso para a nuvem! A página será recarregada.");
-            window.location.reload();
+    
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Importar Banco de Dados',
+      message: confirmMsg,
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        try {
+          setIsImporting(true);
+          const success = await getDataService().importDatabase();
+          if (success) {
+            if (user) {
+              alert("Backup importado com sucesso para a nuvem! A página será recarregada.");
+              window.location.reload();
+            }
+          } else {
+            setIsImporting(false);
           }
-        } else {
+        } catch (e: any) {
+          console.error(e);
+          alert(`Error importing database: ${e?.message || e}`);
           setIsImporting(false);
         }
-      } catch (e: any) {
-        console.error(e);
-        alert(`Error importing database: ${e?.message || e}`);
-        setIsImporting(false);
-      }
-    }
+      },
+      onCancel: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+    });
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -133,73 +149,86 @@ export function DatabaseControls() {
       ? "Deseja importar as campanhas deste backup para a sua conta na nuvem? Suas campanhas atuais não serão apagadas."
       : "Importing a backup will replace your current database. Are you sure you want to continue?";
 
-    if (confirm(confirmMsg)) {
-      try {
-        setIsImporting(true);
-        const buffer = await readFileAsArrayBuffer(file);
-        const data = new Uint8Array(buffer);
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Importar Banco de Dados',
+      message: confirmMsg,
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        try {
+          setIsImporting(true);
+          const buffer = await readFileAsArrayBuffer(file);
+          const data = new Uint8Array(buffer);
 
-        // Validate SQLite magic header: "SQLite format 3\0"
-        const expectedHeader = "SQLite format 3\0";
-        let isValid = data.length >= 16;
-        if (isValid) {
-          for (let i = 0; i < expectedHeader.length; i++) {
-            if (data[i] !== expectedHeader.charCodeAt(i)) {
-              isValid = false;
-              break;
+          // Validate SQLite magic header: "SQLite format 3\0"
+          const expectedHeader = "SQLite format 3\0";
+          let isValid = data.length >= 16;
+          if (isValid) {
+            for (let i = 0; i < expectedHeader.length; i++) {
+              if (data[i] !== expectedHeader.charCodeAt(i)) {
+                isValid = false;
+                break;
+              }
             }
           }
-        }
 
-        if (!isValid) {
-          alert("The selected file is not a valid SQLite database backup.");
+          if (!isValid) {
+            alert("The selected file is not a valid SQLite database backup.");
+            setIsImporting(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+          }
+
+          const success = await getDataService().importDatabase(data);
+          if (success) {
+             alert(user ? "Backup importado com sucesso para a nuvem! A página será recarregada." : "Database imported successfully. Please reload the page.");
+             window.location.reload();
+          } else {
+             setIsImporting(false);
+          }
+        } catch (err: any) {
+          console.error(err);
+          alert(`Error importing database: ${err?.message || err}`);
           setIsImporting(false);
-          if (fileInputRef.current) fileInputRef.current.value = '';
-          return;
         }
-
-        const success = await getDataService().importDatabase(data);
-        if (success) {
-           alert(user ? "Backup importado com sucesso para a nuvem! A página será recarregada." : "Database imported successfully. Please reload the page.");
-           window.location.reload();
-        } else {
-           setIsImporting(false);
-        }
-      } catch (err: any) {
-        console.error(err);
-        alert(`Error importing database: ${err?.message || err}`);
-        setIsImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      },
+      onCancel: () => {
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        if (fileInputRef.current) fileInputRef.current.value = '';
       }
-    }
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    });
   };
 
   return (
-    <div className={containerClass}>
-      <input 
-        type="file" 
-        accept=".db,.sqlite,application/x-sqlite3,application/vnd.sqlite3,application/octet-stream" 
-        ref={fileInputRef} 
-        onChange={handleFileChange} 
-        style={{ display: 'none' }} 
-      />
-      <UpdaterControls />
-      <button
-        onClick={handleExport}
-        disabled={isExporting}
-        className={buttonClass}
-        title="Export Database (Backup)"
-      >
-        <Download size={16} className={isExporting ? 'animate-bounce' : ''} />
-      </button>
-      <button
-        onClick={handleImportClick}
-        disabled={isImporting}
-        className={buttonClass}
-        title="Import Database (Restore)"
-      >
-        <Upload size={16} className={isImporting ? 'animate-bounce' : ''} />
-      </button>
-    </div>
+    <>
+      <div className={containerClass}>
+        <input 
+          type="file" 
+          accept=".db,.sqlite,application/x-sqlite3,application/vnd.sqlite3,application/octet-stream" 
+          ref={fileInputRef} 
+          onChange={handleFileChange} 
+          style={{ display: 'none' }} 
+        />
+        <UpdaterControls />
+        <button
+          onClick={handleExport}
+          disabled={isExporting}
+          className={buttonClass}
+          title="Export Database (Backup)"
+        >
+          <Download size={16} className={isExporting ? 'animate-bounce' : ''} />
+        </button>
+        <button
+          onClick={handleImportClick}
+          disabled={isImporting}
+          className={buttonClass}
+          title="Import Database (Restore)"
+        >
+          <Upload size={16} className={isImporting ? 'animate-bounce' : ''} />
+        </button>
+      </div>
+      <ConfirmDialog {...confirmDialog} />
+    </>
   );
 }

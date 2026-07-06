@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, Users, Trash2, Plus, Loader2 } from 'lucide-react';
 import { getDataService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { ConfirmDialog } from '../../resources/ConfirmDialog';
 
 interface CampaignCollaboratorsModalProps {
   showCollaboratorsModal: boolean;
@@ -25,6 +26,13 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
   const [addingEmail, setAddingEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    onCancel: () => {}
+  });
 
   const isCyber = theme === 'cyberpunk';
   const isMed = theme === 'medieval';
@@ -75,21 +83,29 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
     }
   };
 
-  const handleRemoveCollaborator = async (uid: string) => {
+  const handleRemoveCollaborator = (uid: string) => {
     if (!campaign?.id) return;
-    if (!window.confirm('Tem certeza que deseja remover este jogador como colaborador?')) return;
-    setErrorMsg(null);
-    try {
-      await getDataService().removeCollaborator(campaign.id, uid);
-      await loadCollaborators();
-      
-      // Update parent state
-      const updatedCampaign = await getDataService().getCampaign(campaign.id);
-      onCollaboratorsUpdated(updatedCampaign.collaborators || []);
-    } catch (err: any) {
-      console.error('Failed to remove collaborator:', err);
-      setErrorMsg('Erro ao remover jogador.');
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Remover Colaborador',
+      message: 'Tem certeza que deseja remover este jogador como colaborador?',
+      onConfirm: async () => {
+        setConfirmDialog((prev: any) => ({ ...prev, isOpen: false }));
+        setErrorMsg(null);
+        try {
+          await getDataService().removeCollaborator(campaign.id, uid);
+          await loadCollaborators();
+          
+          // Update parent state
+          const updatedCampaign = await getDataService().getCampaign(campaign.id);
+          onCollaboratorsUpdated(updatedCampaign.collaborators || []);
+        } catch (err: any) {
+          console.error('Failed to remove collaborator:', err);
+          setErrorMsg('Erro ao remover jogador.');
+        }
+      },
+      onCancel: () => setConfirmDialog((prev: any) => ({ ...prev, isOpen: false }))
+    });
   };
 
   if (!showCollaboratorsModal || !campaign) return null;
@@ -138,7 +154,8 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
     : "px-4 py-2 bg-accent text-accent-text hover:bg-accent-hover rounded flex items-center gap-1.5 transition-all text-sm font-medium";
 
   return createPortal(
-    <div className={modalOverlayClass}>
+    <>
+      <div className={modalOverlayClass}>
       <div className={cardClass}>
         <button onClick={() => setShowCollaboratorsModal(false)} className={closeButtonClass}>
           <X size={20} />
@@ -245,7 +262,9 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
           )}
         </div>
       </div>
-    </div>,
+      </div>
+      <ConfirmDialog {...confirmDialog} />
+    </>,
     document.body
   );
 };

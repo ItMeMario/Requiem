@@ -11,7 +11,7 @@ export function setupCampaignHandlersIpc() {
   });
 
   ipcMain.handle('get-campaign', (_, id: number) => {
-    const row = db.prepare('SELECT * FROM campaigns WHERE id = ?').get(id);
+    const row = db.prepare('SELECT * FROM campaigns WHERE id = ?').get(id) as any;
     if (!row) return row;
     return {
       ...row,

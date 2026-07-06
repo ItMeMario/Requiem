@@ -94,10 +94,13 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   return createPortal(
     <>
       <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
-      <div className="bg-surface-card sm:border border-border-default sm:rounded-xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
-        <button onClick={handleCloseCharModal} className="absolute top-4 right-4 text-muted hover:text-heading"><X size={20} /></button>
-        <h3 className="text-xl font-bold text-heading mb-6 flex items-center gap-2"><User className="text-accent-text"/> {editingCharId ? 'Edit Character' : 'New Character'}</h3>
-        <form onSubmit={handleCreateChar} className="space-y-4">
+        <div className="bg-surface-card sm:border border-border-default sm:rounded-xl w-full max-w-2xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden">
+          <button onClick={handleCloseCharModal} className="absolute top-4 right-4 text-muted hover:text-heading z-10"><X size={20} /></button>
+          <div className="p-4 sm:p-6 pb-0 shrink-0">
+            <h3 className="text-xl font-bold text-heading flex items-center gap-2"><User className="text-accent-text"/> {editingCharId ? 'Edit Character' : 'New Character'}</h3>
+          </div>
+          <form onSubmit={handleCreateChar} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField label="Name *" value={newChar.name} onChange={(e:any) => setNewChar({...newChar, name: e.target.value})} />
             <InputField label="Race (Raça)" value={newChar.race} onChange={(e:any) => setNewChar({...newChar, race: e.target.value})} />
@@ -233,15 +236,16 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               />
               <span className="text-xs text-muted">Max 1MB por arquivo</span>
             </div>
-          </div>
+            </div>
+            </div>
 
-          <div className="pt-4 flex justify-end sticky bottom-0 bg-surface-card py-2 border-t border-border-default mt-4">
-            <button type="button" onClick={handleCloseCharModal} className="px-4 py-2 text-muted hover:text-heading transition-colors mr-2">Cancel</button>
-            <button type="submit" disabled={!newChar.name.trim()} className="px-5 py-2 bg-accent hover:bg-accent-hover text-heading font-medium rounded transition-colors disabled:opacity-50">Save Character</button>
-          </div>
-        </form>
+            <div className="p-4 sm:p-6 pt-4 flex justify-end bg-surface-card border-t border-border-default shrink-0">
+              <button type="button" onClick={handleCloseCharModal} className="px-4 py-2 text-muted hover:text-heading transition-colors mr-2">Cancel</button>
+              <button type="submit" disabled={!newChar.name.trim()} className="px-5 py-2 bg-accent hover:bg-accent-hover text-heading font-medium rounded transition-colors disabled:opacity-50">Save Character</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
 
     {activePreviewImage && (
       <div 

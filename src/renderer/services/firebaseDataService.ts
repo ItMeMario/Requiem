@@ -18,6 +18,10 @@ import {
 } from 'firebase/firestore';
 
 export class FirebaseDataService implements IDataService {
+  private characterCampaignMap = new Map<number, number>();
+  private locationCampaignMap = new Map<number, number>();
+  private entryCampaignMap = new Map<number, number>();
+
   private get db() {
     return getFirestore();
   }
@@ -42,6 +46,30 @@ export class FirebaseDataService implements IDataService {
       throw new Error(`Document in ${colName} with ID ${id} not found.`);
     }
     return snap.docs[0].ref;
+  }
+
+  private async getCharacterDocRef(id: number, campaignId?: number): Promise<any> {
+    const campId = campaignId || this.characterCampaignMap.get(id);
+    if (campId) {
+      return doc(this.db, 'campaigns', campId.toString(), 'characters', id.toString());
+    }
+    return this.findDocRef('characters', id);
+  }
+
+  private async getLocationDocRef(id: number, campaignId?: number): Promise<any> {
+    const campId = campaignId || this.locationCampaignMap.get(id);
+    if (campId) {
+      return doc(this.db, 'campaigns', campId.toString(), 'locations', id.toString());
+    }
+    return this.findDocRef('locations', id);
+  }
+
+  private async getEntryDocRef(id: number, campaignId?: number): Promise<any> {
+    const campId = campaignId || this.entryCampaignMap.get(id);
+    if (campId) {
+      return doc(this.db, 'campaigns', campId.toString(), 'entries', id.toString());
+    }
+    return this.findDocRef('entries', id);
   }
 
   // Campaigns
@@ -162,16 +190,18 @@ export class FirebaseDataService implements IDataService {
     const snapshot = await getDocs(q);
     const results = snapshot.docs.map(doc => {
       const data = doc.data() as Entry;
+      const entryId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
+      this.entryCampaignMap.set(entryId, campaignId);
       return {
         ...data,
-        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+        id: entryId
       };
     });
     return results.sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
   }
 
   async getEntry(id: number): Promise<Entry> {
-    const ref = await this.findDocRef('entries', id);
+    const ref = await this.getEntryDocRef(id);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error(`Entry with ID ${id} not found.`);
     const data = snap.data() as Entry;
@@ -193,11 +223,12 @@ export class FirebaseDataService implements IDataService {
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'entries', id.toString());
     await setDoc(docRef, entry);
+    this.entryCampaignMap.set(id, data.campaign_id);
     return id;
   }
 
   async updateEntry(id: number, data: Partial<Entry>): Promise<boolean> {
-    const ref = await this.findDocRef('entries', id);
+    const ref = await this.getEntryDocRef(id, data.campaign_id);
     const snap = await getDoc(ref);
     if (!snap.exists()) return false;
     const existing = snap.data() as Entry;
@@ -206,7 +237,7 @@ export class FirebaseDataService implements IDataService {
   }
 
   async deleteEntry(id: number): Promise<boolean> {
-    const ref = await this.findDocRef('entries', id);
+    const ref = await this.getEntryDocRef(id);
     await deleteDoc(ref);
     return true;
   }
@@ -235,16 +266,18 @@ export class FirebaseDataService implements IDataService {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => {
       const data = doc.data() as Character;
+      const charId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
+      this.characterCampaignMap.set(charId, campaignId);
       return {
         ...data,
         attachments: data.attachments || [],
-        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+        id: charId
       };
     });
   }
 
   async getCharacter(id: number): Promise<Character> {
-    const ref = await this.findDocRef('characters', id);
+    const ref = await this.getCharacterDocRef(id);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error(`Character with ID ${id} not found.`);
     const data = snap.data() as Character;
@@ -267,11 +300,12 @@ export class FirebaseDataService implements IDataService {
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'characters', id.toString());
     await setDoc(docRef, char);
+    this.characterCampaignMap.set(id, data.campaign_id);
     return id;
   }
 
   async updateCharacter(id: number, data: Partial<Character>): Promise<boolean> {
-    const ref = await this.findDocRef('characters', id);
+    const ref = await this.getCharacterDocRef(id, data.campaign_id);
     const snap = await getDoc(ref);
     if (!snap.exists()) return false;
     const existing = snap.data() as Character;
@@ -280,7 +314,7 @@ export class FirebaseDataService implements IDataService {
   }
 
   async deleteCharacter(id: number): Promise<boolean> {
-    const ref = await this.findDocRef('characters', id);
+    const ref = await this.getCharacterDocRef(id);
     await deleteDoc(ref);
     return true;
   }
@@ -309,15 +343,17 @@ export class FirebaseDataService implements IDataService {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => {
       const data = doc.data() as Location;
+      const locId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
+      this.locationCampaignMap.set(locId, campaignId);
       return {
         ...data,
-        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+        id: locId
       };
     });
   }
 
   async getLocation(id: number): Promise<Location> {
-    const ref = await this.findDocRef('locations', id);
+    const ref = await this.getLocationDocRef(id);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error(`Location with ID ${id} not found.`);
     const data = snap.data() as Location;
@@ -339,11 +375,12 @@ export class FirebaseDataService implements IDataService {
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'locations', id.toString());
     await setDoc(docRef, loc);
+    this.locationCampaignMap.set(id, data.campaign_id);
     return id;
   }
 
   async updateLocation(id: number, data: Partial<Location>): Promise<boolean> {
-    const ref = await this.findDocRef('locations', id);
+    const ref = await this.getLocationDocRef(id, data.campaign_id);
     const snap = await getDoc(ref);
     if (!snap.exists()) return false;
     const existing = snap.data() as Location;
@@ -352,7 +389,7 @@ export class FirebaseDataService implements IDataService {
   }
 
   async deleteLocation(id: number): Promise<boolean> {
-    const ref = await this.findDocRef('locations', id);
+    const ref = await this.getLocationDocRef(id);
     await deleteDoc(ref);
     return true;
   }

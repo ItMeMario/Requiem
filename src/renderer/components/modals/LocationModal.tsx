@@ -60,10 +60,13 @@ export const LocationModal: React.FC<LocationModalProps> = ({
   return createPortal(
     <>
       <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
-      <div className="bg-surface-card sm:border border-border-default sm:rounded-xl p-4 sm:p-6 w-full max-w-2xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto custom-scrollbar flex flex-col">
-        <button onClick={handleCloseLocModal} className="absolute top-4 right-4 text-muted hover:text-heading"><X size={20} /></button>
-        <h3 className="text-xl font-bold text-heading mb-6 flex items-center gap-2"><MapIcon className="text-accent2-text"/> {editingLocId ? 'Edit Location' : 'New Location'}</h3>
-        <form onSubmit={handleCreateLoc} className="space-y-4">
+        <div className="bg-surface-card sm:border border-border-default sm:rounded-xl w-full max-w-2xl shadow-2xl relative h-full sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden">
+          <button onClick={handleCloseLocModal} className="absolute top-4 right-4 text-muted hover:text-heading z-10"><X size={20} /></button>
+          <div className="p-4 sm:p-6 pb-0 shrink-0">
+            <h3 className="text-xl font-bold text-heading flex items-center gap-2"><MapIcon className="text-accent2-text"/> {editingLocId ? 'Edit Location' : 'New Location'}</h3>
+          </div>
+          <form onSubmit={handleCreateLoc} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField label="Name *" value={newLoc.name} onChange={(e:any) => setNewLoc({...newLoc, name: e.target.value})} />
             <InputField label="Region (Região)" value={newLoc.region} onChange={(e:any) => setNewLoc({...newLoc, region: e.target.value})} />
@@ -148,13 +151,15 @@ export const LocationModal: React.FC<LocationModalProps> = ({
           <TextAreaField label="Lore" value={newLoc.lore} onChange={(e:any) => setNewLoc({...newLoc, lore: e.target.value})} />
           <TextAreaField label="Present NPCs (NPCs Presentes)" value={newLoc.present_npcs} onChange={(e:any) => setNewLoc({...newLoc, present_npcs: e.target.value})} />
           <TextAreaField label="Atmosphere (Ambientação)" value={newLoc.atmosphere} onChange={(e:any) => setNewLoc({...newLoc, atmosphere: e.target.value})} />
-          <div className="pt-4 flex justify-end sticky bottom-0 bg-surface-card py-2 border-t border-border-default mt-4">
-            <button type="button" onClick={handleCloseLocModal} className="px-4 py-2 text-muted hover:text-heading transition-colors mr-2">Cancel</button>
-            <button type="submit" disabled={!newLoc.name.trim()} className="px-5 py-2 bg-accent2 hover:bg-accent2-hover text-heading font-medium rounded transition-colors disabled:opacity-50">Save Location</button>
-          </div>
-        </form>
+            </div>
+
+            <div className="p-4 sm:p-6 pt-4 flex justify-end bg-surface-card border-t border-border-default shrink-0">
+              <button type="button" onClick={handleCloseLocModal} className="px-4 py-2 text-muted hover:text-heading transition-colors mr-2">Cancel</button>
+              <button type="submit" disabled={!newLoc.name.trim()} className="px-5 py-2 bg-accent2 hover:bg-accent2-hover text-heading font-medium rounded transition-colors disabled:opacity-50">Save Location</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
 
     {activePreviewImage && (
       <div 

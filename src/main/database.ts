@@ -1,4 +1,4 @@
-const Database = require('better-sqlite3');
+import Database from 'better-sqlite3';
 import { app } from 'electron';
 import path from 'path';
 import fs from 'fs';
@@ -17,7 +17,7 @@ if (isDev) {
 
 export const dbPath = path.join(dbDir, 'requiem.db');
 
-export const db = new Database(dbPath, { verbose: console.log });
+export const db: any = new Database(dbPath, { verbose: console.log });
 db.pragma('journal_mode = WAL');
 
 export function initDb() {
