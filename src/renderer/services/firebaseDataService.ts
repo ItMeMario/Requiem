@@ -219,7 +219,7 @@ export class FirebaseDataService implements IDataService {
       id,
       authorId: this.userId,
       authorName: userName,
-      shared: data.shared !== false
+      shared: data.shared === true
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'entries', id.toString());
     await setDoc(docRef, entry);
@@ -296,7 +296,7 @@ export class FirebaseDataService implements IDataService {
       id,
       authorId: this.userId,
       authorName: userName,
-      shared: data.shared !== false
+      shared: data.shared === true
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'characters', id.toString());
     await setDoc(docRef, char);
@@ -371,7 +371,7 @@ export class FirebaseDataService implements IDataService {
       id,
       authorId: this.userId,
       authorName: userName,
-      shared: data.shared !== false
+      shared: data.shared === true
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'locations', id.toString());
     await setDoc(docRef, loc);
@@ -436,11 +436,39 @@ export class FirebaseDataService implements IDataService {
       throw new Error('Você não pode adicionar o próprio mestre como colaborador.');
     }
     
+    // Reset campaign items sharing settings to private if this is the first collaborator
+    if (collaborators.length === 0) {
+      await this.resetCampaignItemsSharing(campaignId);
+    }
+
     await setDoc(campaignRef, {
       collaborators: [...collaborators, targetUserUid]
     }, { merge: true });
     
     return true;
+  }
+
+  private async resetCampaignItemsSharing(campaignId: number) {
+    // 1. Entries
+    const entriesRef = collection(this.db, 'campaigns', campaignId.toString(), 'entries');
+    const entriesSnap = await getDocs(entriesRef);
+    await Promise.all(entriesSnap.docs.map(doc => 
+      setDoc(doc.ref, { shared: false }, { merge: true })
+    ));
+    
+    // 2. Characters
+    const charsRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
+    const charsSnap = await getDocs(charsRef);
+    await Promise.all(charsSnap.docs.map(doc => 
+      setDoc(doc.ref, { shared: false }, { merge: true })
+    ));
+    
+    // 3. Locations
+    const locsRef = collection(this.db, 'campaigns', campaignId.toString(), 'locations');
+    const locsSnap = await getDocs(locsRef);
+    await Promise.all(locsSnap.docs.map(doc => 
+      setDoc(doc.ref, { shared: false }, { merge: true })
+    ));
   }
 
   async removeCollaborator(campaignId: number, uid: string): Promise<boolean> {
@@ -559,7 +587,7 @@ export class FirebaseDataService implements IDataService {
             personal_notes: char.personal_notes ?? null,
             image_url: compressedImg,
             attachments: parsedAttachments,
-            shared: char.shared !== false
+            shared: char.shared === true
           });
         }
       }
@@ -580,7 +608,7 @@ export class FirebaseDataService implements IDataService {
             present_npcs: loc.present_npcs ?? null,
             atmosphere: loc.atmosphere ?? null,
             image_url: compressedImg,
-            shared: loc.shared !== false
+            shared: loc.shared === true
           });
         }
       }
@@ -595,7 +623,7 @@ export class FirebaseDataService implements IDataService {
             title: entry.title,
             content: entry.content ?? null,
             creation_date: entry.creation_date || new Date().toISOString(),
-            shared: entry.shared !== false
+            shared: entry.shared === true
           });
         }
       }

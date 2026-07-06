@@ -275,18 +275,48 @@ export class WebDataService implements IDataService {
 
   // Entries
   async getEntries(campaignId: number): Promise<Entry[]> {
-    return this.query<Entry>('SELECT * FROM entries WHERE campaign_id = ? ORDER BY creation_date DESC', [campaignId]);
+    const rows = await this.query<any>('SELECT * FROM entries WHERE campaign_id = ? ORDER BY creation_date DESC', [campaignId]);
+    return rows.map(row => ({
+      ...row,
+      shared: row.shared === 1 || row.shared === true
+    }));
   }
   async getEntry(id: number): Promise<Entry> {
-    const res = await this.query<Entry>('SELECT * FROM entries WHERE id = ?', [id]);
-    return res[0];
+    const res = await this.query<any>('SELECT * FROM entries WHERE id = ?', [id]);
+    const row = res[0];
+    if (!row) return row;
+    return {
+      ...row,
+      shared: row.shared === 1 || row.shared === true
+    };
   }
   async createEntry(data: Omit<Entry, 'id'>): Promise<number> {
-    const id = await this.execute('INSERT INTO entries (campaign_id, title, content, creation_date) VALUES (?, ?, ?, ?)', [data.campaign_id, data.title, data.content ?? null, data.creation_date]);
+    const id = await this.execute(
+      'INSERT INTO entries (campaign_id, title, content, creation_date, shared, authorId, authorName) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [
+        data.campaign_id,
+        data.title,
+        data.content ?? null,
+        data.creation_date,
+        data.shared ? 1 : 0,
+        data.authorId ?? null,
+        data.authorName ?? null
+      ]
+    );
     return id || 0;
   }
   async updateEntry(id: number, data: Partial<Entry>): Promise<boolean> {
-    await this.execute('UPDATE entries SET title = ?, content = ? WHERE id = ?', [data.title, data.content ?? null, id]);
+    await this.execute(
+      'UPDATE entries SET title = ?, content = ?, shared = ?, authorId = ?, authorName = ? WHERE id = ?',
+      [
+        data.title,
+        data.content ?? null,
+        data.shared ? 1 : 0,
+        data.authorId ?? null,
+        data.authorName ?? null,
+        id
+      ]
+    );
     return true;
   }
   async deleteEntry(id: number): Promise<boolean> {
@@ -299,7 +329,8 @@ export class WebDataService implements IDataService {
     const rows = await this.query<any>('SELECT * FROM characters WHERE campaign_id = ?', [campaignId]);
     return rows.map(row => ({
       ...row,
-      attachments: row.attachments ? JSON.parse(row.attachments) : []
+      attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      shared: row.shared === 1 || row.shared === true
     }));
   }
   async getCharacter(id: number): Promise<Character> {
@@ -308,14 +339,15 @@ export class WebDataService implements IDataService {
     if (!row) return row;
     return {
       ...row,
-      attachments: row.attachments ? JSON.parse(row.attachments) : []
+      attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      shared: row.shared === 1 || row.shared === true
     };
   }
   async createCharacter(data: Omit<Character, 'id'>): Promise<number> {
     const id = await this.execute(`
       INSERT INTO characters (
-        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       data.campaign_id,
       data.name,
@@ -327,7 +359,10 @@ export class WebDataService implements IDataService {
       data.bonds ?? null,
       data.personal_notes ?? null,
       data.image_url ?? null,
-      data.attachments ? JSON.stringify(data.attachments) : null
+      data.attachments ? JSON.stringify(data.attachments) : null,
+      data.shared ? 1 : 0,
+      data.authorId ?? null,
+      data.authorName ?? null
     ]);
     return id || 0;
   }
@@ -335,7 +370,8 @@ export class WebDataService implements IDataService {
     await this.execute(`
       UPDATE characters SET 
         name = ?, race = ?, status = ?, age = ?, 
-        faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?, attachments = ?
+        faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?, attachments = ?,
+        shared = ?, authorId = ?, authorName = ?
       WHERE id = ?
     `, [
       data.name,
@@ -348,6 +384,9 @@ export class WebDataService implements IDataService {
       data.personal_notes ?? null,
       data.image_url ?? null,
       data.attachments ? JSON.stringify(data.attachments) : null,
+      data.shared ? 1 : 0,
+      data.authorId ?? null,
+      data.authorName ?? null,
       id
     ]);
     return true;
@@ -359,27 +398,63 @@ export class WebDataService implements IDataService {
 
   // Locations
   async getLocations(campaignId: number): Promise<Location[]> {
-    return this.query<Location>('SELECT * FROM locations WHERE campaign_id = ?', [campaignId]);
+    const rows = await this.query<any>('SELECT * FROM locations WHERE campaign_id = ?', [campaignId]);
+    return rows.map(row => ({
+      ...row,
+      shared: row.shared === 1 || row.shared === true
+    }));
   }
   async getLocation(id: number): Promise<Location> {
-    const res = await this.query<Location>('SELECT * FROM locations WHERE id = ?', [id]);
-    return res[0];
+    const res = await this.query<any>('SELECT * FROM locations WHERE id = ?', [id]);
+    const row = res[0];
+    if (!row) return row;
+    return {
+      ...row,
+      shared: row.shared === 1 || row.shared === true
+    };
   }
   async createLocation(data: Omit<Location, 'id'>): Promise<number> {
     const id = await this.execute(`
       INSERT INTO locations (
-        campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [data.campaign_id, data.name, data.region ?? null, data.type ?? null, data.description ?? null, data.lore ?? null, data.present_npcs ?? null, data.atmosphere ?? null, data.image_url ?? null]);
+        campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url, shared, authorId, authorName
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      data.campaign_id,
+      data.name,
+      data.region ?? null,
+      data.type ?? null,
+      data.description ?? null,
+      data.lore ?? null,
+      data.present_npcs ?? null,
+      data.atmosphere ?? null,
+      data.image_url ?? null,
+      data.shared ? 1 : 0,
+      data.authorId ?? null,
+      data.authorName ?? null
+    ]);
     return id || 0;
   }
   async updateLocation(id: number, data: Partial<Location>): Promise<boolean> {
     await this.execute(`
       UPDATE locations SET 
         name = ?, region = ?, type = ?, description = ?, 
-        lore = ?, present_npcs = ?, atmosphere = ?, image_url = ?
+        lore = ?, present_npcs = ?, atmosphere = ?, image_url = ?,
+        shared = ?, authorId = ?, authorName = ?
       WHERE id = ?
-    `, [data.name, data.region ?? null, data.type ?? null, data.description ?? null, data.lore ?? null, data.present_npcs ?? null, data.atmosphere ?? null, data.image_url ?? null, id]);
+    `, [
+      data.name,
+      data.region ?? null,
+      data.type ?? null,
+      data.description ?? null,
+      data.lore ?? null,
+      data.present_npcs ?? null,
+      data.atmosphere ?? null,
+      data.image_url ?? null,
+      data.shared ? 1 : 0,
+      data.authorId ?? null,
+      data.authorName ?? null,
+      id
+    ]);
     return true;
   }
   async deleteLocation(id: number): Promise<boolean> {

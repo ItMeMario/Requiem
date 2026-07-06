@@ -144,11 +144,11 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
                   </h1>
                   {user && (
                     <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
-                      char.shared !== false
+                      char.shared === true
                         ? 'bg-green-500/10 text-green-400 border-green-500/30'
                         : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
                     }`}>
-                      {char.shared !== false ? 'Grupo' : 'Pessoal'}
+                      {char.shared === true ? 'Grupo' : 'Pessoal'}
                     </span>
                   )}
                 </div>

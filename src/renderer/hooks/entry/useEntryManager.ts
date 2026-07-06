@@ -48,7 +48,7 @@ export function useEntryManager({
         campaign_id: selectedCampaign.id,
         title: newEntry.title,
         content: newEntry.content,
-        shared: (newEntry as any).shared !== false,
+        shared: (newEntry as any).shared === true,
         creation_date: isEditing
           ? entries.find(evt => evt.id === editingEntryId)?.creation_date
           : new Date().toISOString()
@@ -74,7 +74,7 @@ export function useEntryManager({
     setNewEntry({ 
       title: entry.title, 
       content: entry.content,
-      shared: entry.shared !== false,
+      shared: entry.shared === true,
       authorId: entry.authorId || null,
       authorName: entry.authorName || null
     } as any);
@@ -87,7 +87,7 @@ export function useEntryManager({
     setNewEntry({ 
       title: entry.title, 
       content: entry.content,
-      shared: entry.shared !== false,
+      shared: entry.shared === true,
       authorId: entry.authorId || null,
       authorName: entry.authorName || null
     } as any);
@@ -118,7 +118,7 @@ export function useEntryManager({
 
   const openNewEntryModal = () => {
     setEditingEntryId(null);
-    setNewEntry({ title: '', content: '', shared: true } as any);
+    setNewEntry({ title: '', content: '', shared: false } as any);
     setIsViewingEntry(false);
     setShowEntryModal(true);
   };

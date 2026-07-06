@@ -12,7 +12,7 @@ const initCharState = {
   personal_notes: '',
   image_url: '',
   attachments: [] as any[],
-  shared: true
+  shared: false
 };
 
 interface UseCharacterManagerProps {

@@ -76,7 +76,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
               <div className="flex items-center pb-2 h-full sm:pt-6">
                 <Checkbox
                   id="loc-shared-checkbox"
-                  checked={newLoc.shared !== false}
+                  checked={newLoc.shared === true}
                   onChange={(checked) => setNewLoc({...newLoc, shared: checked})}
                   label="Compartilhar com o grupo (Lugar)"
                 />

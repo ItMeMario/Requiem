@@ -149,11 +149,11 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                     <h1 className="text-4xl font-bold text-primary mr-4">{newEntry.title}</h1>
                     {user && (
                       <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
-                        newEntry.shared !== false
+                        newEntry.shared === true
                           ? 'bg-green-500/10 text-green-400 border-green-500/30'
                           : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
                       }`}>
-                        {newEntry.shared !== false ? 'Grupo' : 'Pessoal'}
+                        {newEntry.shared === true ? 'Grupo' : 'Pessoal'}
                       </span>
                     )}
                   </div>
@@ -184,7 +184,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                     <div className="flex items-center pb-2">
                       <Checkbox
                         id="entry-shared-checkbox"
-                        checked={newEntry.shared !== false}
+                        checked={newEntry.shared === true}
                         onChange={(checked) => setNewEntry({...newEntry, shared: checked})}
                         label="Compartilhar com o grupo (Nota de Grupo)"
                       />

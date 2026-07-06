@@ -112,7 +112,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               <div className="flex items-center pb-2 h-full sm:pt-6">
                 <Checkbox
                   id="char-shared-checkbox"
-                  checked={newChar.shared !== false}
+                  checked={newChar.shared === true}
                   onChange={(checked) => setNewChar({...newChar, shared: checked})}
                   label="Compartilhar com o grupo (Personagem)"
                 />

@@ -130,11 +130,11 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
                   </h1>
                   {user && (
                     <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
-                      loc.shared !== false
+                      loc.shared === true
                         ? 'bg-green-500/10 text-green-400 border-green-500/30'
                         : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
                     }`}>
-                      {loc.shared !== false ? 'Grupo' : 'Pessoal'}
+                      {loc.shared === true ? 'Grupo' : 'Pessoal'}
                     </span>
                   )}
                 </div>

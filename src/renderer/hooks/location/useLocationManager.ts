@@ -10,7 +10,7 @@ const initLocState = {
   present_npcs: '',
   atmosphere: '',
   image_url: '',
-  shared: true
+  shared: false
 };
 
 interface UseLocationManagerProps {
