@@ -14,7 +14,8 @@ import {
   query, 
   where,
   or,
-  collectionGroup
+  collectionGroup,
+  onSnapshot
 } from 'firebase/firestore';
 
 export class FirebaseDataService implements IDataService {
@@ -746,5 +747,174 @@ export class FirebaseDataService implements IDataService {
       const importedData = await importFromSQLite(data);
       return this.uploadImportedData(importedData);
     }
+  }
+
+  // Real-time Subscriptions
+  subscribeCampaigns(callback: (campaigns: Campaign[]) => void, onError?: (error: Error) => void): () => void {
+    if (!auth || !auth.currentUser) {
+      return () => {};
+    }
+    const colRef = collection(this.db, 'campaigns');
+    const q = query(
+      colRef,
+      or(
+        where('ownerId', '==', this.userId),
+        where('collaborators', 'array-contains', this.userId)
+      )
+    );
+    return onSnapshot(q, (snapshot) => {
+      const camps = snapshot.docs.map(doc => {
+        const data = doc.data() as Campaign;
+        return {
+          ...data,
+          id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+        };
+      });
+      callback(camps);
+    }, (error) => {
+      console.error('[FirebaseDataService] subscribeCampaigns error:', error);
+      if (onError) onError(error);
+    });
+  }
+
+  subscribeCharacters(campaignId: number, callback: (chars: Character[]) => void, onError?: (error: Error) => void): () => void {
+    if (!auth || !auth.currentUser) {
+      return () => {};
+    }
+    const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
+    const q = query(
+      colRef,
+      or(
+        where('shared', '==', true),
+        where('authorId', '==', this.userId)
+      )
+    );
+
+    let personalNotes: Record<string, string> = {};
+    let charsData: any[] = [];
+
+    const updateCallback = () => {
+      const mapped = charsData.map(c => {
+        const charId = c.id !== undefined && c.id !== null ? Number(c.id) : c.id;
+        this.characterCampaignMap.set(Number(charId), campaignId);
+        return {
+          ...c,
+          personal_notes: personalNotes[charId.toString()] || '',
+          attachments: c.attachments || [],
+          id: charId
+        };
+      });
+      callback(mapped);
+    };
+
+    const unsubNotes = onSnapshot(collection(this.db, 'users', this.userId, 'personal_notes'), (notesSnap) => {
+      personalNotes = {};
+      notesSnap.docs.forEach(d => {
+        personalNotes[d.id] = d.data().notes || '';
+      });
+      updateCallback();
+    }, (err) => {
+      console.warn('[FirebaseDataService] Failed to subscribe to personal notes:', err);
+    });
+
+    const unsubChars = onSnapshot(q, (snapshot) => {
+      charsData = snapshot.docs.map(doc => {
+        const data = doc.data() as Character;
+        return {
+          ...data,
+          id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+        };
+      });
+      updateCallback();
+    }, (error) => {
+      console.error('[FirebaseDataService] subscribeCharacters error:', error);
+      if (onError) onError(error);
+    });
+
+    return () => {
+      unsubNotes();
+      unsubChars();
+    };
+  }
+
+  subscribeLocations(campaignId: number, callback: (locs: Location[]) => void, onError?: (error: Error) => void): () => void {
+    if (!auth || !auth.currentUser) {
+      return () => {};
+    }
+    let unsubLocations: (() => void) | null = null;
+    let isCancelled = false;
+
+    getDoc(doc(this.db, 'campaigns', campaignId.toString())).then((campaignDoc) => {
+      if (isCancelled) return;
+      if (!campaignDoc.exists()) return;
+      const campaign = campaignDoc.data() as Campaign;
+      const isOwner = campaign.ownerId === this.userId;
+      const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'locations');
+      const q = isOwner ? query(colRef) : query(colRef, or(where('shared', '==', true), where('authorId', '==', this.userId)));
+      
+      unsubLocations = onSnapshot(q, (snapshot) => {
+        const locs = snapshot.docs.map(doc => {
+          const data = doc.data() as Location;
+          const locId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
+          this.locationCampaignMap.set(locId, campaignId);
+          return { ...data, id: locId };
+        });
+        callback(locs);
+      }, (error) => {
+        console.error('[FirebaseDataService] subscribeLocations error:', error);
+        if (onError) onError(error);
+      });
+    }).catch((error) => {
+      console.error('[FirebaseDataService] Failed to fetch campaign for locations subscription:', error);
+      if (onError) onError(error);
+    });
+
+    return () => {
+      isCancelled = true;
+      if (unsubLocations) {
+        unsubLocations();
+      }
+    };
+  }
+
+  subscribeEntries(campaignId: number, callback: (entries: Entry[]) => void, onError?: (error: Error) => void): () => void {
+    if (!auth || !auth.currentUser) {
+      return () => {};
+    }
+    let unsubEntries: (() => void) | null = null;
+    let isCancelled = false;
+
+    getDoc(doc(this.db, 'campaigns', campaignId.toString())).then((campaignDoc) => {
+      if (isCancelled) return;
+      if (!campaignDoc.exists()) return;
+      const campaign = campaignDoc.data() as Campaign;
+      const isOwner = campaign.ownerId === this.userId;
+      const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'entries');
+      const q = isOwner ? query(colRef) : query(colRef, or(where('shared', '==', true), where('authorId', '==', this.userId)));
+      
+      unsubEntries = onSnapshot(q, (snapshot) => {
+        const entries = snapshot.docs.map(doc => {
+          const data = doc.data() as Entry;
+          const entryId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
+          this.entryCampaignMap.set(entryId, campaignId);
+          return { ...data, id: entryId };
+        });
+        entries.sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
+        callback(entries);
+      }, (error) => {
+        console.error('[FirebaseDataService] subscribeEntries error:', error);
+        if (onError) onError(error);
+      });
+    }).catch((error) => {
+      console.error('[FirebaseDataService] Failed to fetch campaign for entries subscription:', error);
+      if (onError) onError(error);
+    });
+
+    return () => {
+      isCancelled = true;
+      if (unsubEntries) {
+        unsubEntries();
+      }
+    };
   }
 }

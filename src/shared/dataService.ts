@@ -37,4 +37,11 @@ export interface IDataService {
   getCollaborators(campaignId: number): Promise<any[]>;
   addCollaborator(campaignId: number, email: string): Promise<boolean>;
   removeCollaborator(campaignId: number, uid: string): Promise<boolean>;
+
+  // Real-time Subscriptions
+  subscribeCampaigns?(callback: (campaigns: Campaign[]) => void, onError?: (error: Error) => void): () => void;
+  subscribeEntries?(campaignId: number, callback: (entries: Entry[]) => void, onError?: (error: Error) => void): () => void;
+  subscribeCharacters?(campaignId: number, callback: (chars: Character[]) => void, onError?: (error: Error) => void): () => void;
+  subscribeLocations?(campaignId: number, callback: (locs: Location[]) => void, onError?: (error: Error) => void): () => void;
 }
+

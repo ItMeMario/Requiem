@@ -38,7 +38,7 @@ import { CampaignCollaboratorsModal } from './components/modals/CampaignCollabor
 function App() {
   const { user, isConfigured } = useAuth();
   const { campaigns, selectedCampaign, setSelectedCampaign, createCampaign, updateCampaign, deleteCampaign } = useCampaigns(user);
-  const { characters, locations, entries, loadEntities, crud } = useEntities();
+  const { characters, locations, entries, loadEntities, crud } = useEntities(selectedCampaign?.id || null);
   const { theme } = useTheme();
 
   useEffect(() => {

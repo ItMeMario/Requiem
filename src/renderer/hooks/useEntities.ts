@@ -1,22 +1,57 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getDataService } from '../services';
 
-export const useEntities = () => {
+export const useEntities = (campaignId: number | null) => {
   const [characters, setCharacters] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
   const [entries, setEntries] = useState<any[]>([]);
 
-  const loadEntities = useCallback(async (campaignId: number) => {
-    try {
-      const chars = await getDataService().getCharacters(campaignId);
-      setCharacters(chars);
-      const locs = await getDataService().getLocations(campaignId);
-      setLocations(locs);
-      const ents = await getDataService().getEntries(campaignId);
-      setEntries(ents);
-    } catch (error) {
-       console.error('Error loading entities for campaign:', error);
+  useEffect(() => {
+    if (campaignId === null) {
+      setCharacters([]);
+      setLocations([]);
+      setEntries([]);
+      return;
     }
+
+    const service = getDataService();
+
+    // Subscribe to Characters
+    const unsubChars = service.subscribeCharacters
+      ? service.subscribeCharacters(campaignId, setCharacters)
+      : (() => {
+          let active = true;
+          service.getCharacters(campaignId).then(data => { if (active) setCharacters(data); });
+          return () => { active = false; };
+        })();
+
+    // Subscribe to Locations
+    const unsubLocs = service.subscribeLocations
+      ? service.subscribeLocations(campaignId, setLocations)
+      : (() => {
+          let active = true;
+          service.getLocations(campaignId).then(data => { if (active) setLocations(data); });
+          return () => { active = false; };
+        })();
+
+    // Subscribe to Entries
+    const unsubEntries = service.subscribeEntries
+      ? service.subscribeEntries(campaignId, setEntries)
+      : (() => {
+          let active = true;
+          service.getEntries(campaignId).then(data => { if (active) setEntries(data); });
+          return () => { active = false; };
+        })();
+
+    return () => {
+      unsubChars();
+      unsubLocs();
+      unsubEntries();
+    };
+  }, [campaignId]);
+
+  const loadEntities = useCallback(async (id: number) => {
+    // Sincronização em tempo real cuida disso de forma declarativa.
   }, []);
 
   // CRUD Character

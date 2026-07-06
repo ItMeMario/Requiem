@@ -16,6 +16,17 @@ export class WebDataService implements IDataService {
   public initError: string | null = null;
   private dirty: boolean = false;
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  private listeners = new Set<() => void>();
+
+  private notifyListeners() {
+    this.listeners.forEach(l => {
+      try {
+        l();
+      } catch (err) {
+        console.error('[WebDataService] Listener error:', err);
+      }
+    });
+  }
 
   constructor() {
     this.initPromise = this.init();
@@ -249,6 +260,8 @@ export class WebDataService implements IDataService {
     // Also schedule a debounced backup save as safety net
     this.scheduleSave();
     
+    this.notifyListeners();
+    
     return lastId;
   }
 
@@ -474,6 +487,7 @@ export class WebDataService implements IDataService {
     if (!this.SQL) return false;
     this.db = new this.SQL.Database(data);
     await this.saveToIndexedDB();
+    this.notifyListeners();
     return true;
   }
 
@@ -486,5 +500,62 @@ export class WebDataService implements IDataService {
   }
   async removeCollaborator(campaignId: number, uid: string): Promise<boolean> {
     return false;
+  }
+
+  // Real-time Subscriptions
+  subscribeCampaigns(callback: (campaigns: Campaign[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getCampaigns().then(callback).catch(err => {
+        console.error('[WebDataService] error in campaigns subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
+  }
+
+  subscribeCharacters(campaignId: number, callback: (chars: Character[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getCharacters(campaignId).then(callback).catch(err => {
+        console.error('[WebDataService] error in characters subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
+  }
+
+  subscribeLocations(campaignId: number, callback: (locs: Location[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getLocations(campaignId).then(callback).catch(err => {
+        console.error('[WebDataService] error in locations subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
+  }
+
+  subscribeEntries(campaignId: number, callback: (entries: Entry[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getEntries(campaignId).then(callback).catch(err => {
+        console.error('[WebDataService] error in entries subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
   }
 }

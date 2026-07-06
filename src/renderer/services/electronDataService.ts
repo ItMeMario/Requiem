@@ -6,6 +6,18 @@ export class ElectronDataService implements IDataService {
     return (window as any).api;
   }
 
+  private listeners = new Set<() => void>();
+
+  private notifyListeners() {
+    this.listeners.forEach(l => {
+      try {
+        l();
+      } catch (err) {
+        console.error('[ElectronDataService] Listener error:', err);
+      }
+    });
+  }
+
   // Campaigns
   getCampaigns(): Promise<Campaign[]> {
     return this.api.getCampaigns();
@@ -13,14 +25,20 @@ export class ElectronDataService implements IDataService {
   getCampaign(id: number): Promise<Campaign> {
     return this.api.getCampaign(id);
   }
-  createCampaign(data: Omit<Campaign, 'id'>): Promise<number> {
-    return this.api.createCampaign(data);
+  async createCampaign(data: Omit<Campaign, 'id'>): Promise<number> {
+    const res = await this.api.createCampaign(data);
+    this.notifyListeners();
+    return res;
   }
-  updateCampaign(id: number, data: Partial<Campaign>): Promise<boolean> {
-    return this.api.updateCampaign(id, data);
+  async updateCampaign(id: number, data: Partial<Campaign>): Promise<boolean> {
+    const res = await this.api.updateCampaign(id, data);
+    this.notifyListeners();
+    return res;
   }
-  deleteCampaign(id: number): Promise<boolean> {
-    return this.api.deleteCampaign(id);
+  async deleteCampaign(id: number): Promise<boolean> {
+    const res = await this.api.deleteCampaign(id);
+    this.notifyListeners();
+    return res;
   }
 
   // Entries
@@ -30,14 +48,20 @@ export class ElectronDataService implements IDataService {
   getEntry(id: number): Promise<Entry> {
     return this.api.getEntry(id);
   }
-  createEntry(data: Omit<Entry, 'id'>): Promise<number> {
-    return this.api.createEntry(data);
+  async createEntry(data: Omit<Entry, 'id'>): Promise<number> {
+    const res = await this.api.createEntry(data);
+    this.notifyListeners();
+    return res;
   }
-  updateEntry(id: number, data: Partial<Entry>): Promise<boolean> {
-    return this.api.updateEntry(id, data);
+  async updateEntry(id: number, data: Partial<Entry>): Promise<boolean> {
+    const res = await this.api.updateEntry(id, data);
+    this.notifyListeners();
+    return res;
   }
-  deleteEntry(id: number): Promise<boolean> {
-    return this.api.deleteEntry(id);
+  async deleteEntry(id: number): Promise<boolean> {
+    const res = await this.api.deleteEntry(id);
+    this.notifyListeners();
+    return res;
   }
 
   // Characters
@@ -47,14 +71,20 @@ export class ElectronDataService implements IDataService {
   getCharacter(id: number): Promise<Character> {
     return this.api.getCharacter(id);
   }
-  createCharacter(data: Omit<Character, 'id'>): Promise<number> {
-    return this.api.createCharacter(data);
+  async createCharacter(data: Omit<Character, 'id'>): Promise<number> {
+    const res = await this.api.createCharacter(data);
+    this.notifyListeners();
+    return res;
   }
-  updateCharacter(id: number, data: Partial<Character>): Promise<boolean> {
-    return this.api.updateCharacter(id, data);
+  async updateCharacter(id: number, data: Partial<Character>): Promise<boolean> {
+    const res = await this.api.updateCharacter(id, data);
+    this.notifyListeners();
+    return res;
   }
-  deleteCharacter(id: number): Promise<boolean> {
-    return this.api.deleteCharacter(id);
+  async deleteCharacter(id: number): Promise<boolean> {
+    const res = await this.api.deleteCharacter(id);
+    this.notifyListeners();
+    return res;
   }
 
   // Locations
@@ -64,22 +94,30 @@ export class ElectronDataService implements IDataService {
   getLocation(id: number): Promise<Location> {
     return this.api.getLocation(id);
   }
-  createLocation(data: Omit<Location, 'id'>): Promise<number> {
-    return this.api.createLocation(data);
+  async createLocation(data: Omit<Location, 'id'>): Promise<number> {
+    const res = await this.api.createLocation(data);
+    this.notifyListeners();
+    return res;
   }
-  updateLocation(id: number, data: Partial<Location>): Promise<boolean> {
-    return this.api.updateLocation(id, data);
+  async updateLocation(id: number, data: Partial<Location>): Promise<boolean> {
+    const res = await this.api.updateLocation(id, data);
+    this.notifyListeners();
+    return res;
   }
-  deleteLocation(id: number): Promise<boolean> {
-    return this.api.deleteLocation(id);
+  async deleteLocation(id: number): Promise<boolean> {
+    const res = await this.api.deleteLocation(id);
+    this.notifyListeners();
+    return res;
   }
 
   // Backups
   exportDatabase(): Promise<Uint8Array | boolean> {
     return this.api.exportDatabase();
   }
-  importDatabase(data?: Uint8Array): Promise<boolean> {
-    return this.api.importDatabase();
+  async importDatabase(data?: Uint8Array): Promise<boolean> {
+    const res = await this.api.importDatabase(data);
+    this.notifyListeners();
+    return res;
   }
 
   // Collaborators
@@ -91,5 +129,62 @@ export class ElectronDataService implements IDataService {
   }
   async removeCollaborator(campaignId: number, uid: string): Promise<boolean> {
     return false;
+  }
+
+  // Real-time Subscriptions
+  subscribeCampaigns(callback: (campaigns: Campaign[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getCampaigns().then(callback).catch(err => {
+        console.error('[ElectronDataService] error in campaigns subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
+  }
+
+  subscribeCharacters(campaignId: number, callback: (chars: Character[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getCharacters(campaignId).then(callback).catch(err => {
+        console.error('[ElectronDataService] error in characters subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
+  }
+
+  subscribeLocations(campaignId: number, callback: (locs: Location[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getLocations(campaignId).then(callback).catch(err => {
+        console.error('[ElectronDataService] error in locations subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
+  }
+
+  subscribeEntries(campaignId: number, callback: (entries: Entry[]) => void, onError?: (error: Error) => void): () => void {
+    const handler = () => {
+      this.getEntries(campaignId).then(callback).catch(err => {
+        console.error('[ElectronDataService] error in entries subscription:', err);
+        if (onError) onError(err);
+      });
+    };
+    this.listeners.add(handler);
+    handler(); // Initial load
+    return () => {
+      this.listeners.delete(handler);
+    };
   }
 }
