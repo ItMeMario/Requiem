@@ -20,6 +20,7 @@ let auth: ReturnType<typeof getAuth> | null = null;
 
 if (isFirebaseConfigured) {
   try {
+    console.log('[Requiem Auth] Initializing Firebase with Project ID:', firebaseConfig.projectId);
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
   } catch (error) {

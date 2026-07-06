@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "233820586577",
+    "project_id": "requiem-dev",
+    "storage_bucket": "requiem-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233820586577:android:20f48bfa38191f832b6e70",
+        "android_client_info": {
+          "package_name": "com.mario.requiemapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "233820586577-417igqmlqfi5q8a34lenk8l7uc4ltkg4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJxLd1vpcENr_C6H2W5pQu9w3X06KjLtc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "233820586577-417igqmlqfi5q8a34lenk8l7uc4ltkg4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
