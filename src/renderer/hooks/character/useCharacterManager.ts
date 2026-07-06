@@ -11,7 +11,8 @@ const initCharState = {
   bonds: '',
   personal_notes: '',
   image_url: '',
-  attachments: [] as any[]
+  attachments: [] as any[],
+  shared: true
 };
 
 interface UseCharacterManagerProps {

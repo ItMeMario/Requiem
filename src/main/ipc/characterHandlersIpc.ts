@@ -6,7 +6,8 @@ export function setupCharacterHandlersIpc() {
     const rows = db.prepare('SELECT * FROM characters WHERE campaign_id = ?').all(campaignId);
     return rows.map((row: any) => ({
       ...row,
-      attachments: row.attachments ? JSON.parse(row.attachments) : []
+      attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      shared: row.shared === 1 || row.shared === true
     }));
   });
 
@@ -15,15 +16,16 @@ export function setupCharacterHandlersIpc() {
     if (!row) return row;
     return {
       ...row,
-      attachments: row.attachments ? JSON.parse(row.attachments) : []
+      attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      shared: row.shared === 1 || row.shared === true
     };
   });
 
   ipcMain.handle('create-character', (_, data: any) => {
     const stmt = db.prepare(`
       INSERT INTO characters (
-        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
       data.campaign_id,
@@ -36,7 +38,10 @@ export function setupCharacterHandlersIpc() {
       data.bonds ?? null,
       data.personal_notes ?? null,
       data.image_url ?? null,
-      data.attachments ? JSON.stringify(data.attachments) : null
+      data.attachments ? JSON.stringify(data.attachments) : null,
+      data.shared ? 1 : 0,
+      data.authorId ?? null,
+      data.authorName ?? null
     );
     return info.lastInsertRowid;
   });
@@ -45,7 +50,8 @@ export function setupCharacterHandlersIpc() {
     const stmt = db.prepare(`
       UPDATE characters SET 
         name = ?, race = ?, status = ?, age = ?, 
-        faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?, attachments = ?
+        faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?, attachments = ?,
+        shared = ?, authorId = ?, authorName = ?
       WHERE id = ?
     `);
     stmt.run(
@@ -59,6 +65,9 @@ export function setupCharacterHandlersIpc() {
       data.personal_notes ?? null,
       data.image_url ?? null,
       data.attachments ? JSON.stringify(data.attachments) : null,
+      data.shared ? 1 : 0,
+      data.authorId ?? null,
+      data.authorName ?? null,
       id
     );
     return true;

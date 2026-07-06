@@ -18,7 +18,8 @@ export const EntrySchema = z.object({
   content: z.string(), // JSON string that holds ReactQuill content or similar
   creation_date: z.string(), // ISO date string
   shared: z.boolean().optional().nullable(),
-  authorId: z.string().optional().nullable()
+  authorId: z.string().optional().nullable(),
+  authorName: z.string().optional().nullable()
 });
 
 export type Entry = z.infer<typeof EntrySchema>;
@@ -36,6 +37,8 @@ export const CharacterSchema = z.object({
   personal_notes: z.string().optional().nullable(),
   image_url: z.string().optional().nullable(),
   shared: z.boolean().optional().nullable(),
+  authorId: z.string().optional().nullable(),
+  authorName: z.string().optional().nullable(),
   attachments: z.array(
     z.object({
       id: z.string(),
@@ -60,7 +63,9 @@ export const LocationSchema = z.object({
   present_npcs: z.string().optional().nullable(),
   atmosphere: z.string().optional().nullable(),
   image_url: z.string().optional().nullable(),
-  shared: z.boolean().optional().nullable()
+  shared: z.boolean().optional().nullable(),
+  authorId: z.string().optional().nullable(),
+  authorName: z.string().optional().nullable()
 });
 
 export type Location = z.infer<typeof LocationSchema>;

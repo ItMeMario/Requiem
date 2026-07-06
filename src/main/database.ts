@@ -85,4 +85,17 @@ export function initDb() {
   } catch (e) {
     // Column already exists
   }
+
+  // Migrations for sharing/collaboration columns
+  try { db.exec("ALTER TABLE campaigns ADD COLUMN ownerId TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE campaigns ADD COLUMN collaborators TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE entries ADD COLUMN shared INTEGER;"); } catch (e) {}
+  try { db.exec("ALTER TABLE entries ADD COLUMN authorId TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE entries ADD COLUMN authorName TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE characters ADD COLUMN shared INTEGER;"); } catch (e) {}
+  try { db.exec("ALTER TABLE characters ADD COLUMN authorId TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE characters ADD COLUMN authorName TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE locations ADD COLUMN shared INTEGER;"); } catch (e) {}
+  try { db.exec("ALTER TABLE locations ADD COLUMN authorId TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE locations ADD COLUMN authorName TEXT;"); } catch (e) {}
 }

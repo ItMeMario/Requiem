@@ -6,6 +6,7 @@ import { CharacterList } from '../characters/CharacterList';
 import { LocationList } from '../locations/LocationList';
 import { JournalList } from '../journal/JournalList';
 import { MonsterList } from '../monsters/MonsterList';
+import { useAuth } from '../../context/AuthContext';
 
 interface ActiveCampaignViewProps {
   theme: string;
@@ -28,6 +29,7 @@ interface ActiveCampaignViewProps {
   handleEditEntry: (entry: any) => void;
   handleViewEntry: (entry: any) => void;
   openNewEntryModal: () => void;
+  setShowCollaboratorsModal: (show: boolean) => void;
 }
 
 export function ActiveCampaignView({
@@ -50,8 +52,24 @@ export function ActiveCampaignView({
   handleDeleteEntry,
   handleEditEntry,
   handleViewEntry,
-  openNewEntryModal
+  openNewEntryModal,
+  setShowCollaboratorsModal
 }: ActiveCampaignViewProps) {
+  const { user } = useAuth();
+  const isOwner = selectedCampaign.ownerId === user?.uid || !selectedCampaign.ownerId;
+
+  const isCyber = theme === 'cyberpunk';
+  const isMed = theme === 'medieval';
+  const isVamp = theme === 'vampire';
+
+  const shareButtonStyle = isCyber 
+    ? "flex items-center space-x-2 px-3 py-1.5 text-xs cyber-metallic-panel text-[#0ff] border border-[#0ff]/30 hover:bg-[#0ff]/20 hover:shadow-[0_0_10px_rgba(0,255,255,0.4)] transition-all font-mono uppercase tracking-wider cursor-pointer"
+    : isVamp
+    ? "flex items-center space-x-2 px-3 py-1.5 text-sm bg-[#1a1a24] border border-[#3d3d4a] text-[#a0a0b0] hover:text-[#ff3333] hover:border-[#ff3333]/50 transition-colors font-serif cursor-pointer"
+    : isMed
+    ? "flex items-center space-x-2 px-3 py-1.5 text-sm wood-plank border border-[#5c2e0b] text-[#f4eacc] hover:shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] transition-all font-serif cursor-pointer"
+    : "flex items-center space-x-2 px-3 py-1.5 text-sm bg-surface-elevated border border-border-subtle text-heading hover:border-accent hover:text-accent-text transition-colors rounded-md cursor-pointer";
+
   return (
     <main className={`flex-1 flex flex-col h-full z-0 w-full overflow-hidden ${theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-surface-app'}`}>
       {/* Header */}
@@ -59,7 +77,7 @@ export function ActiveCampaignView({
         <div className="flex flex-row items-center gap-2 sm:gap-4 sm:space-x-6 w-full sm:w-auto min-w-0">
           <button 
             onClick={() => setSelectedCampaign(null)}
-            className="text-muted hover:text-heading flex items-center space-x-1 sm:space-x-2 transition-colors shrink-0 sm:pr-6 sm:border-r border-border-subtle"
+            className="text-muted hover:text-heading flex items-center space-x-1 sm:space-x-2 transition-colors shrink-0 sm:pr-6 sm:border-r border-border-subtle cursor-pointer"
           >
             <ArrowLeft size={20} />
             <span className="hidden sm:inline">{getThemeLabels(theme).dashboardName}</span>
@@ -75,8 +93,20 @@ export function ActiveCampaignView({
             </div>
           </div>
         </div>
-        <div className="hidden sm:block">
-          <AuthControls />
+        <div className="flex items-center space-x-3">
+          {user && isOwner && (
+            <button 
+              onClick={() => setShowCollaboratorsModal(true)} 
+              className={shareButtonStyle}
+              title="Compartilhar Campanha"
+            >
+              <Users size={16} />
+              <span className="hidden md:inline">Compartilhar</span>
+            </button>
+          )}
+          <div className="hidden sm:block">
+            <AuthControls />
+          </div>
         </div>
       </header>
 

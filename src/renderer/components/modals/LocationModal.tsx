@@ -7,6 +7,7 @@ import { compressBase64Image } from '../../utils/imageCompressor';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { useAuth } from '../../context/AuthContext';
 
 interface LocationModalProps {
   showLocModal: boolean;
@@ -20,6 +21,7 @@ interface LocationModalProps {
 export const LocationModal: React.FC<LocationModalProps> = ({ 
   showLocModal, handleCloseLocModal, editingLocId, newLoc, setNewLoc, handleCreateLoc 
 }) => {
+  const { user } = useAuth();
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
   if (!showLocModal) return null;
@@ -66,6 +68,20 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             <InputField label="Name *" value={newLoc.name} onChange={(e:any) => setNewLoc({...newLoc, name: e.target.value})} />
             <InputField label="Region (Região)" value={newLoc.region} onChange={(e:any) => setNewLoc({...newLoc, region: e.target.value})} />
             <InputField label="Type (Tipo)" value={newLoc.type} onChange={(e:any) => setNewLoc({...newLoc, type: e.target.value})} />
+            {user && (
+              <div className="flex items-center space-x-2 pb-2 h-full sm:pt-6">
+                <input 
+                  type="checkbox" 
+                  id="loc-shared-checkbox"
+                  checked={newLoc.shared !== false}
+                  onChange={(e) => setNewLoc({...newLoc, shared: e.target.checked})}
+                  className="w-4 h-4 rounded text-accent border-border-default focus:ring-accent bg-surface-elevated cursor-pointer"
+                />
+                <label htmlFor="loc-shared-checkbox" className="text-sm font-medium text-secondary cursor-pointer">
+                  Compartilhar com o grupo (Lugar)
+                </label>
+              </div>
+            )}
             <div className="flex flex-col space-y-1">
               <label className="text-sm font-medium text-secondary">Image (Imagem)</label>
               <div className="flex items-start gap-3">

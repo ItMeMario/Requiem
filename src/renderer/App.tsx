@@ -33,6 +33,7 @@ import { MedievalIntro } from './themes/medieval/MedievalIntro';
 import { CyberpunkIntro } from './themes/cyberpunk/CyberpunkIntro';
 import { VampireIntro } from './themes/vampire/VampireIntro';
 import { ConfirmDialog } from './resources/ConfirmDialog';
+import { CampaignCollaboratorsModal } from './components/modals/CampaignCollaboratorsModal';
 
 function App() {
   const { user, isConfigured } = useAuth();
@@ -195,6 +196,7 @@ function App() {
               handleEditEntry={entryMgr.handleEditEntry}
               handleViewEntry={entryMgr.handleViewEntry}
               openNewEntryModal={entryMgr.openNewEntryModal}
+              setShowCollaboratorsModal={nav.setShowCollaboratorsModal}
             />
           )}
         </>
@@ -255,6 +257,17 @@ function App() {
         handleEditLoc={locMgr.handleEditLocFromView}
       />
       <ConfirmDialog {...confirmDialog} />
+      <CampaignCollaboratorsModal 
+        showCollaboratorsModal={nav.showCollaboratorsModal}
+        setShowCollaboratorsModal={nav.setShowCollaboratorsModal}
+        campaign={selectedCampaign}
+        theme={theme}
+        onCollaboratorsUpdated={(newCollaborators) => {
+          if (selectedCampaign) {
+            setSelectedCampaign({ ...selectedCampaign, collaborators: newCollaborators });
+          }
+        }}
+      />
     </>
   );
 }

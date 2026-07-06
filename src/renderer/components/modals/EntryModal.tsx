@@ -6,6 +6,7 @@ import 'react-quill/dist/quill.snow.css';
 import { InputField } from '../InputField';
 import { parseMentions } from '../../utils/mentionParser';
 import DOMPurify from 'dompurify';
+import { useAuth } from '../../context/AuthContext';
 
 interface EntryModalProps {
   showEntryModal: boolean;
@@ -28,6 +29,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   entries, newEntry, setNewEntry, handleCreateEntry, handleDeleteEntry, handleMentionClick, 
   characters, locations 
 }) => {
+  const { user } = useAuth();
   const quillRef = useRef<any>(null);
   const [contextMenu, setContextMenu] = useState<{show: boolean, x: number, y: number, text: string, index: number, length: number} | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -142,8 +144,30 @@ export const EntryModal: React.FC<EntryModalProps> = ({
             {isViewingEntry ? (
               <div className="flex-1 flex flex-col space-y-6 max-w-4xl mx-auto w-full">
                 <div className="border-b border-border-default pb-6">
-                  <h1 className="text-4xl font-bold text-primary">{newEntry.title}</h1>
-                  <div className="text-accent-text mt-2 text-sm">{entries.find(e => e.id === editingEntryId)?.creation_date ? new Date(entries.find(e => e.id === editingEntryId).creation_date).toLocaleString() : ''}</div>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h1 className="text-4xl font-bold text-primary mr-4">{newEntry.title}</h1>
+                    {user && (
+                      <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
+                        newEntry.shared !== false
+                          ? 'bg-green-500/10 text-green-400 border-green-500/30'
+                          : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                      }`}>
+                        {newEntry.shared !== false ? 'Grupo' : 'Pessoal'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-muted text-xs sm:text-sm flex flex-wrap gap-x-4 gap-y-1">
+                    <span>
+                      {entries.find(e => e.id === editingEntryId)?.creation_date 
+                        ? new Date(entries.find(e => e.id === editingEntryId).creation_date).toLocaleString() 
+                        : ''}
+                    </span>
+                    {newEntry.authorName && (
+                      <span className="text-accent-text">
+                        Criado por: <span className="font-semibold">{newEntry.authorName}</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div 
                   className="quill-content text-lg text-secondary"
@@ -153,7 +177,23 @@ export const EntryModal: React.FC<EntryModalProps> = ({
               </div>
             ) : (
               <form id="entry-form" onSubmit={handleCreateEntry} className="flex-1 flex flex-col space-y-4">
-                <InputField label="Title *" value={newEntry.title} onChange={(e:any) => setNewEntry({...newEntry, title: e.target.value})} placeholder="Day 1: The Journey Begins..." />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                  <InputField label="Title *" value={newEntry.title} onChange={(e:any) => setNewEntry({...newEntry, title: e.target.value})} placeholder="Day 1: The Journey Begins..." />
+                  {user && (
+                    <div className="flex items-center space-x-2 pb-2">
+                      <input 
+                        type="checkbox" 
+                        id="entry-shared-checkbox"
+                        checked={newEntry.shared !== false}
+                        onChange={(e) => setNewEntry({...newEntry, shared: e.target.checked})}
+                        className="w-4 h-4 rounded text-accent border-border-default focus:ring-accent bg-surface-elevated cursor-pointer"
+                      />
+                      <label htmlFor="entry-shared-checkbox" className="text-sm font-medium text-secondary cursor-pointer">
+                        Compartilhar com o grupo (Nota de Grupo)
+                      </label>
+                    </div>
+                  )}
+                </div>
                 
                 <div className="flex-1 flex flex-col min-h-[400px]">
                   <label className="block text-sm text-muted mb-1">Content <span className="text-xs text-faint ml-2">(Tip: Select text and press Ctrl+L or right-click to link!)</span></label>

@@ -48,6 +48,7 @@ export function useEntryManager({
         campaign_id: selectedCampaign.id,
         title: newEntry.title,
         content: newEntry.content,
+        shared: (newEntry as any).shared !== false,
         creation_date: isEditing
           ? entries.find(evt => evt.id === editingEntryId)?.creation_date
           : new Date().toISOString()
@@ -70,14 +71,26 @@ export function useEntryManager({
 
   const handleEditEntry = (entry: any) => {
     setEditingEntryId(entry.id);
-    setNewEntry({ title: entry.title, content: entry.content });
+    setNewEntry({ 
+      title: entry.title, 
+      content: entry.content,
+      shared: entry.shared !== false,
+      authorId: entry.authorId || null,
+      authorName: entry.authorName || null
+    } as any);
     setIsViewingEntry(false);
     setShowEntryModal(true);
   };
 
   const handleViewEntry = (entry: any) => {
     setEditingEntryId(entry.id);
-    setNewEntry({ title: entry.title, content: entry.content });
+    setNewEntry({ 
+      title: entry.title, 
+      content: entry.content,
+      shared: entry.shared !== false,
+      authorId: entry.authorId || null,
+      authorName: entry.authorName || null
+    } as any);
     setIsViewingEntry(true);
     setShowEntryModal(true);
   };
@@ -105,7 +118,7 @@ export function useEntryManager({
 
   const openNewEntryModal = () => {
     setEditingEntryId(null);
-    setNewEntry(initEntryState);
+    setNewEntry({ title: '', content: '', shared: true } as any);
     setIsViewingEntry(false);
     setShowEntryModal(true);
   };

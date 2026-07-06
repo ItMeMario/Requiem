@@ -169,6 +169,19 @@ export class WebDataService implements IDataService {
 
     try { this.db.run("ALTER TABLE locations ADD COLUMN image_url TEXT;"); } catch (e) {}
 
+    // Migrations for sharing/collaboration columns
+    try { this.db.run("ALTER TABLE campaigns ADD COLUMN ownerId TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE campaigns ADD COLUMN collaborators TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE entries ADD COLUMN shared INTEGER;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE entries ADD COLUMN authorId TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE entries ADD COLUMN authorName TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE characters ADD COLUMN shared INTEGER;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE characters ADD COLUMN authorId TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE characters ADD COLUMN authorName TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE locations ADD COLUMN shared INTEGER;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE locations ADD COLUMN authorId TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE locations ADD COLUMN authorName TEXT;"); } catch (e) {}
+
     await this.saveToIndexedDB();
   }
 
@@ -387,5 +400,16 @@ export class WebDataService implements IDataService {
     this.db = new this.SQL.Database(data);
     await this.saveToIndexedDB();
     return true;
+  }
+
+  // Collaborators
+  async getCollaborators(campaignId: number): Promise<any[]> {
+    return [];
+  }
+  async addCollaborator(campaignId: number, email: string): Promise<boolean> {
+    return false;
+  }
+  async removeCollaborator(campaignId: number, uid: string): Promise<boolean> {
+    return false;
   }
 }

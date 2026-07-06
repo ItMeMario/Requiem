@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { auth, loginWithGoogleWeb, logoutUser } from '../utils/auth';
 
 interface AuthContextType {
@@ -27,6 +28,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+      if (currentUser) {
+        try {
+          const db = getFirestore();
+          const userRef = doc(db, 'users', currentUser.uid);
+          setDoc(userRef, {
+            email: currentUser.email,
+            displayName: currentUser.displayName || '',
+            photoURL: currentUser.photoURL || ''
+          }, { merge: true }).catch((err) => {
+            console.error('[AuthContext] Failed to write user profile to Firestore:', err);
+          });
+        } catch (err) {
+          console.error('[AuthContext] Firestore not available yet:', err);
+        }
+      }
     });
 
     return () => unsubscribe();

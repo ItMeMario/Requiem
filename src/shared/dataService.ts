@@ -32,4 +32,9 @@ export interface IDataService {
   // Backups
   exportDatabase(): Promise<Uint8Array | boolean>;
   importDatabase(data?: Uint8Array): Promise<boolean>;
+
+  // Collaborators
+  getCollaborators(campaignId: number): Promise<any[]>;
+  addCollaborator(campaignId: number, email: string): Promise<boolean>;
+  removeCollaborator(campaignId: number, uid: string): Promise<boolean>;
 }

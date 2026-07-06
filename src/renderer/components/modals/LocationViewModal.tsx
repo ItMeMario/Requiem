@@ -4,6 +4,7 @@ import { Map as MapIcon, X, Edit2, Download, Eye } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { useAuth } from '../../context/AuthContext';
 
 interface LocationViewModalProps {
   showLocViewModal: boolean;
@@ -18,6 +19,7 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
   loc,
   handleEditLoc,
 }) => {
+  const { user } = useAuth();
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
   if (!showLocViewModal || !loc) return null;
@@ -122,9 +124,25 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
             {/* Right Column: Location Information */}
             <div className="md:col-span-3 space-y-6">
               <div>
-                <h1 className="text-3xl font-extrabold text-accent2-heading tracking-wide mb-1">
-                  {loc.name}
-                </h1>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h1 className="text-3xl font-extrabold text-accent2-heading tracking-wide">
+                    {loc.name}
+                  </h1>
+                  {user && (
+                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
+                      loc.shared !== false
+                        ? 'bg-green-500/10 text-green-400 border-green-500/30'
+                        : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                    }`}>
+                      {loc.shared !== false ? 'Grupo' : 'Pessoal'}
+                    </span>
+                  )}
+                </div>
+                {loc.authorName && (
+                  <p className="text-xs text-accent-text mb-2">
+                    Criado por: <span className="font-semibold">{loc.authorName}</span>
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-2 mt-2">
                   {loc.region && (
                     <span className="px-3 py-1 bg-surface-hover text-secondary text-xs font-semibold rounded-full border border-border-subtle">

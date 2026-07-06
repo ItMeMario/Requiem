@@ -12,6 +12,7 @@ export function useAppNavigation() {
   const [isViewingEntry, setIsViewingEntry] = useState(false);
   const [showCharViewModal, setShowCharViewModal] = useState(false);
   const [showLocViewModal, setShowLocViewModal] = useState(false);
+  const [showCollaboratorsModal, setShowCollaboratorsModal] = useState(false);
 
   return {
     activeTab,
@@ -32,6 +33,8 @@ export function useAppNavigation() {
     showCharViewModal,
     setShowCharViewModal,
     showLocViewModal,
-    setShowLocViewModal
+    setShowLocViewModal,
+    showCollaboratorsModal,
+    setShowCollaboratorsModal
   };
 }

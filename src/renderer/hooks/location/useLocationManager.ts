@@ -9,7 +9,8 @@ const initLocState = {
   lore: '',
   present_npcs: '',
   atmosphere: '',
-  image_url: ''
+  image_url: '',
+  shared: true
 };
 
 interface UseLocationManagerProps {

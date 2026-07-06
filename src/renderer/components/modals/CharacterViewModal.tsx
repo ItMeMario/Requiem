@@ -4,6 +4,7 @@ import { User, X, Edit2, Paperclip, FileText, Download, Eye, Trash2 } from 'luci
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { useAuth } from '../../context/AuthContext';
 
 interface CharacterViewModalProps {
   showCharViewModal: boolean;
@@ -20,6 +21,7 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
   handleEditChar,
   handleDeleteAttachment,
 }) => {
+  const { user } = useAuth();
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
   if (!showCharViewModal || !char) return null;
@@ -136,9 +138,25 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
             {/* Right Column: Character Information */}
             <div className="md:col-span-3 space-y-6">
               <div>
-                <h1 className="text-3xl font-extrabold text-primary tracking-wide mb-1">
-                  {char.name}
-                </h1>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h1 className="text-3xl font-extrabold text-primary tracking-wide">
+                    {char.name}
+                  </h1>
+                  {user && (
+                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${
+                      char.shared !== false
+                        ? 'bg-green-500/10 text-green-400 border-green-500/30'
+                        : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                    }`}>
+                      {char.shared !== false ? 'Grupo' : 'Pessoal'}
+                    </span>
+                  )}
+                </div>
+                {char.authorName && (
+                  <p className="text-xs text-accent-text mb-2">
+                    Criado por: <span className="font-semibold">{char.authorName}</span>
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-2 mt-2">
                   {char.race && (
                     <span className="px-3 py-1 bg-surface-hover text-secondary text-xs font-semibold rounded-full border border-border-subtle">

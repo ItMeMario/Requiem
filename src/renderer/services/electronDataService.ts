@@ -81,4 +81,15 @@ export class ElectronDataService implements IDataService {
   importDatabase(data?: Uint8Array): Promise<boolean> {
     return this.api.importDatabase();
   }
+
+  // Collaborators
+  async getCollaborators(campaignId: number): Promise<any[]> {
+    return [];
+  }
+  async addCollaborator(campaignId: number, email: string): Promise<boolean> {
+    return false;
+  }
+  async removeCollaborator(campaignId: number, uid: string): Promise<boolean> {
+    return false;
+  }
 }
