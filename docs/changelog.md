@@ -1,3 +1,67 @@
+📌 Patch Notes - Version 1.0.7
+
+✨ New Features
+
+- **Campaign Collaboration & Sharing**:
+  - Implemented Firebase campaign collaboration, allowing Game Masters to invite other players to their campaigns via email.
+  - Added a `CampaignCollaboratorsModal` with dynamic styling for Medieval, Cyberpunk, Vampire, and Default themes, and a "Share" button for GMs on active campaigns.
+  - Updated SQLite, Web SQL, and IPC handlers to support new schema columns (`ownerId`, `collaborators`, `shared`, `authorId`, `authorName`) to keep local and cloud databases synchronized.
+  - Configured automatic user profile saving to `/users/{uid}` on login to enable email-to-UID resolution.
+  - Refactored `FirebaseDataService` to store collections globally under `/campaigns/{campaignId}` and filter entries, characters, and locations based on owner/collaborator visibility rules.
+- **Privacy by Default for Campaign Items**:
+  - Changed default initialization of new characters, locations, and journal entries to private (`shared: false`).
+  - Added `resetCampaignItemsSharing` to automatically mark all existing items as private when the first collaborator is added to a campaign.
+- **Private & Individual Character Personal Notes**:
+  - Created Firestore rules for a new private subcollection `/users/{userId}/personal_notes/{characterId}`, allowing players and GMs to have individual, private personal notes.
+  - Refactored `FirebaseDataService` to load, save, and delete personal notes in this private subcollection instead of the shared character document.
+- **Bestiary (Monsters) Tab & XML Compendium**:
+  - Added a "Bestiary (Monsters)" tab to the active campaign view (using the Lucide `Skull` icon).
+  - Migrated Bestiary data to a pure XML compendium-driven architecture with glob loading (`import.meta.glob`), dynamically parsing D&D 5e monster XML files on-the-fly using the browser's native `DOMParser`.
+  - Implemented automatic calculation of standard ability modifiers, CR-to-XP mapping, meta info synthesis, and formatting of nested XML structures (traits, actions, reactions, legendary actions) into HTML paragraphs.
+  - Created `MonsterDetailModal` displaying full themed stat blocks customized for Medieval (parchment/wax-red accents), Cyberpunk (HUD terminal/neon alerts), and Vampire (charcoal/crimson font) modes, including combat stats rendering (resistances, vulnerabilities, immunities).
+- **Environment & Build Automation Reorganization**:
+  - Separated Firebase credentials and configurations into environment-specific local files (`.env.development.local` and `.env.production.local`).
+  - Configured `capacitor.config.ts` to scan environment configurations in order of preference to resolve the Google Client ID.
+  - Configured `android/app/build.gradle` to support build-type specific configs (checking `src/debug` and `src/release` directories for `google-services.json`).
+  - Refactored `scripts/build.js` to dynamically parse arguments for building development or production packages for desktop/mobile.
+  - Reorganized `package.json` scripts with new commands for development and production modes (e.g. `npm run apk:dev`, `npm run dist dev`).
+- **Attachment Deletion**:
+  - Added the ability to delete attachments directly from the character details view, prompting the user with a confirmation dialog.
+
+🛠️ Improvements
+
+- **Themed UI Input Controls**:
+  - Created a custom themed Checkbox component supporting Medieval, Cyberpunk, and Vampire modes.
+  - Relocated basic inputs (Checkbox, InputField, TextAreaField) into `src/renderer/components/ui/` for better code structure and updated imports across all modals.
+- **Mobile UX & UI Enhancements**:
+  - Made edit and delete campaign buttons always visible on small screens (`sm` and below) in `DashboardView` to support mobile/touch devices.
+  - Added `pointer-events-none` (with group-hover overrides) to hidden image overlays in Character, Location, and Monster modals, enabling mobile touch events to trigger the lightbox zoom and download actions.
+  - Propagated `selectedCampaign` down to list and modal components to ensure proper context consistency.
+  - Conditionally hide Edit and Delete triggers or disable inputs based on campaign owner and item author permissions.
+  - Disabled core character form inputs in `CharacterModal` for non-author/non-owner users while keeping the personal notes field enabled.
+- **Database Rules & Exporter**:
+  - Configured local `firestore.rules` and `firebase.json` for easy deployment, adding `firebase-tools` to devDependencies.
+  - Upgraded desktop cloud exporter schema to prevent column mismatch errors and support the new collaboration metadata.
+
+🐛 Bug Fixes
+
+- **Firestore Permission & Composite Index Fix**:
+  - Bypassed `collectionGroup` queries by implementing in-memory lookup maps (`characterCampaignMap`, `locationCampaignMap`, `entryCampaignMap`) in `FirebaseDataService`, avoiding Firestore rules blocks and missing index errors when updating or saving characters.
+- **Mobile ID Lookup Bug**:
+  - Cast document IDs to `Number` during lookups in cache maps to resolve a runtime bug where string IDs from the UI bypassed the cache and triggered unauthorized queries on mobile devices.
+- **TypeScript Compilation Errors**:
+  - Resolved compiler warning TS4023 in `database.ts` by using modern ES6 imports for `better-sqlite3` and casting database instance references.
+  - Added typecasts to SQLite `.get(id)` outputs in main process IPC handlers to avoid compiler errors regarding property access on `unknown` types.
+- **Security Policy Update**:
+  - Added `'unsafe-eval'` to the Content-Security-Policy meta tag in `index.html` under `script-src` to permit WebAssembly-based SQLite execution in web environments.
+- **Attachment Deletion Security & Modal Crash**:
+  - Restricted the attachment deletion action in `CharacterViewModal` to author and owner users.
+  - Fixed a potential null pointer crash in modals by refactoring permission checks to occur after character existence validation.
+
+📅 Release Date: 07/06/2026
+
+---
+
 📌 Patch Notes - Version 1.0.6
 
 ✨ New Features
