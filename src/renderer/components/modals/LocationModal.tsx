@@ -17,15 +17,18 @@ interface LocationModalProps {
   newLoc: any;
   setNewLoc: (loc: any) => void;
   handleCreateLoc: (e: React.FormEvent) => void;
+  selectedCampaign?: any;
 }
 
 export const LocationModal: React.FC<LocationModalProps> = ({ 
-  showLocModal, handleCloseLocModal, editingLocId, newLoc, setNewLoc, handleCreateLoc 
+  showLocModal, handleCloseLocModal, editingLocId, newLoc, setNewLoc, handleCreateLoc, selectedCampaign 
 }) => {
   const { user } = useAuth();
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
   if (!showLocModal) return null;
+
+  const canEditCore = !user || !selectedCampaign || !editingLocId || newLoc?.authorId === user.uid || selectedCampaign.ownerId === user.uid;
 
   const handleDownloadPortrait = async () => {
     try {
@@ -69,9 +72,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
           <form onSubmit={handleCreateLoc} className="flex-1 flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField label="Name *" value={newLoc.name} onChange={(e:any) => setNewLoc({...newLoc, name: e.target.value})} />
-            <InputField label="Region (Região)" value={newLoc.region} onChange={(e:any) => setNewLoc({...newLoc, region: e.target.value})} />
-            <InputField label="Type (Tipo)" value={newLoc.type} onChange={(e:any) => setNewLoc({...newLoc, type: e.target.value})} />
+            <InputField label="Name *" value={newLoc.name} onChange={(e:any) => setNewLoc({...newLoc, name: e.target.value})} disabled={!canEditCore} />
+            <InputField label="Region (Região)" value={newLoc.region} onChange={(e:any) => setNewLoc({...newLoc, region: e.target.value})} disabled={!canEditCore} />
+            <InputField label="Type (Tipo)" value={newLoc.type} onChange={(e:any) => setNewLoc({...newLoc, type: e.target.value})} disabled={!canEditCore} />
             {user && (
               <div className="flex items-center pb-2 h-full sm:pt-6">
                 <Checkbox
@@ -79,6 +82,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   checked={newLoc.shared === true}
                   onChange={(checked) => setNewLoc({...newLoc, shared: checked})}
                   label="Compartilhar com o grupo (Lugar)"
+                  disabled={!canEditCore}
                 />
               </div>
             )}
@@ -117,6 +121,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   <input 
                     type="file" 
                     accept="image/*"
+                    disabled={!canEditCore}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -128,9 +133,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="block w-full text-sm text-secondary file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-hover file:text-heading hover:file:bg-surface-elevated2 transition-colors cursor-pointer"
+                    className="block w-full text-sm text-secondary file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-surface-hover file:text-heading hover:file:bg-surface-elevated2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   />
-                  {newLoc.image_url && (
+                  {newLoc.image_url && canEditCore && (
                     <button 
                       type="button" 
                       onClick={() => setNewLoc({...newLoc, image_url: ''})}
@@ -144,15 +149,15 @@ export const LocationModal: React.FC<LocationModalProps> = ({
               </div>
             </div>
           </div>
-          <TextAreaField label="Description (Descrição)" value={newLoc.description} onChange={(e:any) => setNewLoc({...newLoc, description: e.target.value})} />
-          <TextAreaField label="Lore" value={newLoc.lore} onChange={(e:any) => setNewLoc({...newLoc, lore: e.target.value})} />
-          <TextAreaField label="Present NPCs (NPCs Presentes)" value={newLoc.present_npcs} onChange={(e:any) => setNewLoc({...newLoc, present_npcs: e.target.value})} />
-          <TextAreaField label="Atmosphere (Ambientação)" value={newLoc.atmosphere} onChange={(e:any) => setNewLoc({...newLoc, atmosphere: e.target.value})} />
+          <TextAreaField label="Description (Descrição)" value={newLoc.description} onChange={(e:any) => setNewLoc({...newLoc, description: e.target.value})} disabled={!canEditCore} />
+          <TextAreaField label="Lore" value={newLoc.lore} onChange={(e:any) => setNewLoc({...newLoc, lore: e.target.value})} disabled={!canEditCore} />
+          <TextAreaField label="Present NPCs (NPCs Presentes)" value={newLoc.present_npcs} onChange={(e:any) => setNewLoc({...newLoc, present_npcs: e.target.value})} disabled={!canEditCore} />
+          <TextAreaField label="Atmosphere (Ambientação)" value={newLoc.atmosphere} onChange={(e:any) => setNewLoc({...newLoc, atmosphere: e.target.value})} disabled={!canEditCore} />
             </div>
 
             <div className="p-4 sm:p-6 pt-4 flex justify-end bg-surface-card border-t border-border-default shrink-0">
               <button type="button" onClick={handleCloseLocModal} className="px-4 py-2 text-muted hover:text-heading transition-colors mr-2">Cancel</button>
-              <button type="submit" disabled={!newLoc.name.trim()} className="px-5 py-2 bg-accent2 hover:bg-accent2-hover text-heading font-medium rounded transition-colors disabled:opacity-50">Save Location</button>
+              <button type="submit" disabled={!newLoc.name.trim() || !canEditCore} className="px-5 py-2 bg-accent2 hover:bg-accent2-hover text-heading font-medium rounded transition-colors disabled:opacity-50">Save Location</button>
             </div>
           </form>
         </div>

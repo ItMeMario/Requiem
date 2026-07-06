@@ -11,6 +11,7 @@ interface LocationViewModalProps {
   handleCloseLocViewModal: () => void;
   loc: any;
   handleEditLoc: (loc: any) => void;
+  selectedCampaign?: any;
 }
 
 export const LocationViewModal: React.FC<LocationViewModalProps> = ({
@@ -18,11 +19,14 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
   handleCloseLocViewModal,
   loc,
   handleEditLoc,
+  selectedCampaign,
 }) => {
   const { user } = useAuth();
   const [activePreviewImage, setActivePreviewImage] = React.useState<string | null>(null);
 
   if (!showLocViewModal || !loc) return null;
+
+  const canEdit = !user || !selectedCampaign || loc.authorId === user.uid || selectedCampaign.ownerId === user.uid;
 
   const handleDownloadPortrait = async () => {
     try {
@@ -64,13 +68,15 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
             <MapIcon className="text-accent2-text" /> Location Details
           </h3>
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleEditLoc(loc)}
-              className="px-3 py-1.5 bg-surface-hover hover:opacity-90 rounded text-secondary hover:text-heading transition-colors border border-border-hover flex items-center space-x-1.5 text-sm font-medium"
-            >
-              <Edit2 size={14} />
-              <span>Edit</span>
-            </button>
+            {canEdit && (
+              <button
+                onClick={() => handleEditLoc(loc)}
+                className="px-3 py-1.5 bg-surface-hover hover:opacity-90 rounded text-secondary hover:text-heading transition-colors border border-border-hover flex items-center space-x-1.5 text-sm font-medium"
+              >
+                <Edit2 size={14} />
+                <span>Edit</span>
+              </button>
+            )}
             <button
               onClick={handleCloseLocViewModal}
               className="p-1.5 text-muted hover:text-heading transition-colors rounded-full hover:bg-surface-hover"

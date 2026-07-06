@@ -1,5 +1,6 @@
 import React from 'react';
 import { User, Plus, Edit2, Trash2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface CharacterListProps {
   characters: any[];
@@ -7,9 +8,18 @@ interface CharacterListProps {
   handleDeleteChar: (id: number) => void;
   openNewCharModal: () => void;
   handleViewChar: (char: any) => void;
+  selectedCampaign?: any;
 }
 
-export const CharacterList: React.FC<CharacterListProps> = ({ characters, handleEditChar, handleDeleteChar, openNewCharModal, handleViewChar }) => {
+export const CharacterList: React.FC<CharacterListProps> = ({ 
+  characters, handleEditChar, handleDeleteChar, openNewCharModal, handleViewChar, selectedCampaign 
+}) => {
+  const { user } = useAuth();
+
+  const canDelete = (char: any) => {
+    return !user || !selectedCampaign || char.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -39,9 +49,11 @@ export const CharacterList: React.FC<CharacterListProps> = ({ characters, handle
                 <button onClick={(e) => { e.stopPropagation(); handleEditChar(char); }} className="p-2 bg-surface-card/80 hover:bg-accent rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDeleteChar(char.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
-                  <Trash2 size={16} />
-                </button>
+                {canDelete(char) && (
+                  <button onClick={(e) => { e.stopPropagation(); handleDeleteChar(char.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
               {char.image_url ? (
                 <div className="h-48 w-full bg-surface-hover overflow-hidden relative">

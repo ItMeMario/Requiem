@@ -71,18 +71,17 @@ service cloud.firestore {
 
       // Subcoleção: Personagens (Characters)
       match /characters/{charId} {
-        // Leitura: Mestre lê tudo. Jogador lê apenas se estiver marcado como compartilhado (shared == true) ou se for o autor.
+        // Leitura: Mestre ou jogador só leem se for compartilhado ou se for o autor.
         allow read: if isCampaignMember(campaignId) && (
           resource.data.shared == true || 
-          resource.data.authorId == request.auth.uid ||
-          isCampaignOwner(campaignId)
+          resource.data.authorId == request.auth.uid
         );
         // Criação: Qualquer membro da campanha
         allow create: if isCampaignMember(campaignId);
-        // Edição/Deleção: Apenas o autor ou o Mestre
+        // Edição/Deleção: Apenas o autor ou o Mestre (se compartilhado)
         allow update, delete: if isCampaignMember(campaignId) && (
           resource.data.authorId == request.auth.uid ||
-          isCampaignOwner(campaignId)
+          (isCampaignOwner(campaignId) && resource.data.shared == true)
         );
       }
 

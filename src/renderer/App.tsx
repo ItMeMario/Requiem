@@ -227,6 +227,7 @@ function App() {
         newLoc={locMgr.newLoc} 
         setNewLoc={locMgr.setNewLoc} 
         handleCreateLoc={locMgr.handleCreateLoc} 
+        selectedCampaign={selectedCampaign}
       />
 
       <EntryModal 
@@ -243,6 +244,7 @@ function App() {
         handleMentionClick={entryMgr.handleMentionClick} 
         characters={characters} 
         locations={locations} 
+        selectedCampaign={selectedCampaign}
       />
       <CharacterViewModal 
         showCharViewModal={nav.showCharViewModal}
@@ -257,6 +259,7 @@ function App() {
         handleCloseLocViewModal={locMgr.handleCloseLocViewModal}
         loc={locMgr.selectedLocForView}
         handleEditLoc={locMgr.handleEditLocFromView}
+        selectedCampaign={selectedCampaign}
       />
       <ConfirmDialog {...confirmDialog} />
       <CampaignCollaboratorsModal 

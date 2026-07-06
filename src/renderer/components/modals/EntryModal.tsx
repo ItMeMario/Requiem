@@ -23,12 +23,13 @@ interface EntryModalProps {
   handleMentionClick: (e: React.MouseEvent) => void;
   characters: any[];
   locations: any[];
+  selectedCampaign?: any;
 }
 
 export const EntryModal: React.FC<EntryModalProps> = ({ 
   showEntryModal, setShowEntryModal, isViewingEntry, setIsViewingEntry, editingEntryId, 
   entries, newEntry, setNewEntry, handleCreateEntry, handleDeleteEntry, handleMentionClick, 
-  characters, locations 
+  characters, locations, selectedCampaign 
 }) => {
   const { user } = useAuth();
   const quillRef = useRef<any>(null);
@@ -113,6 +114,8 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
   if (!showEntryModal) return null;
 
+  const canEditOrDelete = !user || !selectedCampaign || !editingEntryId || newEntry.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+
   return createPortal(
     <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
       <div className="bg-surface-card border-y sm:border border-border-default sm:rounded-xl w-full max-w-full lg:max-w-6xl shadow-2xl relative h-full sm:h-[90vh] flex flex-col overflow-hidden">
@@ -126,7 +129,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
             <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 bg-surface-hover text-muted hover:text-heading rounded border border-border-subtle" title="Show References">
               <MapIcon size={18} />
             </button>
-            {isViewingEntry && (
+            {isViewingEntry && canEditOrDelete && (
               <div className="flex space-x-2">
                 <button onClick={() => setIsViewingEntry(false)} className="px-3 sm:px-4 py-2 bg-accent hover:bg-accent-hover rounded text-heading text-xs sm:text-sm font-medium transition-colors flex items-center gap-2">
                   <Edit2 size={16} className="hidden sm:block" /> Edit

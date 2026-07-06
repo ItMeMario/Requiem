@@ -2,6 +2,7 @@ import React from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { parseMentions } from '../../utils/mentionParser';
 import DOMPurify from 'dompurify';
+import { useAuth } from '../../context/AuthContext';
 
 interface JournalListProps {
   entries: any[];
@@ -11,11 +12,18 @@ interface JournalListProps {
   handleEditEntry: (entry: any) => void;
   handleDeleteEntry: (id: number) => void;
   openNewEntryModal: () => void;
+  selectedCampaign?: any;
 }
 
 export const JournalList: React.FC<JournalListProps> = ({ 
-  entries, characters, locations, handleViewEntry, handleEditEntry, handleDeleteEntry, openNewEntryModal 
+  entries, characters, locations, handleViewEntry, handleEditEntry, handleDeleteEntry, openNewEntryModal, selectedCampaign 
 }) => {
+  const { user } = useAuth();
+
+  const canEditOrDelete = (entry: any) => {
+    return !user || !selectedCampaign || entry.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -38,12 +46,16 @@ export const JournalList: React.FC<JournalListProps> = ({
           {entries.map(entry => (
             <div key={entry.id} onClick={() => handleViewEntry(entry)} className="bg-surface-card border border-border-default rounded-lg p-5 hover:border-border-hover transition-colors group relative cursor-pointer">
               <div className="absolute top-4 right-4 flex space-x-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
-                <button onClick={(e) => { e.stopPropagation(); handleEditEntry(entry); }} className="p-2 bg-surface-hover hover:bg-accent rounded text-secondary hover:text-heading transition-colors shadow-sm">
-                  <Edit2 size={16} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDeleteEntry(entry.id); }} className="p-2 bg-surface-hover hover:bg-danger rounded text-secondary hover:text-heading transition-colors shadow-sm">
-                  <Trash2 size={16} />
-                </button>
+                {canEditOrDelete(entry) && (
+                  <>
+                    <button onClick={(e) => { e.stopPropagation(); handleEditEntry(entry); }} className="p-2 bg-surface-hover hover:bg-accent rounded text-secondary hover:text-heading transition-colors shadow-sm">
+                      <Edit2 size={16} />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDeleteEntry(entry.id); }} className="p-2 bg-surface-hover hover:bg-danger rounded text-secondary hover:text-heading transition-colors shadow-sm">
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                )}
               </div>
               <h4 className="text-xl font-bold text-primary mb-1">{entry.title}</h4>
               <div className="text-xs text-accent-text mb-4">{new Date(entry.creation_date).toLocaleString()}</div>

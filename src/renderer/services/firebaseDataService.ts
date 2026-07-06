@@ -49,27 +49,27 @@ export class FirebaseDataService implements IDataService {
   }
 
   private async getCharacterDocRef(id: number, campaignId?: number): Promise<any> {
-    const campId = campaignId || this.characterCampaignMap.get(id);
+    const campId = campaignId || this.characterCampaignMap.get(Number(id));
     if (campId) {
       return doc(this.db, 'campaigns', campId.toString(), 'characters', id.toString());
     }
-    return this.findDocRef('characters', id);
+    return this.findDocRef('characters', Number(id));
   }
 
   private async getLocationDocRef(id: number, campaignId?: number): Promise<any> {
-    const campId = campaignId || this.locationCampaignMap.get(id);
+    const campId = campaignId || this.locationCampaignMap.get(Number(id));
     if (campId) {
       return doc(this.db, 'campaigns', campId.toString(), 'locations', id.toString());
     }
-    return this.findDocRef('locations', id);
+    return this.findDocRef('locations', Number(id));
   }
 
   private async getEntryDocRef(id: number, campaignId?: number): Promise<any> {
-    const campId = campaignId || this.entryCampaignMap.get(id);
+    const campId = campaignId || this.entryCampaignMap.get(Number(id));
     if (campId) {
       return doc(this.db, 'campaigns', campId.toString(), 'entries', id.toString());
     }
-    return this.findDocRef('entries', id);
+    return this.findDocRef('entries', Number(id));
   }
 
   // Campaigns
@@ -246,22 +246,15 @@ export class FirebaseDataService implements IDataService {
   async getCharacters(campaignId: number): Promise<Character[]> {
     const campaignDoc = await getDoc(doc(this.db, 'campaigns', campaignId.toString()));
     if (!campaignDoc.exists()) return [];
-    const campaign = campaignDoc.data() as Campaign;
-    const isOwner = campaign.ownerId === this.userId;
 
     const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
-    let q;
-    if (isOwner) {
-      q = query(colRef);
-    } else {
-      q = query(
-        colRef,
-        or(
-          where('shared', '==', true),
-          where('authorId', '==', this.userId)
-        )
-      );
-    }
+    const q = query(
+      colRef,
+      or(
+        where('shared', '==', true),
+        where('authorId', '==', this.userId)
+      )
+    );
 
     const snapshot = await getDocs(q);
 

@@ -151,6 +151,7 @@ export function ActiveCampaignView({
             handleEditChar={handleEditChar} 
             openNewCharModal={openNewCharModal} 
             handleViewChar={handleViewChar}
+            selectedCampaign={selectedCampaign}
           />
         )}
         {activeTab === 'locations' && (
@@ -160,6 +161,7 @@ export function ActiveCampaignView({
             handleEditLoc={handleEditLoc} 
             openNewLocModal={openNewLocModal} 
             handleViewLoc={handleViewLoc}
+            selectedCampaign={selectedCampaign}
           />
         )}
         {activeTab === 'journal' && (
@@ -171,6 +173,7 @@ export function ActiveCampaignView({
             handleEditEntry={handleEditEntry} 
             handleViewEntry={handleViewEntry} 
             openNewEntryModal={openNewEntryModal} 
+            selectedCampaign={selectedCampaign}
           />
         )}
         {activeTab === 'monsters' && (

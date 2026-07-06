@@ -1,5 +1,6 @@
 import React from 'react';
 import { Map as MapIcon, Plus, Edit2, Trash2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface LocationListProps {
   locations: any[];
@@ -7,9 +8,18 @@ interface LocationListProps {
   handleDeleteLoc: (id: number) => void;
   openNewLocModal: () => void;
   handleViewLoc: (loc: any) => void;
+  selectedCampaign?: any;
 }
 
-export const LocationList: React.FC<LocationListProps> = ({ locations, handleEditLoc, handleDeleteLoc, openNewLocModal, handleViewLoc }) => {
+export const LocationList: React.FC<LocationListProps> = ({ 
+  locations, handleEditLoc, handleDeleteLoc, openNewLocModal, handleViewLoc, selectedCampaign 
+}) => {
+  const { user } = useAuth();
+
+  const canEditOrDelete = (loc: any) => {
+    return !user || !selectedCampaign || loc.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -36,12 +46,16 @@ export const LocationList: React.FC<LocationListProps> = ({ locations, handleEdi
               className="bg-surface-card border border-border-default rounded-lg overflow-hidden flex flex-col sm:flex-row hover:border-border-hover transition-colors group relative cursor-pointer"
             >
               <div className="absolute top-2 right-2 flex space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
-                <button onClick={(e) => { e.stopPropagation(); handleEditLoc(loc); }} className="p-2 bg-surface-card/80 hover:bg-accent2 rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
-                  <Edit2 size={16} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDeleteLoc(loc.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
-                  <Trash2 size={16} />
-                </button>
+                {canEditOrDelete(loc) && (
+                  <>
+                    <button onClick={(e) => { e.stopPropagation(); handleEditLoc(loc); }} className="p-2 bg-surface-card/80 hover:bg-accent2 rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                      <Edit2 size={16} />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDeleteLoc(loc.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                )}
               </div>
               <div className="sm:w-1/3 h-48 sm:h-auto bg-surface-hover/50 relative">
                 {loc.image_url ? (
