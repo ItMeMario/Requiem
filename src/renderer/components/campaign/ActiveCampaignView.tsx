@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { ArrowLeft, Users, Map as MapIcon, Book, Skull } from 'lucide-react';
 import { getThemeLabels } from '../../utils/themeLabels';
 import { AuthControls } from '../AuthControls';
@@ -56,6 +56,59 @@ export function ActiveCampaignView({
   setShowCollaboratorsModal
 }: ActiveCampaignViewProps) {
   const { user } = useAuth();
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    
+    const target = e.target as HTMLElement;
+    const tagName = target.tagName.toLowerCase();
+    if (
+      tagName === 'input' ||
+      tagName === 'textarea' ||
+      tagName === 'select' ||
+      target.isContentEditable ||
+      target.closest('.no-swipe') !== null
+    ) {
+      return;
+    }
+
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    if (e.changedTouches.length !== 1) return;
+
+    const diffX = e.changedTouches[0].clientX - touchStartX.current;
+    const diffY = e.changedTouches[0].clientY - touchStartY.current;
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+      const tabs: ('characters' | 'locations' | 'journal' | 'monsters')[] = [
+        'characters',
+        'locations',
+        'journal',
+        'monsters'
+      ];
+      const currentIndex = tabs.indexOf(activeTab);
+
+      if (diffX > 0) {
+        if (currentIndex > 0) {
+          setActiveTab(tabs[currentIndex - 1]);
+        }
+      } else {
+        if (currentIndex < tabs.length - 1) {
+          setActiveTab(tabs[currentIndex + 1]);
+        }
+      }
+    }
+  };
+
   const isOwner = selectedCampaign.ownerId === user?.uid || !selectedCampaign.ownerId;
 
   const isCyber = theme === 'cyberpunk';
@@ -143,7 +196,11 @@ export function ActiveCampaignView({
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-8">
+      <div 
+        className="flex-1 overflow-y-auto p-4 md:p-8"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {activeTab === 'characters' && (
           <CharacterList 
             characters={characters} 
