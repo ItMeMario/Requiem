@@ -1,0 +1,201 @@
+/* ==========================================
+   VAMPIRE GOTHIC GATE TRANSITION
+   ========================================== */
+
+/* Card transition: fades out, scales down, then fades in and scales up */
+.vampire-page-transition {
+  animation: vampirePageSeq 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes vampirePageSeq {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0) drop-shadow(0 0 0 rgba(0,0,0,0));
+  }
+  40% {
+    opacity: 0;
+    transform: scale(0.97);
+    filter: blur(4px) drop-shadow(0 0 15px rgba(139, 0, 0, 0.8));
+  }
+  60% {
+    opacity: 0;
+    transform: scale(0.97);
+    filter: blur(4px) drop-shadow(0 0 15px rgba(139, 0, 0, 0.8));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0) drop-shadow(0 0 0 rgba(0,0,0,0));
+  }
+}
+
+/* Gate Overlay Container */
+.vampire-gate-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Gate Doors */
+.vampire-gate-door {
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(135deg, #140b0b 0%, #070404 100%);
+  position: relative;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #2e1515;
+  border-bottom: 1px solid #2e1515;
+}
+
+.vampire-gate-door-left {
+  border-right: 3px double #5c1a1a;
+  transform: translateX(-100%);
+  animation: vampireGateLeftSeq 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  justify-content: flex-end;
+}
+
+.vampire-gate-door-right {
+  border-left: 3px double #5c1a1a;
+  transform: translateX(100%);
+  animation: vampireGateRightSeq 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  justify-content: flex-start;
+}
+
+/* Door filigree and panel details */
+.vampire-gate-door::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(139, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+/* Keyframes for sliding left door */
+@keyframes vampireGateLeftSeq {
+  0% {
+    transform: translateX(-100%);
+  }
+  38% {
+    transform: translateX(0);
+  }
+  62% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Keyframes for sliding right door */
+@keyframes vampireGateRightSeq {
+  0% {
+    transform: translateX(100%);
+  }
+  38% {
+    transform: translateX(0);
+  }
+  62% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Center Crest/Seal */
+.vampire-gate-crest-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vampireCrestSeq 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes vampireCrestSeq {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  35% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 15px #ff1a1a);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 25px #ff3333) brightness(1.2);
+  }
+  65% {
+    transform: translate(-50%, -50%) scale(0.9) rotate(-2deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 15px #ff1a1a);
+  }
+  95% {
+    transform: translate(-50%, -50%) scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* Blood Flash overlay */
+.vampire-gate-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.4) 0%, transparent 70%);
+  z-index: 105;
+  opacity: 0;
+  pointer-events: none;
+  animation: vampireFlashSeq 0.8s ease-in-out forwards;
+}
+
+@keyframes vampireFlashSeq {
+  0% {
+    opacity: 0;
+  }
+  38% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ==========================================
+   VAMPIRE PAGINATION CONTROLS
+   ========================================== */
+.vamp-pagination-btn {
+  color: #8b0000;
+  border: 1px solid rgba(139, 0, 0, 0.4);
+  background: rgba(139, 0, 0, 0.05);
+  text-shadow: 0 0 5px rgba(139, 0, 0, 0.4);
+  box-shadow: inset 0 0 8px rgba(139, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.vamp-pagination-btn:hover:not(:disabled) {
+  color: #ff3333;
+  border-color: #ff3333;
+  background: rgba(139, 0, 0, 0.15);
+  text-shadow: 0 0 8px rgba(255, 51, 51, 0.8);
+  box-shadow: 0 0 10px rgba(255, 51, 51, 0.3), inset 0 0 8px rgba(255, 51, 51, 0.1);
+}

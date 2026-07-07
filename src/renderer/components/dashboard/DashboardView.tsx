@@ -113,7 +113,7 @@ export function DashboardView({
     ...campaigns.map(camp => ({ type: 'campaign', data: camp }))
   ], [campaigns]);
 
-  const pageSize = ((theme === 'medieval' || theme === 'cyberpunk') && isMobile) ? 1 : 2;
+  const pageSize = ((theme === 'medieval' || theme === 'cyberpunk' || theme === 'vampire') && isMobile) ? 1 : 2;
   const totalPages = Math.ceil(items.length / pageSize);
 
   // Keep page index within valid bounds when resizing or campaigns are deleted
@@ -129,11 +129,22 @@ export function DashboardView({
       setIsTransitioning(true);
       
       const transitionDuration = isMobile ? 600 : 800; // Matches animation duration in CSS
-      setTimeout(() => {
-        setCurrentPage(prev => prev + 1);
-        setIsTransitioning(false);
-        setDirection(null);
-      }, transitionDuration);
+      if (theme === 'vampire') {
+        setTimeout(() => {
+          setCurrentPage(prev => prev + 1);
+        }, transitionDuration / 2);
+        
+        setTimeout(() => {
+          setIsTransitioning(false);
+          setDirection(null);
+        }, transitionDuration);
+      } else {
+        setTimeout(() => {
+          setCurrentPage(prev => prev + 1);
+          setIsTransitioning(false);
+          setDirection(null);
+        }, transitionDuration);
+      }
     }
   };
 
@@ -143,11 +154,22 @@ export function DashboardView({
       setIsTransitioning(true);
       
       const transitionDuration = isMobile ? 600 : 800; // Matches animation duration in CSS
-      setTimeout(() => {
-        setCurrentPage(prev => prev - 1);
-        setIsTransitioning(false);
-        setDirection(null);
-      }, transitionDuration);
+      if (theme === 'vampire') {
+        setTimeout(() => {
+          setCurrentPage(prev => prev - 1);
+        }, transitionDuration / 2);
+        
+        setTimeout(() => {
+          setIsTransitioning(false);
+          setDirection(null);
+        }, transitionDuration);
+      } else {
+        setTimeout(() => {
+          setCurrentPage(prev => prev - 1);
+          setIsTransitioning(false);
+          setDirection(null);
+        }, transitionDuration);
+      }
     }
   };
 
@@ -157,6 +179,47 @@ export function DashboardView({
       <div className="h-48 w-full rounded p-6 bg-[#f4eacc] border-[#5c3a21] border relative overflow-hidden shadow-md">
         <div className="absolute inset-0 bg-[#d4a373] mix-blend-multiply opacity-20 pointer-events-none" />
         <div className="absolute inset-2 border border-[#3e2723]/30 pointer-events-none rounded" />
+      </div>
+    );
+  };
+
+  // Render the gothic gate/doors closing and opening transition
+  const renderVampireGateOverlay = () => {
+    return (
+      <div className="vampire-gate-overlay">
+        {/* Left sliding door with gothic arch details */}
+        <div className="vampire-gate-door vampire-gate-door-left">
+          <svg className="absolute right-0 top-0 h-full w-24 text-[#3d1515] opacity-25" viewBox="0 0 100 500" preserveAspectRatio="none">
+            <path d="M100,0 C60,50 20,150 20,250 L20,500 L100,500" fill="none" stroke="currentColor" strokeWidth="3" />
+            <path d="M100,50 C75,90 40,170 40,250 L40,500" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5,5" />
+            <path d="M20,150 Q40,160 100,170 M20,200 Q40,210 100,220 M20,250 Q40,260 100,270" fill="none" stroke="currentColor" strokeWidth="1" />
+          </svg>
+        </div>
+
+        {/* Right sliding door with gothic arch details */}
+        <div className="vampire-gate-door vampire-gate-door-right">
+          <svg className="absolute left-0 top-0 h-full w-24 text-[#3d1515] opacity-25" viewBox="0 0 100 500" preserveAspectRatio="none">
+            <path d="M0,0 C40,50 80,150 80,250 L80,500 L0,500" fill="none" stroke="currentColor" strokeWidth="3" />
+            <path d="M0,50 C25,90 60,170 60,250 L60,500" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5,5" />
+            <path d="M80,150 Q60,160 0,170 M80,200 Q60,210 0,220 M80,250 Q60,260 0,270" fill="none" stroke="currentColor" strokeWidth="1" />
+          </svg>
+        </div>
+
+        {/* Glowing Red Vampire Ankh Crest in the center */}
+        <div className="vampire-gate-crest-container">
+          <div className="w-24 h-24 rounded-full bg-[#140808] border-4 border-[#5c1a1a] shadow-[0_0_20px_rgba(139,0,0,0.8)] flex items-center justify-center relative">
+            <div className="absolute inset-1 rounded-full border border-[#8b0000]/40 pointer-events-none" />
+            <svg width="48" height="48" viewBox="0 0 100 100" className="text-[#ff3333] drop-shadow-[0_0_8px_#ff3333]">
+              <path 
+                d="M50,15 C40,15 32,23 32,33 C32,45 42,53 47,56 L47,68 L35,68 L35,74 L47,74 L47,90 L53,90 L53,74 L65,74 L65,68 L53,68 L53,56 C58,53 68,45 68,33 C68,23 60,15 50,15 Z M50,21 C56,21 62,26 62,33 C62,40 54,47 50,50 C46,47 38,40 38,33 C38,26 44,21 50,21 Z" 
+                fill="currentColor" 
+              />
+            </svg>
+          </div>
+        </div>
+
+        {/* Crimson flash overlay when gates meet */}
+        <div className="vampire-gate-flash" />
       </div>
     );
   };
@@ -185,6 +248,21 @@ export function DashboardView({
               </div>
             </div>
             <span className="mt-28 text-sm font-bold tracking-widest z-20 bg-[#02050a]/80 backdrop-blur-md px-6 py-1.5 rounded-sm border border-[#0ff]/50 shadow-[0_0_10px_rgba(0,255,255,0.3)] group-hover:bg-[#0ff]/10 group-hover:border-[#0ff] transition-all">START NEW CAMPAIGN</span>
+          </button>
+        );
+      }
+
+      if (theme === 'vampire') {
+        return (
+          <button 
+            onClick={() => {
+              setNewCampaign({ name: '', genre: '', system: '' });
+              setShowCreateModal(true);
+            }}
+            className="h-48 rounded-xl bg-[#0d0d12] border border-[#1f1f2e] flex flex-col items-center justify-center text-[#555566] hover:text-[#d1d1d6] hover:border-[#3d3d4a] hover:shadow-[0_0_20px_rgba(0,0,0,0.6)] transition-all group relative overflow-hidden w-full"
+          >
+            <Plus size={48} strokeWidth={1.5} className="mb-4 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(255,0,0,0.5)] z-10" />
+            <span className="text-sm font-bold tracking-widest font-serif z-10">FORGE BLOODLINE</span>
           </button>
         );
       }
@@ -274,6 +352,63 @@ export function DashboardView({
       );
     }
 
+    if (theme === 'vampire') {
+      return (
+        <div
+          onClick={() => handleSelectCampaign(camp)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleSelectCampaign(camp);
+          }}
+          className="h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer relative overflow-hidden bg-[#0d0d12] border border-[#1f1f2e] hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(0,0,0,0.6)] hover:border-[#3d3d4a] w-full"
+        >
+          {/* Actions Container */}
+          <div className="absolute top-4 right-4 z-20 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex gap-1">
+            <button
+              onClick={(e) => handleEditCampaign(e, camp)}
+              className="p-1.5 rounded-md transition-colors text-[#555566] hover:text-[#d1d1d6] hover:bg-white/10"
+              title="Edit Campaign"
+            >
+              <Edit2 size={16} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteCampaign(camp.id, camp.name);
+              }}
+              className="p-1.5 rounded-md transition-colors text-[#555566] hover:text-[#ff3333] hover:bg-[#ff0000]/10"
+              title="Delete Campaign"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+
+          <div className="relative pointer-events-none z-10 flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-3 mb-2">
+              <span className="text-[#8b0000] text-2xl select-none flex items-center justify-center">☽☉☾</span>
+              <h3 className="text-xl font-bold truncate pr-8 text-[#ff3333] font-serif tracking-widest">{camp.name}</h3>
+            </div>
+            
+            {camp.genre && (
+              <span className="inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start bg-[#1f1f2e]/60 text-[#a0a0b0] border border-[#2a2a35]">
+                {camp.genre}
+              </span>
+            )}
+          </div>
+          
+          <div className="relative flex items-end text-sm mt-auto pointer-events-none z-10 justify-between pt-4 border-t border-[#1f1f2e] text-[#606070]">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mt-1 text-[#606070]">
+              {camp.system || 'Unknown System'}
+            </span>
+            <span className="font-semibold px-4 py-1.5 rounded transition-colors text-[#8b0000] tracking-widest text-xs hover:text-[#ff3333]">
+              ENTER &rarr;
+            </span>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         onClick={() => handleSelectCampaign(camp)}
@@ -331,9 +466,9 @@ export function DashboardView({
   let frontItem = null;
   let backItem = null;
 
-  if (theme === 'medieval' || theme === 'cyberpunk') {
+  if (theme === 'medieval' || theme === 'cyberpunk' || theme === 'vampire') {
     if (!isMobile) {
-      if (isTransitioning) {
+      if (isTransitioning && theme !== 'vampire') {
         if (direction === 'next') {
           // Turning forward:
           leftItem = items[currentPage * 2];
@@ -348,7 +483,7 @@ export function DashboardView({
           backItem = items[(currentPage - 1) * 2 + 1];
         }
       } else {
-        // Normal side-by-side display
+        // Normal side-by-side display (also used for vampire during transition)
         leftItem = items[currentPage * 2];
         rightItem = items[currentPage * 2 + 1];
       }
@@ -650,101 +785,142 @@ export function DashboardView({
               </div>
             )}
           </div>
-        ) : (
-          /* Original Grid Layout for default and vampire themes */
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-24 md:gap-y-12">
-            {theme === 'vampire' ? (
-              <button 
-                onClick={() => {
-                  setNewCampaign({ name: '', genre: '', system: '' });
-                  setShowCreateModal(true);
-                }}
-                className="h-48 rounded-xl bg-[#0d0d12] border border-[#1f1f2e] flex flex-col items-center justify-center text-[#555566] hover:text-[#d1d1d6] hover:border-[#3d3d4a] hover:shadow-[0_0_20px_rgba(0,0,0,0.6)] transition-all group relative overflow-hidden"
-              >
-                <Plus size={48} strokeWidth={1.5} className="mb-4 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(255,0,0,0.5)] z-10" />
-                <span className="text-sm font-bold tracking-widest font-serif z-10">FORGE BLOODLINE</span>
-              </button>
+        ) : theme === 'vampire' ? (
+          <div className="w-full">
+            {/* Main Vampire Gate Content */}
+            {isMobile ? (
+              /* Mobile Paging Layout (1 Card with Gate Transition) */
+              <div className="relative w-full min-h-[14rem] px-2 py-4 overflow-hidden">
+                <div className={`w-full max-w-[400px] mx-auto ${
+                  isTransitioning ? 'vampire-page-transition' : ''
+                }`}>
+                  {renderItem(leftItem)}
+                </div>
+                
+                {isTransitioning && renderVampireGateOverlay()}
+              </div>
             ) : (
-              <button 
-                onClick={() => {
-                  setNewCampaign({ name: '', genre: '', system: '' });
-                  setShowCreateModal(true);
-                }}
-                className="h-48 rounded-xl border-2 border-dashed border-border-default flex flex-col items-center justify-center text-muted hover:text-accent-text hover:border-accent hover:bg-surface-hover transition-all group"
-              >
-                <Plus size={36} className="mb-4 text-accent2-text group-hover:text-accent-text transition-colors" />
-                <span className="text-lg font-semibold border-b border-transparent group-hover:border-accent-text transition-colors">Start New Campaign</span>
-              </button>
-            )}
-
-            {campaigns.map(camp => {
-              const isVamp = theme === 'vampire';
-
-              return (
-                <div
-                  key={camp.id}
-                  onClick={() => handleSelectCampaign(camp)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') handleSelectCampaign(camp);
-                  }}
-                  className={
-                    isVamp
-                      ? 'h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer relative overflow-hidden bg-[#0d0d12] border border-[#1f1f2e] hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(0,0,0,0.6)] hover:border-[#3d3d4a]'
-                      : 'h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer bg-surface-elevated border border-border-subtle hover:shadow-lg hover:border-accent hover:-translate-y-1 relative overflow-hidden'
-                  }
-                >
-                  {!isVamp && <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />}
-                  
-                  {/* Actions Container */}
-                  <div className="absolute top-4 right-4 z-20 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex gap-1">
-                    <button
-                      onClick={(e) => handleEditCampaign(e, camp)}
-                      className={`p-1.5 rounded-md transition-colors ${
-                        isVamp ? 'text-[#555566] hover:text-[#d1d1d6] hover:bg-[#ffffff]/10' : 
-                        'text-muted hover:text-accent-text hover:bg-surface-hover'
-                      }`}
-                      title="Edit Campaign"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCampaign(camp.id, camp.name);
-                      }}
-                      className={`p-1.5 rounded-md transition-colors ${
-                        isVamp ? 'text-[#555566] hover:text-[#ff3333] hover:bg-[#ff0000]/10' : 
-                        'text-muted hover:text-red-500 hover:bg-red-500/10'
-                      }`}
-                      title="Delete Campaign"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-
-                  <div className="relative pointer-events-none z-10 flex-1 flex flex-col justify-center">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <span className={`${isVamp ? 'text-[#8b0000]' : 'text-accent-text'} text-2xl select-none flex items-center justify-center`}>☽☉☾</span>
-                      <h3 className={`text-xl font-bold truncate pr-8 ${isVamp ? 'text-[#ff3333] font-serif tracking-widest' : 'text-heading'}`}>{camp.name}</h3>
+              /* Desktop/Tablet Paging Layout (2 Cards with Gate Transition) */
+              <div className="relative w-full min-h-[14rem] overflow-hidden">
+                <div className={`grid grid-cols-2 gap-x-24 gap-y-12 w-full ${
+                  isTransitioning ? 'vampire-page-transition' : ''
+                }`}>
+                  {/* Left Column */}
+                  <div className="w-full flex justify-end pr-12">
+                    <div className="w-full max-w-[400px]">
+                      {renderItem(leftItem)}
                     </div>
-                    
-                    {camp.genre && <span className={`inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start ${isVamp ? 'bg-[#1f1f2e]/60 text-[#a0a0b0] border border-[#2a2a35]' : 'bg-surface-deep text-secondary'}`}>{camp.genre}</span>}
                   </div>
                   
-                  <div className={`relative flex items-end text-sm mt-auto pointer-events-none z-10 ${
-                    isVamp ? 'justify-between pt-4 border-t border-[#1f1f2e] text-[#606070]' : 
-                    'justify-between pt-4 border-t border-border-subtle text-faint'
-                  }`}>
-                    <span className={isVamp ? 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mt-1 text-[#606070]' : ''}>{camp.system || 'Unknown System'}</span>
-                    <span className={`font-semibold px-4 py-1.5 rounded transition-colors ${isVamp ? 'text-[#8b0000] tracking-widest text-xs hover:text-[#ff3333]' : 'group-hover:text-accent-text'}`}>
-                      {isVamp ? 'ENTER' : 'Enter'} &rarr;
-                    </span>
+                  {/* Right Column */}
+                  <div className="w-full flex justify-start pl-12">
+                    <div className="w-full max-w-[400px]">
+                      {renderItem(rightItem)}
+                    </div>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Sliding Tomb Gates Overlay */}
+                {isTransitioning && renderVampireGateOverlay()}
+              </div>
+            )}
+
+            {/* Vampire Pagination Footer */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-12 px-4 md:px-8 font-serif text-[#8b0000]">
+                <button
+                  disabled={currentPage === 0 || isTransitioning}
+                  onClick={goToPrevPage}
+                  className="vamp-pagination-btn flex items-center justify-center p-3 rounded-full disabled:opacity-30 disabled:hover:border-transparent transition-all text-[#8b0000] select-none"
+                  title="Previous Bloodline"
+                  style={{ minWidth: '44px', minHeight: '44px' }}
+                >
+                  <ChevronLeft size={24} strokeWidth={2.5} />
+                  <span className="hidden sm:inline ml-1 uppercase tracking-wider text-xs md:text-sm font-semibold">☽ Prev ☾</span>
+                </button>
+                
+                <div className="text-center font-bold tracking-widest uppercase text-xs md:text-sm select-none text-[#ff3333]">
+                  ☽ Page {toRoman(currentPage + 1)} / {toRoman(totalPages)} ☾
+                </div>
+                
+                <button
+                  disabled={currentPage >= totalPages - 1 || isTransitioning}
+                  onClick={goToNextPage}
+                  className="vamp-pagination-btn flex items-center justify-center p-3 rounded-full disabled:opacity-30 disabled:hover:border-transparent transition-all text-[#8b0000] select-none"
+                  title="Next Bloodline"
+                  style={{ minWidth: '44px', minHeight: '44px' }}
+                >
+                  <span className="hidden sm:inline mr-1 uppercase tracking-wider text-xs md:text-sm font-semibold">☽ Next ☾</span>
+                  <ChevronRight size={24} strokeWidth={2.5} />
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Original Grid Layout for default theme */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-24 md:gap-y-12">
+            <button 
+              onClick={() => {
+                setNewCampaign({ name: '', genre: '', system: '' });
+                setShowCreateModal(true);
+              }}
+              className="h-48 rounded-xl border-2 border-dashed border-border-default flex flex-col items-center justify-center text-muted hover:text-accent-text hover:border-accent hover:bg-surface-hover transition-all group"
+            >
+              <Plus size={36} className="mb-4 text-accent2-text group-hover:text-accent-text transition-colors" />
+              <span className="text-lg font-semibold border-b border-transparent group-hover:border-accent-text transition-colors">Start New Campaign</span>
+            </button>
+
+            {campaigns.map(camp => (
+              <div
+                key={camp.id}
+                onClick={() => handleSelectCampaign(camp)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') handleSelectCampaign(camp);
+                }}
+                className="h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer bg-surface-elevated border border-border-subtle hover:shadow-lg hover:border-accent hover:-translate-y-1 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                
+                {/* Actions Container */}
+                <div className="absolute top-4 right-4 z-20 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex gap-1">
+                  <button
+                    onClick={(e) => handleEditCampaign(e, camp)}
+                    className="p-1.5 rounded-md transition-colors text-muted hover:text-accent-text hover:bg-surface-hover"
+                    title="Edit Campaign"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCampaign(camp.id, camp.name);
+                    }}
+                    className="p-1.5 rounded-md transition-colors text-muted hover:text-red-500 hover:bg-red-500/10"
+                    title="Delete Campaign"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
+                <div className="relative pointer-events-none z-10 flex-1 flex flex-col justify-center">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <span className="text-accent-text text-2xl select-none flex items-center justify-center">☽☉☾</span>
+                    <h3 className="text-xl font-bold truncate pr-8 text-heading">{camp.name}</h3>
+                  </div>
+                  
+                  {camp.genre && <span className="inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start bg-surface-deep text-secondary">{camp.genre}</span>}
+                </div>
+                
+                <div className="relative flex items-end text-sm mt-auto pointer-events-none z-10 justify-between pt-4 border-t border-border-subtle text-faint">
+                  <span>{camp.system || 'Unknown System'}</span>
+                  <span className="font-semibold px-4 py-1.5 rounded transition-colors group-hover:text-accent-text">
+                    Enter &rarr;
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
