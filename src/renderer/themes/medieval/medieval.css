@@ -267,3 +267,148 @@
   @apply absolute top-[80px] md:top-[120px] bottom-2 md:bottom-6 right-1 md:right-8 w-2 bg-gradient-to-l from-black/20 to-transparent;
 }
 
+/* ============================================================
+   3D BOOK PAGE FLIP ANIMATIONS
+   ============================================================ */
+.book-pages-container {
+  perspective: 1500px;
+  position: relative;
+  width: 100%;
+}
+
+.book-page-flipping {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  transform-style: preserve-3d;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.book-page-flipping.to-left {
+  right: 0;
+  transform-origin: left center;
+  animation: flipToLeft 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+.book-page-flipping.to-right {
+  left: 0;
+  transform-origin: right center;
+  animation: flipToRight 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+@keyframes flipToLeft {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(-180deg);
+  }
+}
+
+@keyframes flipToRight {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+.book-page-flipping-front,
+.book-page-flipping-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-page-flipping-back {
+  transform: rotateY(180deg);
+}
+
+/* Shading sweep effect on folding pages */
+.book-page-flipping-front::after,
+.book-page-flipping-back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: black;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+.book-page-flipping.to-left .book-page-flipping-front::after {
+  animation: pageShadowFront 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+.book-page-flipping.to-left .book-page-flipping-back::after {
+  animation: pageShadowBack 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+.book-page-flipping.to-right .book-page-flipping-front::after {
+  animation: pageShadowFront 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+.book-page-flipping.to-right .book-page-flipping-back::after {
+  animation: pageShadowBack 0.8s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+@keyframes pageShadowFront {
+  0% { opacity: 0; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+
+@keyframes pageShadowBack {
+  0% { opacity: 0; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+
+/* Mobile Paging Transitions (3D single page flip) */
+.mobile-book-container {
+  perspective: 1200px;
+  position: relative;
+  width: 100%;
+}
+
+.mobile-page-flipping {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.mobile-page-flipping.flip-out {
+  transform-origin: left center;
+  animation: mobileFlipOut 0.6s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+.mobile-page-flipping.flip-in {
+  transform-origin: left center;
+  animation: mobileFlipIn 0.6s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+@keyframes mobileFlipOut {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(-180deg);
+  }
+}
+
+@keyframes mobileFlipIn {
+  0% {
+    transform: rotateY(-180deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+
+

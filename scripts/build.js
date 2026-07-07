@@ -14,9 +14,9 @@ try {
     
     // Sync capacitor and build APK
     if (isDev) {
-      execSync('npm run cap:sync:dev && cd android && gradlew.bat assembleDebug', { stdio: 'inherit', cwd: rootDir });
+      execSync('npm run cap:sync:dev && cd android && gradlew.bat clean assembleDebug', { stdio: 'inherit', cwd: rootDir });
     } else {
-      execSync('npm run cap:sync && cd android && gradlew.bat assembleRelease', { stdio: 'inherit', cwd: rootDir });
+      execSync('npm run cap:sync && cd android && gradlew.bat clean assembleRelease', { stdio: 'inherit', cwd: rootDir });
     }
     
     // Create dist/mobile and copy APK
