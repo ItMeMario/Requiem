@@ -81,6 +81,7 @@ export function DashboardView({
   const [currentPage, setCurrentPage] = React.useState(0);
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   const [direction, setDirection] = React.useState<'next' | 'prev' | null>(null);
+  const [cyberLogs, setCyberLogs] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -90,12 +91,29 @@ export function DashboardView({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  React.useEffect(() => {
+    if (theme === 'cyberpunk' && isTransitioning) {
+      const logs = [
+        'INIT_SEQUENCE_LOAD: CAMPAIGN_INDEX',
+        `CONNECTING TO SECURE SECTOR_0x${Math.floor(Math.random()*16777215).toString(16).toUpperCase()}`,
+        'PROTOCOL: RSA_4096_GCM_DECRYPT',
+        'SYS_MEM_ALLOC: 4096B [STATUS: OK]',
+        'DECRYPTING ACCESS KEYS...',
+        'AUTHORIZATION: ACCESS GRANTED',
+        'COMPILING DATA ENTRIES...',
+        'RECONSTRUCTING CHRONICLES MAIN NODE',
+        'LOG: DATA STREAM STABILIZED'
+      ];
+      setCyberLogs(logs);
+    }
+  }, [isTransitioning, theme]);
+
   const items = React.useMemo(() => [
     { type: 'create' },
     ...campaigns.map(camp => ({ type: 'campaign', data: camp }))
   ], [campaigns]);
 
-  const pageSize = (theme === 'medieval' && isMobile) ? 1 : 2;
+  const pageSize = ((theme === 'medieval' || theme === 'cyberpunk') && isMobile) ? 1 : 2;
   const totalPages = Math.ceil(items.length / pageSize);
 
   // Keep page index within valid bounds when resizing or campaigns are deleted
@@ -146,7 +164,31 @@ export function DashboardView({
   // Select campaign card rendering helper
   const renderItem = (item: any) => {
     if (!item) return <div className="h-48 invisible" />; // Placeholder to keep layout height
+    
     if (item.type === 'create') {
+      if (theme === 'cyberpunk') {
+        return (
+          <button 
+            onClick={() => {
+              setNewCampaign({ name: '', genre: '', system: '' });
+              setShowCreateModal(true);
+            }}
+            className="h-48 rounded-xl cyber-smoked-glass flex flex-col items-center justify-center text-[#0ff] hover:text-white hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-all group overflow-hidden relative w-full"
+          >
+            <div className="micro-circuit-pattern" />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div className="absolute w-36 h-36 border border-[#0ff]/10 rounded-full animate-[spin_20s_linear_infinite]" />
+              <div className="absolute w-24 h-24 border-[2px] border-dashed border-[#0ff]/30 rounded-full animate-[spin_10s_linear_infinite_reverse]" />
+              <div className="absolute w-12 h-12 bg-[#02050a] border border-[#0ff] rounded-full shadow-[0_0_15px_rgba(0,255,255,0.6)] flex items-center justify-center group-hover:scale-110 group-hover:border-[#b400ff] transition-all duration-300">
+                <div className="w-3 h-3 bg-[#0ff] group-hover:bg-[#b400ff] rounded-sm animate-pulse" />
+                <div className="absolute inset-0 rounded-full border border-[#0ff]/50 animate-ping" style={{ animationDuration: '3s' }} />
+              </div>
+            </div>
+            <span className="mt-28 text-sm font-bold tracking-widest z-20 bg-[#02050a]/80 backdrop-blur-md px-6 py-1.5 rounded-sm border border-[#0ff]/50 shadow-[0_0_10px_rgba(0,255,255,0.3)] group-hover:bg-[#0ff]/10 group-hover:border-[#0ff] transition-all">START NEW CAMPAIGN</span>
+          </button>
+        );
+      }
+      
       return (
         <button 
           onClick={() => {
@@ -171,6 +213,67 @@ export function DashboardView({
     }
 
     const camp = item.data;
+    if (theme === 'cyberpunk') {
+      return (
+        <div
+          onClick={() => handleSelectCampaign(camp)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleSelectCampaign(camp);
+          }}
+          className="h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer cyber-smoked-glass hover:border-[#0ff]/80 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] relative overflow-hidden w-full"
+        >
+          <div className="micro-circuit-pattern" />
+          
+          {/* Actions Container */}
+          <div className="absolute top-4 right-4 z-20 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex gap-1">
+            <button
+              onClick={(e) => handleEditCampaign(e, camp)}
+              className="p-1.5 rounded-md transition-colors text-[#0ff] hover:bg-[#0ff]/20"
+              title="Edit Campaign"
+            >
+              <Edit2 size={16} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteCampaign(camp.id, camp.name);
+              }}
+              className="p-1.5 rounded-md transition-colors text-[#ff003c] hover:bg-[#ff003c]/20"
+              title="Delete Campaign"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+
+          <div className="relative pointer-events-none z-10 flex-1 flex flex-col justify-center">
+            <div className="flex items-center space-x-3 mb-2">
+              <span className="text-[#0ff] text-2xl select-none flex items-center justify-center">☽☉☾</span>
+              <h3 className="text-xl font-bold truncate pr-8 text-[#0ff] tracking-wider">{camp.name}</h3>
+            </div>
+            
+            {camp.genre && (
+              <span className="inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start cyber-glowing-pill text-cyan-glitch">
+                {camp.genre}
+              </span>
+            )}
+          </div>
+          
+          <div className="absolute bottom-4 left-6 text-[10px] text-[#0ff]/40 font-mono">v.1.{camp.id} | RAD DX</div>
+          
+          <div className="relative flex items-end text-sm mt-auto pointer-events-none z-10 justify-between pt-4 border-t border-[#0ff]/30 text-[#0ff]/70">
+            <span className="cyber-glowing-pill px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mt-1">
+              {camp.system || 'Unknown System'}
+            </span>
+            <span className="font-semibold px-4 py-1.5 rounded transition-colors cyber-enter-btn text-xs tracking-widest">
+              ENTER &rarr;
+            </span>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         onClick={() => handleSelectCampaign(camp)}
@@ -228,7 +331,7 @@ export function DashboardView({
   let frontItem = null;
   let backItem = null;
 
-  if (theme === 'medieval') {
+  if (theme === 'medieval' || theme === 'cyberpunk') {
     if (!isMobile) {
       if (isTransitioning) {
         if (direction === 'next') {
@@ -431,7 +534,7 @@ export function DashboardView({
                 <button
                   disabled={currentPage === 0 || isTransitioning}
                   onClick={goToPrevPage}
-                  className="flex items-center justify-center p-3 rounded-full hover:bg-[#8b4513]/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all text-[#8b4513] select-none"
+                  className="flex items-center justify-center p-3 rounded-full hover:bg-[#8b4513]/10 disabled:opacity-30 disabled:hover:border-transparent transition-all text-[#8b4513] select-none"
                   title="Previous Page"
                   style={{ minWidth: '44px', minHeight: '44px' }}
                 >
@@ -446,7 +549,7 @@ export function DashboardView({
                 <button
                   disabled={currentPage >= totalPages - 1 || isTransitioning}
                   onClick={goToNextPage}
-                  className="flex items-center justify-center p-3 rounded-full hover:bg-[#8b4513]/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all text-[#8b4513] select-none"
+                  className="flex items-center justify-center p-3 rounded-full hover:bg-[#8b4513]/10 disabled:opacity-30 disabled:hover:border-transparent transition-all text-[#8b4513] select-none"
                   title="Next Page"
                   style={{ minWidth: '44px', minHeight: '44px' }}
                 >
@@ -456,30 +559,101 @@ export function DashboardView({
               </div>
             )}
           </div>
-        ) : (
-          /* Original Grid Layout for other themes */
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-24 md:gap-y-12">
-            {/* Start New Campaign button depending on theme */}
-            {theme === 'cyberpunk' ? (
-              <button 
-                onClick={() => {
-                  setNewCampaign({ name: '', genre: '', system: '' });
-                  setShowCreateModal(true);
-                }}
-                className="h-48 rounded-xl cyber-smoked-glass flex flex-col items-center justify-center text-[#0ff] hover:text-white hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] transition-all group overflow-hidden relative"
-              >
-                <div className="micro-circuit-pattern" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                  <div className="absolute w-36 h-36 border border-[#0ff]/10 rounded-full animate-[spin_20s_linear_infinite]" />
-                  <div className="absolute w-24 h-24 border-[2px] border-dashed border-[#0ff]/30 rounded-full animate-[spin_10s_linear_infinite_reverse]" />
-                  <div className="absolute w-12 h-12 bg-[#02050a] border border-[#0ff] rounded-full shadow-[0_0_15px_rgba(0,255,255,0.6)] flex items-center justify-center group-hover:scale-110 group-hover:border-[#b400ff] transition-all duration-300">
-                    <div className="w-3 h-3 bg-[#0ff] group-hover:bg-[#b400ff] rounded-sm animate-pulse" />
-                    <div className="absolute inset-0 rounded-full border border-[#0ff]/50 animate-ping" style={{ animationDuration: '3s' }} />
+        ) : theme === 'cyberpunk' ? (
+          <div className="w-full">
+            {/* Main Cyberpunk Console Content */}
+            {isMobile ? (
+              /* Mobile Paging Layout (1 Card with Glitch & Overlay) */
+              <div className="relative w-full min-h-[14rem] px-2 py-4 overflow-hidden">
+                <div className={`w-full max-w-[400px] mx-auto ${
+                  isTransitioning ? (direction === 'next' ? 'cyber-glitch-out' : 'cyber-glitch-in') : ''
+                }`}>
+                  {renderItem(leftItem)}
+                </div>
+                
+                {isTransitioning && (
+                  <div className="cyber-terminal-overlay w-full max-w-[400px] mx-auto">
+                    <div className="cyber-code-scroll text-[#0ff] font-mono text-xs select-none">
+                      {cyberLogs.map((log, i) => (
+                        <div key={i} className="truncate">
+                          &gt; {log}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Desktop/Tablet Paging Layout (2 Cards with Glitch & Overlay) */
+              <div className="relative w-full min-h-[14rem] overflow-hidden">
+                <div className={`grid grid-cols-2 gap-x-24 gap-y-12 w-full ${
+                  isTransitioning ? (direction === 'next' ? 'cyber-glitch-out' : 'cyber-glitch-in') : ''
+                }`}>
+                  {/* Left Column */}
+                  <div className="w-full flex justify-end pr-12">
+                    <div className="w-full max-w-[400px]">
+                      {renderItem(leftItem)}
+                    </div>
+                  </div>
+                  
+                  {/* Right Column */}
+                  <div className="w-full flex justify-start pl-12">
+                    <div className="w-full max-w-[400px]">
+                      {renderItem(rightItem)}
+                    </div>
                   </div>
                 </div>
-                <span className="mt-28 text-sm font-bold tracking-widest z-20 bg-[#02050a]/80 backdrop-blur-md px-6 py-1.5 rounded-sm border border-[#0ff]/50 shadow-[0_0_10px_rgba(0,255,255,0.3)] group-hover:bg-[#0ff]/10 group-hover:border-[#0ff] transition-all">START NEW CAMPAIGN</span>
-              </button>
-            ) : theme === 'vampire' ? (
+
+                {/* Scrolling Terminal Code Stream Overlay */}
+                {isTransitioning && (
+                  <div className="cyber-terminal-overlay">
+                    <div className="cyber-code-scroll text-[#0ff] font-mono text-xs select-none">
+                      {cyberLogs.map((log, i) => (
+                        <div key={i} className="truncate">
+                          &gt; {log}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Cyberpunk Pagination Footer */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-12 px-4 md:px-8 font-mono text-[#0ff]">
+                <button
+                  disabled={currentPage === 0 || isTransitioning}
+                  onClick={goToPrevPage}
+                  className="cyber-pagination-btn flex items-center justify-center p-3 rounded-sm disabled:opacity-30 disabled:hover:border-[#0ff]/30 transition-all uppercase tracking-wider text-xs font-semibold select-none"
+                  title="Previous Sector"
+                  style={{ minWidth: '44px', minHeight: '44px' }}
+                >
+                  <ChevronLeft size={20} strokeWidth={2.5} />
+                  <span className="hidden sm:inline ml-1">[PREV_DIR]</span>
+                </button>
+                
+                <div className="text-center font-bold tracking-widest uppercase text-xs md:text-sm select-none">
+                  SEC_{(currentPage + 1).toString().padStart(2, '0')} // SEC_{totalPages.toString().padStart(2, '0')}
+                </div>
+                
+                <button
+                  disabled={currentPage >= totalPages - 1 || isTransitioning}
+                  onClick={goToNextPage}
+                  className="cyber-pagination-btn flex items-center justify-center p-3 rounded-sm disabled:opacity-30 disabled:hover:border-[#0ff]/30 transition-all uppercase tracking-wider text-xs font-semibold select-none"
+                  title="Next Sector"
+                  style={{ minWidth: '44px', minHeight: '44px' }}
+                >
+                  <span className="hidden sm:inline mr-1">[NEXT_DIR]</span>
+                  <ChevronRight size={20} strokeWidth={2.5} />
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Original Grid Layout for default and vampire themes */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-24 md:gap-y-12">
+            {theme === 'vampire' ? (
               <button 
                 onClick={() => {
                   setNewCampaign({ name: '', genre: '', system: '' });
@@ -504,7 +678,6 @@ export function DashboardView({
             )}
 
             {campaigns.map(camp => {
-              const isCyber = theme === 'cyberpunk';
               const isVamp = theme === 'vampire';
 
               return (
@@ -517,22 +690,18 @@ export function DashboardView({
                     if (e.key === 'Enter' || e.key === ' ') handleSelectCampaign(camp);
                   }}
                   className={
-                    isCyber 
-                      ? 'h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer cyber-smoked-glass hover:border-[#0ff]/80 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]' 
-                      : isVamp
+                    isVamp
                       ? 'h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer relative overflow-hidden bg-[#0d0d12] border border-[#1f1f2e] hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(0,0,0,0.6)] hover:border-[#3d3d4a]'
                       : 'h-48 text-left rounded-xl p-6 flex flex-col justify-between transition-all group cursor-pointer bg-surface-elevated border border-border-subtle hover:shadow-lg hover:border-accent hover:-translate-y-1 relative overflow-hidden'
                   }
                 >
-                  {!isCyber && !isVamp && <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />}
-                  {isCyber && <div className="micro-circuit-pattern" />}
+                  {!isVamp && <div className="absolute inset-0 bg-gradient-to-br from-transparent to-surface-hover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />}
                   
                   {/* Actions Container */}
                   <div className="absolute top-4 right-4 z-20 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex gap-1">
                     <button
                       onClick={(e) => handleEditCampaign(e, camp)}
                       className={`p-1.5 rounded-md transition-colors ${
-                        isCyber ? 'text-[#0ff] hover:bg-[#0ff]/20' : 
                         isVamp ? 'text-[#555566] hover:text-[#d1d1d6] hover:bg-[#ffffff]/10' : 
                         'text-muted hover:text-accent-text hover:bg-surface-hover'
                       }`}
@@ -546,7 +715,6 @@ export function DashboardView({
                         handleDeleteCampaign(camp.id, camp.name);
                       }}
                       className={`p-1.5 rounded-md transition-colors ${
-                        isCyber ? 'text-[#ff003c] hover:bg-[#ff003c]/20' : 
                         isVamp ? 'text-[#555566] hover:text-[#ff3333] hover:bg-[#ff0000]/10' : 
                         'text-muted hover:text-red-500 hover:bg-red-500/10'
                       }`}
@@ -558,23 +726,20 @@ export function DashboardView({
 
                   <div className="relative pointer-events-none z-10 flex-1 flex flex-col justify-center">
                     <div className="flex items-center space-x-3 mb-2">
-                      <span className={`${isCyber ? 'text-[#0ff]' : isVamp ? 'text-[#8b0000]' : 'text-accent-text'} text-2xl select-none flex items-center justify-center`}>☽☉☾</span>
-                      <h3 className={`text-xl font-bold truncate pr-8 ${isCyber ? 'text-[#0ff] tracking-wider' : isVamp ? 'text-[#ff3333] font-serif tracking-widest' : 'text-heading'}`}>{camp.name}</h3>
+                      <span className={`${isVamp ? 'text-[#8b0000]' : 'text-accent-text'} text-2xl select-none flex items-center justify-center`}>☽☉☾</span>
+                      <h3 className={`text-xl font-bold truncate pr-8 ${isVamp ? 'text-[#ff3333] font-serif tracking-widest' : 'text-heading'}`}>{camp.name}</h3>
                     </div>
                     
-                    {camp.genre && <span className={`inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start ${isCyber ? 'cyber-glowing-pill text-cyan-glitch' : isVamp ? 'bg-[#1f1f2e]/60 text-[#a0a0b0] border border-[#2a2a35]' : 'bg-surface-deep text-secondary'}`}>{camp.genre}</span>}
+                    {camp.genre && <span className={`inline-block mt-2 px-3 py-1 text-[11px] rounded uppercase tracking-wider font-bold self-start ${isVamp ? 'bg-[#1f1f2e]/60 text-[#a0a0b0] border border-[#2a2a35]' : 'bg-surface-deep text-secondary'}`}>{camp.genre}</span>}
                   </div>
                   
-                  {isCyber && <div className="absolute bottom-4 left-6 text-[10px] text-[#0ff]/40 font-mono">v.1.{camp.id} | RAD DX</div>}
-                  
                   <div className={`relative flex items-end text-sm mt-auto pointer-events-none z-10 ${
-                    isCyber ? 'justify-between pt-4 border-t border-[#0ff]/30 text-[#0ff]/70' : 
                     isVamp ? 'justify-between pt-4 border-t border-[#1f1f2e] text-[#606070]' : 
                     'justify-between pt-4 border-t border-border-subtle text-faint'
                   }`}>
-                    <span className={isCyber ? 'cyber-glowing-pill px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mt-1' : isVamp ? 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mt-1 text-[#606070]' : ''}>{camp.system || 'Unknown System'}</span>
-                    <span className={`font-semibold px-4 py-1.5 rounded transition-colors ${isCyber ? 'cyber-enter-btn text-xs tracking-widest' : isVamp ? 'text-[#8b0000] tracking-widest text-xs hover:text-[#ff3333]' : 'group-hover:text-accent-text'}`}>
-                      {(isCyber || isVamp) ? 'ENTER' : 'Enter'} &rarr;
+                    <span className={isVamp ? 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest mt-1 text-[#606070]' : ''}>{camp.system || 'Unknown System'}</span>
+                    <span className={`font-semibold px-4 py-1.5 rounded transition-colors ${isVamp ? 'text-[#8b0000] tracking-widest text-xs hover:text-[#ff3333]' : 'group-hover:text-accent-text'}`}>
+                      {isVamp ? 'ENTER' : 'Enter'} &rarr;
                     </span>
                   </div>
                 </div>

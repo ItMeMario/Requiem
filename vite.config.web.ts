@@ -3,10 +3,13 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { resolve } from 'path';
 
+const isCapacitor = process.env.CAPACITOR_BUILD === 'true';
+
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      disable: isCapacitor,
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}'],
