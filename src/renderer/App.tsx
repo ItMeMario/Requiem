@@ -15,9 +15,7 @@ import { useLocationManager } from './hooks/location/useLocationManager';
 import { useEntryManager } from './hooks/entry/useEntryManager';
 
 // Modular Presentation Components
-import { ThemeSwitcher } from './components/ThemeSwitcher';
-import { DatabaseControls } from './components/DatabaseControls';
-import { AuthControls } from './components/AuthControls';
+import { SettingsPanel } from './components/SettingsPanel';
 import { ThemeLayout } from './components/layout/ThemeLayout';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { ActiveCampaignView } from './components/campaign/ActiveCampaignView';
@@ -149,13 +147,7 @@ function App() {
 
   return (
     <>
-      <ThemeSwitcher size="md" />
-      <DatabaseControls />
-      {isConfigured && (
-        <div className={`block sm:hidden fixed bottom-36 right-4 z-[100] p-1.5 ${theme === 'cyberpunk' ? 'bg-transparent' : theme === 'vampire' ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`}>
-          <AuthControls />
-        </div>
-      )}
+      <SettingsPanel />
       {dbError && (
         <div className="fixed top-0 left-0 right-0 z-[10000] bg-red-900 text-white p-3 text-xs font-mono break-all">
           <strong>DB Error:</strong> {dbError}

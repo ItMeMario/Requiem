@@ -4,14 +4,17 @@ import { useTheme } from '../context/ThemeContext';
 
 interface ThemeSwitcherProps {
   size?: 'sm' | 'md';
+  inline?: boolean;
 }
 
-export function ThemeSwitcher({ size = 'md' }: ThemeSwitcherProps) {
+export function ThemeSwitcher({ size = 'md', inline = false }: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme();
 
   const isSmall = size === 'sm';
   const isCyber = theme === 'cyberpunk';
-  const containerClass = `fixed bottom-20 sm:bottom-auto sm:top-4 right-4 z-[100] flex gap-1.5 ${isSmall ? 'p-1 scale-90 origin-right' : 'p-1.5'} ${isCyber ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`;
+  const containerClass = inline
+    ? "flex gap-2 justify-center w-full"
+    : `fixed bottom-20 sm:bottom-auto sm:top-4 right-4 z-[100] flex gap-1.5 ${isSmall ? 'p-1 scale-90 origin-right' : 'p-1.5'} ${isCyber ? 'bg-transparent' : 'bg-black/60 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl'}`;
   
   const buttonClass = (targetTheme: string) => {
     // Base button styles: size and shape
