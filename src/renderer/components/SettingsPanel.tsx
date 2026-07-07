@@ -10,7 +10,7 @@ export function SettingsPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme } = useTheme();
   const { isConfigured } = useAuth();
-  
+
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -25,7 +25,7 @@ export function SettingsPanel() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        panelRef.current && 
+        panelRef.current &&
         !panelRef.current.contains(event.target as Node) &&
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
@@ -61,7 +61,7 @@ export function SettingsPanel() {
   const getPanelClass = () => {
     const base = '!fixed bottom-20 right-4 z-[101] w-80 max-w-[calc(100vw-2rem)] p-5 transition-all duration-300 transform shadow-2xl';
     const visibility = isOpen ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 translate-y-4 scale-95 pointer-events-none';
-    
+
     if (isCyber) {
       return `${base} ${visibility} cyber-smoked-glass border-[#0ff]/50 bg-[#050c18]/95 text-[#0ff] shadow-[0_0_30px_rgba(0,255,255,0.35)] font-mono`;
     }
@@ -85,8 +85,8 @@ export function SettingsPanel() {
   // Panel title text
   const getPanelHeader = () => {
     if (isCyber) return '[SYS_SETTINGS]';
-    if (isVamp) return 'Ajustes Góticos';
-    if (isMed) return 'Ajustes da Campanha';
+    if (isVamp) return 'Ajustes Sombrios';
+    if (isMed) return 'Ajustes na Trama';
     return 'Settings';
   };
 
@@ -115,8 +115,8 @@ export function SettingsPanel() {
         {/* Panel Header */}
         <div className="flex items-center justify-between border-b pb-2 mb-4 border-current/10">
           <span className="text-sm font-bold tracking-wider">{getPanelHeader()}</span>
-          <button 
-            onClick={() => setIsOpen(false)} 
+          <button
+            onClick={() => setIsOpen(false)}
             className="opacity-60 hover:opacity-100 transition-opacity p-0.5"
             title="Fechar"
           >
