@@ -96,7 +96,7 @@ export async function exportToSQLite(data: { campaigns: any[], characters: any[]
   // Insert locations
   for (const loc of data.locations) {
     db.run(
-      'INSERT INTO locations (id, campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO locations (id, campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         loc.id, loc.campaign_id, loc.name, loc.region ?? null, loc.type ?? null,
         loc.description ?? null, loc.lore ?? null, loc.present_npcs ?? null,
