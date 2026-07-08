@@ -121,7 +121,7 @@ export function CyberpunkView({
 
       {/* Cyberpunk Pagination Footer */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-12 px-4 md:px-8 font-mono text-[#0ff]">
+        <div className="flex items-center justify-between mt-12 px-16 md:px-8 font-mono text-[#0ff]">
           <button
             disabled={currentPage === 0 || isTransitioning}
             onClick={goToPrevPage}

@@ -242,7 +242,7 @@
 }
 
 .layout-medieval .layout-scroll-area {
-  @apply flex-1 flex flex-col w-full h-full relative z-10 pl-2 pr-2 overflow-y-auto overflow-x-hidden;
+  @apply flex-1 flex flex-col w-full h-full relative z-10 pl-2 pr-2 overflow-y-auto overflow-x-hidden pb-20 md:pb-0;
 }
 
 .layout-medieval .layout-frame-decorations {

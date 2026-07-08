@@ -142,7 +142,7 @@ export function VampireView({
 
       {/* Vampire Pagination Footer */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-12 px-4 md:px-8 font-serif text-[#8b0000]">
+        <div className="flex items-center justify-between mt-12 px-16 md:px-8 font-serif text-[#8b0000]">
           <button
             disabled={currentPage === 0 || isTransitioning}
             onClick={goToPrevPage}
