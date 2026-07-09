@@ -1,3 +1,57 @@
+📌 Patch Notes - Version 1.0.8
+
+✨ New Features
+
+- **Real-Time Database Synchronization**:
+  - Implemented Firestore `onSnapshot` subscriptions in `FirebaseDataService` to sync campaigns, characters (with personal notes mapping), locations, and entries in real time.
+  - Implemented a Pub/Sub event dispatcher in `ElectronDataService` and `WebDataService` to trigger subscription callbacks on local database mutations, maintaining reactive parity across local, offline, and cloud modes.
+  - Refactored `useCampaigns` and `useEntities` hooks to utilize subscription observers reactively within React `useEffect` loops, ensuring automatic cleanup.
+- **Swipe Gestures for Tab Navigation**:
+  - Added horizontal touch swipe gestures (`onTouchStart` and `onTouchEnd`) on the campaign container in `ActiveCampaignView` to cycle through Characters, Locations, Journal, and Bestiary tabs.
+  - Implemented a 60px swipe threshold and restricted detection to horizontal movement, excluding inputs, textareas, and editable fields to prevent interference with typing.
+- **Unified Settings Panel**:
+  - Consolidated theme switcher, database controls, and authentication into a floating, theme-responsive `SettingsPanel` in the bottom-right corner.
+  - Decluttered screen space by removing separate floating elements from `App.tsx`.
+- **Themed Campaign List Paging & 3D Transitions**:
+  - **Medieval Theme**: Added campaign pagination (2 cards on desktop, 1 on mobile) with 3D book page-turning transitions, sweeping shadows, and a 3D page-flip card transition for mobile.
+  - **Cyberpunk Theme**: Added campaign pagination with custom monospaced console pagination controls and zero-padded page numbers (`SEC_01 // SEC_03`). Added 3D digital glitch card animations (scale, skew, RGB hue-shift) and a terminal code-stream decryption transition overlay.
+  - **Vampire Theme**: Added campaign pagination and implemented a synchronized gothic gate/tomb doors overlay with ornate SVG details and a pulsing central Vampire Ankh crest medallion, replacing the previous bat swarm transition.
+- **Android WebView Cache Purging & PWA Controls**:
+  - Implemented automatic clearing of WebView disk and memory cache on app startup when a new version code is detected in `SharedPreferences`.
+  - Added a startup script in `main.tsx` to clear PWA cache storage and unregister service workers when running inside a native Capacitor container.
+  - Configured VitePWA to be conditionally disabled during Capacitor compilation using the `CAPACITOR_BUILD` environment variable.
+
+🛠️ Improvements
+
+- **Dashboard Layout Modularization**:
+  - Refactored `DashboardView.tsx` by extracting components into a new `dashboardModules` directory, reducing file size from ~930 lines to 216 lines.
+  - Created `CampaignCard` to isolate card rendering and themes (Default, Medieval, Cyberpunk, Vampire).
+  - Created `DashboardDivider` to handle theme-specific dividers (fleurons, lasers, gothic ankhs).
+  - Split theme-specific layout containers into `MedievalView`, `CyberpunkView`, `VampireView`, and `DefaultView`.
+- **Mobile UX Enhancements**:
+  - Fixed mobile pagination overlaps by changing arrow padding from `px-4` to `px-16` on Cyberpunk and Vampire themes, avoiding the floating settings button while keeping arrows symmetrically aligned.
+  - Added bottom padding (`pb-20` on mobile, `md:pb-0` on desktop) to scroll containers to clear the settings button.
+  - Upgraded pagination controls to use large 44x44px chevron touch targets for mobile accessibility.
+- **Android Build & Credentials Customization**:
+  - Configured project-specific `debug-dev.keystore` for Android debug builds to prevent global debug SHA-1 signing conflicts.
+  - Configured Android release signing configs (`signingConfigs.release`) in `build.gradle` to generate signed APKs, with a fallback to debug keystore if release credentials are not configured.
+  - Updated build scripts to run a `gradle clean` task before compilation to ensure stale assets are cleared.
+  - Configured Capacitor to load `.env` files based on the `CAPACITOR_ENV` environment variable, supporting dev and prod environments.
+
+🐛 Bug Fixes
+
+- **SQL Database Exporter Column Mismatch**:
+  - Fixed a placeholder mismatch in the sqlite exporter (`sqliteParser.ts`) that caused a "11 values for 10 columns" error when exporting database tables on mobile.
+- **Visual Campaign Flashing**:
+  - Staggered dashboard page state updates to execute exactly at the half-way point of transitions (300ms mobile / 400ms desktop) to prevent flickering of cards during page turns.
+- **Mobile Invite Modal Layout Overflow**:
+  - Refactored the `CampaignCollaboratorsModal` invite form to stack vertically on mobile (`flex-col sm:flex-row`).
+  - Added `shrink-0` to the invite button to prevent text truncation on narrow mobile screens.
+
+📅 Release Date: 07/09/2026
+
+---
+
 📌 Patch Notes - Version 1.0.7
 
 ✨ New Features
