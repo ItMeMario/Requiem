@@ -1,6 +1,6 @@
 {
   "name": "requiem",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "dist/main/index.js",
   "scripts": {
     "start": "concurrently -k \"vite --mode production\" \"npm run dev:electron\"",
@@ -15,8 +15,8 @@
     "build:web": "cross-env CAPACITOR_BUILD=true vite build --config vite.config.web.ts",
     "build:web:dev": "cross-env CAPACITOR_BUILD=true vite build --mode development --config vite.config.web.ts",
     "preview:web": "vite preview --config vite.config.web.ts",
-    "cap:sync": "npm run build:web && npx cap sync",
-    "cap:sync:dev": "npm run build:web:dev && npx cap sync",
+    "cap:sync": "cross-env CAPACITOR_ENV=production npm run build:web && cross-env CAPACITOR_ENV=production npx cap sync",
+    "cap:sync:dev": "cross-env CAPACITOR_ENV=development npm run build:web:dev && cross-env CAPACITOR_ENV=development npx cap sync",
     "cap:open": "npx cap open android",
     "build": "npm run build:vite && npm run build:electron && electron-builder",
     "build:dev": "npm run build:vite:dev && npm run build:electron && electron-builder",

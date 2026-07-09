@@ -4,14 +4,27 @@ import * as path from 'path';
 
 // Simple parser for environment files to retrieve VITE_GOOGLE_CLIENT_ID_WEB
 let googleClientId = 'your_google_web_client_id.apps.googleusercontent.com';
-const possibleEnvFiles = [
-  '.env.development.local',
-  '.env.development',
-  '.env.local',
-  '.env',
-  '.env.production.local',
-  '.env.production'
-];
+
+const isProduction = process.env.CAPACITOR_ENV === 'production' || process.env.NODE_ENV === 'production';
+console.log(`[Capacitor Config] Loading configurations for: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}`);
+
+const possibleEnvFiles = isProduction
+  ? [
+      '.env.production.local',
+      '.env.production',
+      '.env.local',
+      '.env',
+      '.env.development.local',
+      '.env.development'
+    ]
+  : [
+      '.env.development.local',
+      '.env.development',
+      '.env.local',
+      '.env',
+      '.env.production.local',
+      '.env.production'
+    ];
 
 for (const envFile of possibleEnvFiles) {
   try {
@@ -33,8 +46,8 @@ for (const envFile of possibleEnvFiles) {
 }
 
 const config: CapacitorConfig = {
-  appId: 'com.mario.requiemapp',
-  appName: 'Requiem',
+  appId: isProduction ? 'com.mario.requiemapp' : 'com.mario.requiemapp.dev',
+  appName: isProduction ? 'Requiem' : 'Requiem Dev',
   webDir: 'dist/web',
   server: {
     androidScheme: 'https'
