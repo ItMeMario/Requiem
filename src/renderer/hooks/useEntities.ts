@@ -5,6 +5,7 @@ export const useEntities = (campaignId: number | null) => {
   const [characters, setCharacters] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
   const [entries, setEntries] = useState<any[]>([]);
+  const service = getDataService();
 
   useEffect(() => {
     if (campaignId === null) {
@@ -13,8 +14,6 @@ export const useEntities = (campaignId: number | null) => {
       setEntries([]);
       return;
     }
-
-    const service = getDataService();
 
     // Subscribe to Characters
     const unsubChars = service.subscribeCharacters
@@ -55,19 +54,55 @@ export const useEntities = (campaignId: number | null) => {
   }, []);
 
   // CRUD Character
-  const addCharacter = (char: any) => setCharacters(prev => [...prev, char]);
-  const editCharacter = (id: number, char: any) => setCharacters(prev => prev.map(c => c.id === id ? { ...char, id } : c));
-  const removeCharacter = (id: number) => setCharacters(prev => prev.filter(c => c.id !== id));
+  const addCharacter = (char: any) => {
+    if (!service.subscribeCharacters) {
+      setCharacters(prev => [...prev, char]);
+    }
+  };
+  const editCharacter = (id: number, char: any) => {
+    if (!service.subscribeCharacters) {
+      setCharacters(prev => prev.map(c => c.id === id ? { ...char, id } : c));
+    }
+  };
+  const removeCharacter = (id: number) => {
+    if (!service.subscribeCharacters) {
+      setCharacters(prev => prev.filter(c => c.id !== id));
+    }
+  };
 
   // CRUD Location
-  const addLocation = (loc: any) => setLocations(prev => [...prev, loc]);
-  const editLocation = (id: number, loc: any) => setLocations(prev => prev.map(l => l.id === id ? { ...loc, id } : l));
-  const removeLocation = (id: number) => setLocations(prev => prev.filter(l => l.id !== id));
+  const addLocation = (loc: any) => {
+    if (!service.subscribeLocations) {
+      setLocations(prev => [...prev, loc]);
+    }
+  };
+  const editLocation = (id: number, loc: any) => {
+    if (!service.subscribeLocations) {
+      setLocations(prev => prev.map(l => l.id === id ? { ...loc, id } : l));
+    }
+  };
+  const removeLocation = (id: number) => {
+    if (!service.subscribeLocations) {
+      setLocations(prev => prev.filter(l => l.id !== id));
+    }
+  };
 
   // CRUD Entry
-  const addEntry = (entry: any) => setEntries(prev => [entry, ...prev]);
-  const editEntry = (id: number, entry: any) => setEntries(prev => prev.map(e => e.id === id ? { ...entry, id } : e));
-  const removeEntry = (id: number) => setEntries(prev => prev.filter(e => e.id !== id));
+  const addEntry = (entry: any) => {
+    if (!service.subscribeEntries) {
+      setEntries(prev => [entry, ...prev]);
+    }
+  };
+  const editEntry = (id: number, entry: any) => {
+    if (!service.subscribeEntries) {
+      setEntries(prev => prev.map(e => e.id === id ? { ...entry, id } : e));
+    }
+  };
+  const removeEntry = (id: number) => {
+    if (!service.subscribeEntries) {
+      setEntries(prev => prev.filter(e => e.id !== id));
+    }
+  };
 
   return {
     characters,
