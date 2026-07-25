@@ -54,7 +54,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await loginWithGoogleWeb();
     } catch (error) {
       console.error('[AuthContext] Login failed:', error);
-      alert(error instanceof Error ? error.message : 'Login failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Ignore user cancellation errors to avoid showing an alert when users cancel or deny permissions
+      if (
+        errorMessage.toLowerCase().includes('cancel') ||
+        errorMessage.toLowerCase().includes('cancelled')
+      ) {
+        return;
+      }
+
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

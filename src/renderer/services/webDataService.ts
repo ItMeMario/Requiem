@@ -179,6 +179,7 @@ export class WebDataService implements IDataService {
     `);
 
     try { this.db.run("ALTER TABLE locations ADD COLUMN image_url TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE characters ADD COLUMN personal_notes TEXT;"); } catch (e) {}
 
     // Migrations for sharing/collaboration columns
     try { this.db.run("ALTER TABLE campaigns ADD COLUMN ownerId TEXT;"); } catch (e) {}
