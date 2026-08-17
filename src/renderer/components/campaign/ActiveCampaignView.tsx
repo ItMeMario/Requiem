@@ -1,19 +1,20 @@
 import React, { useRef } from 'react';
-import { ArrowLeft, Users, Map as MapIcon, Book, Skull } from 'lucide-react';
+import { ArrowLeft, Users, Map as MapIcon, Book, Skull, Swords } from 'lucide-react';
 import { getThemeLabels } from '../../utils/themeLabels';
 import { AuthControls } from '../AuthControls';
 import { CharacterList } from '../characters/CharacterList';
 import { LocationList } from '../locations/LocationList';
 import { JournalList } from '../journal/JournalList';
 import { MonsterList } from '../monsters/MonsterList';
+import { BattleHelperView } from '../battle/BattleHelperView';
 import { useAuth } from '../../context/AuthContext';
 
 interface ActiveCampaignViewProps {
   theme: string;
   selectedCampaign: any;
   setSelectedCampaign: (camp: any) => void;
-  activeTab: 'characters' | 'locations' | 'journal' | 'monsters';
-  setActiveTab: (tab: 'characters' | 'locations' | 'journal' | 'monsters') => void;
+  activeTab: 'characters' | 'locations' | 'journal' | 'monsters' | 'battle';
+  setActiveTab: (tab: 'characters' | 'locations' | 'journal' | 'monsters' | 'battle') => void;
   characters: any[];
   locations: any[];
   entries: any[];
@@ -89,11 +90,12 @@ export function ActiveCampaignView({
     touchStartY.current = null;
 
     if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
-      const tabs: ('characters' | 'locations' | 'journal' | 'monsters')[] = [
+      const tabs: ('characters' | 'locations' | 'journal' | 'monsters' | 'battle')[] = [
         'characters',
         'locations',
         'journal',
-        'monsters'
+        'monsters',
+        'battle'
       ];
       const currentIndex = tabs.indexOf(activeTab);
 
@@ -193,6 +195,13 @@ export function ActiveCampaignView({
           <Skull size={18} />
           <span className="sm:inline">Bestiary</span>
         </button>
+        <button 
+          onClick={() => setActiveTab('battle')}
+          className={`flex shrink-0 items-center space-x-2 py-3 px-4 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'battle' ? 'border-accent text-accent-text' : 'border-transparent text-muted hover:text-heading'}`}
+        >
+          <Swords size={18} />
+          <span className="sm:inline">Battle Helper</span>
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -235,6 +244,13 @@ export function ActiveCampaignView({
         )}
         {activeTab === 'monsters' && (
           <MonsterList theme={theme} />
+        )}
+        {activeTab === 'battle' && (
+          <BattleHelperView
+            theme={theme}
+            selectedCampaign={selectedCampaign}
+            characters={characters}
+          />
         )}
       </div>
     </main>

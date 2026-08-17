@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export function useAppNavigation() {
-  const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal' | 'monsters'>('characters');
+  const [activeTab, setActiveTab] = useState<'characters' | 'locations' | 'journal' | 'monsters' | 'battle'>('characters');
   const [returnToJournalEntryId, setReturnToJournalEntryId] = useState<number | null>(null);
 
   // Modals Visibility
