@@ -50,6 +50,10 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
   const [isEditingInit, setIsEditingInit] = useState(false);
   const [initInput, setInitInput] = useState(combatant.initiative.toString());
 
+  const isCyber = theme === 'cyberpunk';
+  const isMed = theme === 'medieval';
+  const isVamp = theme === 'vampire';
+
   const isPlayer = combatant.type === 'player';
   const isDead = combatant.currentHp <= 0;
   const hpPercent = combatant.maxHp > 0 
@@ -59,9 +63,9 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
   // Cor da barra de vida
   const getHpColor = () => {
     if (isDead) return 'bg-neutral-600';
-    if (hpPercent > 50) return 'bg-emerald-500';
-    if (hpPercent > 25) return 'bg-amber-500';
-    return 'bg-rose-500';
+    if (hpPercent > 50) return isCyber ? 'bg-[#00ff41]' : isVamp ? 'bg-emerald-600' : 'bg-emerald-500';
+    if (hpPercent > 25) return isCyber ? 'bg-[#ffb000]' : 'bg-amber-500';
+    return isCyber ? 'bg-[#ff0055]' : isVamp ? 'bg-rose-700' : 'bg-rose-500';
   };
 
   const handleApplyCustomHp = (isDamage: boolean) => {
@@ -80,25 +84,50 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
     setIsEditingInit(false);
   };
 
+  // Card theme classes
+  const cardThemeClass = isCyber
+    ? isActiveTurn
+      ? 'border-[#0ff] ring-2 ring-[#0ff] shadow-[0_0_25px_rgba(0,255,255,0.4)] bg-[#05111a]'
+      : isPlayer
+      ? 'border-[#0ff]/20 bg-[#08101a]/80 hover:border-[#0ff]/50'
+      : 'border-[#f0f]/20 bg-[#120814]/80 hover:border-[#f0f]/50'
+    : isVamp
+    ? isActiveTurn
+      ? 'border-[#ff3333] ring-2 ring-[#ff3333] shadow-[0_0_25px_rgba(255,51,51,0.35)] bg-[#1a0f18]'
+      : isPlayer
+      ? 'border-[#3d3d4a] bg-[#14121a]/90 hover:border-[#ff3333]/30'
+      : 'border-rose-900/40 bg-[#170a12]/90 hover:border-rose-600/50'
+    : isMed
+    ? isActiveTurn
+      ? 'border-[#b71c1c] ring-2 ring-[#b71c1c] shadow-[0_0_15px_rgba(183,28,28,0.3)] parchment'
+      : 'border-[#8b4513]/30 parchment hover:border-[#8b4513]'
+    : isActiveTurn
+    ? 'ring-2 ring-accent border-accent shadow-[0_0_20px_rgba(220,38,38,0.25)] bg-surface-card'
+    : isCurrentGroup
+    ? 'border-accent/40 bg-surface-card/90'
+    : 'border-border-default hover:border-border-hover bg-surface-card/70';
+
   return (
     <div 
       onClick={() => onSelectActive && onSelectActive(combatant.id)}
-      className={`relative rounded-xl border transition-all duration-300 overflow-hidden ${
-        isActiveTurn 
-          ? 'ring-2 ring-accent border-accent shadow-[0_0_20px_rgba(220,38,38,0.25)] bg-surface-card scale-[1.01]' 
-          : isCurrentGroup
-          ? 'border-accent/40 bg-surface-card/90'
-          : 'border-border-default hover:border-border-hover bg-surface-card/70'
+      className={`relative rounded-xl border transition-all duration-300 overflow-hidden ${cardThemeClass} ${
+        isActiveTurn ? 'scale-[1.01]' : ''
       } ${isDead ? 'opacity-60 grayscale-[0.3]' : ''}`}
     >
       {/* Banner de Turno Ativo */}
       {isActiveTurn && (
-        <div className="bg-gradient-to-r from-accent to-accent-hover text-white text-[11px] font-bold px-3 py-0.5 flex items-center justify-between tracking-wider uppercase select-none">
+        <div className={`text-white text-[11px] font-bold px-3 py-0.5 flex items-center justify-between tracking-wider uppercase select-none ${
+          isCyber 
+            ? 'bg-gradient-to-r from-[#0ff] to-[#0099ff] text-black font-mono shadow-[0_0_10px_rgba(0,255,255,0.6)]' 
+            : isVamp
+            ? 'bg-gradient-to-r from-[#ff3333] to-[#800000] text-white shadow-[0_0_10px_rgba(255,51,51,0.5)]'
+            : 'bg-gradient-to-r from-accent to-accent-hover text-white'
+        }`}>
           <span className="flex items-center gap-1">
             <Zap size={12} className="animate-bounce" />
             Vez Ativa (Turno Atual)
           </span>
-          <span className="text-[10px] opacity-80 font-mono">Iniciativa: {combatant.initiative}</span>
+          <span className="text-[10px] opacity-90 font-mono">Iniciativa: {combatant.initiative}</span>
         </div>
       )}
 
@@ -160,37 +189,22 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
               </div>
             )}
 
-            {/* Iniciativa */}
+            {/* Iniciativa (Input direto para mesa física) */}
             <div 
-              title="Iniciativa (Clique para editar ou rolar)"
-              className="flex items-center space-x-1 px-2.5 py-1 bg-surface-elevated border border-border-default rounded-lg text-xs font-mono font-bold text-heading shadow-sm"
+              title="Iniciativa (Digite o resultado do dado da mesa)"
+              className="flex items-center space-x-1.5 px-2 py-1 bg-surface-elevated border border-border-default hover:border-accent rounded-lg text-xs font-mono shadow-sm transition-colors"
+              onClick={(e) => e.stopPropagation()}
             >
-              <Dices size={14} className="text-secondary" />
-              {isEditingInit ? (
-                <input
-                  type="number"
-                  value={initInput}
-                  onChange={(e) => setInitInput(e.target.value)}
-                  onBlur={handleSaveInit}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSaveInit()}
-                  autoFocus
-                  className="w-10 bg-surface-input border border-accent rounded text-center text-xs text-heading px-1 py-0.5 outline-none"
-                />
-              ) : (
-                <span 
-                  onClick={(e) => { e.stopPropagation(); setIsEditingInit(true); setInitInput(combatant.initiative.toString()); }}
-                  className="cursor-pointer hover:underline"
-                >
-                  {combatant.initiative}
-                </span>
-              )}
-              <button 
-                onClick={(e) => { e.stopPropagation(); onRollInitiative(combatant.id); }}
-                title="Rolar d20 de iniciativa"
-                className="hover:text-accent transition-colors p-0.5 rounded cursor-pointer"
-              >
-                <Dices size={12} />
-              </button>
+              <span className="text-[10px] text-muted uppercase font-bold">Init</span>
+              <input
+                type="number"
+                value={combatant.initiative}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  onUpdateInitiative(combatant.id, isNaN(val) ? 0 : val);
+                }}
+                className="w-11 bg-surface-input border border-border-subtle focus:border-accent text-heading text-center font-bold font-mono rounded px-1 py-0.5 outline-none text-xs"
+              />
             </div>
 
             {/* Botões de Ação: Duplicar e Remover */}

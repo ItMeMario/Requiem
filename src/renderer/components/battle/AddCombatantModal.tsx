@@ -118,7 +118,7 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
     setEnemyName(monster.name);
     setEnemyHp(parseHpString(monster.hp).toString());
     setEnemyAc(parseAcString(monster.ac).toString());
-    setEnemyInit(rollD20(monster.dexMod).toString());
+    setEnemyInit('0');
     setEnemyNotes(`CR ${monster.cr || '?'}, ${monster.type}`);
   };
 
@@ -205,11 +205,23 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
     setBestiarySearch('');
   };
 
+  const isCyber = theme === 'cyberpunk';
+  const isMed = theme === 'medieval';
+  const isVamp = theme === 'vampire';
+
+  const modalThemeClass = isCyber
+    ? 'font-mono text-cyan-300 bg-[#071018] border-[#0ff]/40 shadow-[0_0_35px_rgba(0,255,255,0.25)]'
+    : isVamp
+    ? 'font-serif text-[#f4eacc] bg-[#120a15] border-[#ff3333]/40 shadow-[0_0_35px_rgba(255,51,51,0.25)]'
+    : isMed
+    ? 'font-serif text-[#3e2723] parchment border-[#8b4513]/50 shadow-2xl'
+    : 'bg-surface-card border-border-hover';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-surface-card border border-border-hover rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className={`border rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden ${modalThemeClass}`}
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-border-subtle bg-surface-elevated">
@@ -388,21 +400,13 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
 
                   {/* Iniciativa */}
                   <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-xs font-semibold text-secondary flex items-center gap-1">
-                        <Dices size={14} className="text-secondary" />
-                        Iniciativa
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setEnemyInit(rollD20().toString())}
-                        className="text-[10px] text-accent hover:underline cursor-pointer"
-                      >
-                        Rolar d20
-                      </button>
-                    </div>
+                    <label className="text-xs font-semibold text-secondary flex items-center gap-1">
+                      <Dices size={14} className="text-secondary" />
+                      Iniciativa (da Mesa)
+                    </label>
                     <input
                       type="number"
+                      placeholder="0"
                       value={enemyInit}
                       onChange={(e) => setEnemyInit(e.target.value)}
                       className="w-full px-3 py-2 bg-surface-input border border-border-default focus:border-accent rounded-lg text-sm text-heading outline-none font-mono"
@@ -473,21 +477,13 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs font-semibold text-secondary flex items-center gap-1">
-                      <Dices size={14} className="text-secondary" />
-                      Iniciativa
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setPlayerInit(rollD20().toString())}
-                      className="text-[10px] text-accent hover:underline cursor-pointer"
-                    >
-                      Rolar d20
-                    </button>
-                  </div>
+                  <label className="text-xs font-semibold text-secondary flex items-center gap-1">
+                    <Dices size={14} className="text-secondary" />
+                    Iniciativa (da Mesa)
+                  </label>
                   <input
                     type="number"
+                    placeholder="0"
                     value={playerInit}
                     onChange={(e) => setPlayerInit(e.target.value)}
                     className="w-full px-3 py-2 bg-surface-input border border-border-default focus:border-accent rounded-lg text-sm text-heading outline-none font-mono"

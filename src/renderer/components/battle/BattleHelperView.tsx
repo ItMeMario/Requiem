@@ -43,20 +43,45 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
   const isMed = theme === 'medieval';
   const isVamp = theme === 'vampire';
 
+  // Estilos de container temático
+  const containerThemeClass = isCyber 
+    ? 'font-mono text-cyan-300' 
+    : isVamp 
+    ? 'font-serif text-rose-100' 
+    : isMed 
+    ? 'font-serif text-[#3e2723]' 
+    : '';
+
+  const headerThemeClass = isCyber
+    ? 'cyber-metallic-panel border-[#0ff]/30 shadow-[0_0_20px_rgba(0,255,255,0.15)] text-[#0ff]'
+    : isVamp
+    ? 'bg-[#121118]/90 border-[#ff3333]/30 shadow-[0_0_25px_rgba(255,51,51,0.15)] text-[#f4eacc]'
+    : isMed
+    ? 'parchment border-[#8b4513]/40 shadow-md text-[#3e2723]'
+    : 'bg-surface-elevated2 border-border-default';
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className={`space-y-6 max-w-7xl mx-auto pb-12 ${containerThemeClass}`}>
       {/* BARRA PRINCIPAL DE CONTROLE TÁTICO */}
       <div className={`p-4 md:p-5 rounded-2xl border shadow-lg transition-all ${
         battle.isActive
-          ? 'bg-surface-card/95 border-accent shadow-[0_0_30px_rgba(220,38,38,0.15)] ring-1 ring-accent/30'
-          : 'bg-surface-elevated2 border-border-default'
+          ? isCyber
+            ? 'cyber-metallic-panel border-[#0ff] shadow-[0_0_30px_rgba(0,255,255,0.3)] ring-1 ring-[#0ff]/50'
+            : isVamp
+            ? 'bg-[#18111b]/95 border-[#ff3333] shadow-[0_0_30px_rgba(255,51,51,0.25)] ring-1 ring-[#ff3333]/40'
+            : 'bg-surface-card/95 border-accent shadow-[0_0_30px_rgba(220,38,38,0.15)] ring-1 ring-accent/30'
+          : headerThemeClass
       }`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Status do Combate & Rodada */}
           <div className="flex items-center space-x-3.5">
             <div className={`p-3 rounded-xl border flex items-center justify-center transition-all ${
               battle.isActive 
-                ? 'bg-accent/20 border-accent text-accent-text animate-pulse shadow-md' 
+                ? isCyber
+                  ? 'bg-[#0ff]/20 border-[#0ff] text-[#0ff] animate-pulse shadow-[0_0_15px_rgba(0,255,255,0.5)]'
+                  : isVamp
+                  ? 'bg-rose-950/60 border-rose-600 text-rose-300 animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]'
+                  : 'bg-accent/20 border-accent text-accent-text animate-pulse shadow-md' 
                 : 'bg-surface-elevated border-border-subtle text-muted'
             }`}>
               <Swords size={26} />
@@ -68,8 +93,10 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
                   Battle Helper
                 </h3>
                 {battle.isActive ? (
-                  <span className="px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-accent text-white flex items-center gap-1.5 shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                  <span className={`px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm ${
+                    isCyber ? 'bg-[#0ff]/20 text-[#0ff] border border-[#0ff]/50' : isVamp ? 'bg-rose-900/60 text-rose-200 border border-rose-600/50' : 'bg-accent text-white'
+                  }`}>
+                    <span className="w-2 h-2 rounded-full bg-current animate-ping" />
                     Combate Ativo • Rodada {battle.round}
                   </span>
                 ) : (
@@ -81,7 +108,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
               <p className="text-xs text-muted mt-0.5">
                 {battle.isActive 
                   ? `Gerenciando iniciativas da Rodada ${battle.round}. Siga a fila de turnos abaixo.`
-                  : 'Monte os combatentes, role iniciativas e inicie o combate.'}
+                  : 'Monte os combatentes, insira as iniciativas roladas na mesa e inicie o combate.'}
               </p>
             </div>
           </div>
@@ -119,27 +146,15 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
                 </button>
               </>
             ) : (
-              /* Se estiver em preparação: Iniciar, Rolar todos, Importar */
-              <>
-                <button
-                  onClick={battle.startCombat}
-                  disabled={battle.combatants.length === 0}
-                  className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-accent-text font-bold rounded-lg text-sm transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
-                >
-                  <Play size={16} />
-                  <span>Iniciar Combate</span>
-                </button>
-
-                <button
-                  onClick={battle.rollAllInitiatives}
-                  disabled={battle.combatants.length === 0}
-                  title="Rolar d20 de iniciativa para todos os combatentes"
-                  className="px-3 py-2 bg-surface-elevated hover:bg-surface-hover disabled:opacity-40 border border-border-subtle text-secondary hover:text-heading rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer"
-                >
-                  <Dices size={16} className="text-secondary" />
-                  <span className="hidden sm:inline">Rolar Todas Iniciativas</span>
-                </button>
-              </>
+              /* Se estiver em preparação: Iniciar Combate */
+              <button
+                onClick={battle.startCombat}
+                disabled={battle.combatants.length === 0}
+                className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-accent-text font-bold rounded-lg text-sm transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
+              >
+                <Play size={16} />
+                <span>Iniciar Combate</span>
+              </button>
             )}
 
             {/* Adicionar combatente */}
