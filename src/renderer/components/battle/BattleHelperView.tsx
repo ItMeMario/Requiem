@@ -1,5 +1,27 @@
-import React from 'react';
-import { Swords, Plus, Shield, Heart, Play, Users, Skull, RotateCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  Swords, 
+  Plus, 
+  Play, 
+  Square, 
+  RotateCcw, 
+  Dices, 
+  Users, 
+  Skull, 
+  Trash2, 
+  ChevronRight, 
+  ChevronLeft, 
+  Shield, 
+  Heart, 
+  History, 
+  Zap, 
+  AlertCircle,
+  Clock,
+  Sparkles
+} from 'lucide-react';
+import { useBattleHelper } from '../../hooks/battle/useBattleHelper';
+import { CombatGroupContainer } from './CombatGroupContainer';
+import { AddCombatantModal } from './AddCombatantModal';
 
 interface BattleHelperViewProps {
   theme: string;
@@ -12,48 +34,322 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
   selectedCampaign,
   characters
 }) => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
+
+  const battle = useBattleHelper({ campaignId: selectedCampaign?.id || null });
+
+  const isCyber = theme === 'cyberpunk';
+  const isMed = theme === 'medieval';
+  const isVamp = theme === 'vampire';
+
   return (
-    <div className="space-y-6">
-      {/* Header / Action Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-surface-elevated2 p-4 rounded-lg border border-border-subtle">
-        <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-accent/20 border border-accent/40 rounded-lg text-accent-text">
-            <Swords size={24} />
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* BARRA PRINCIPAL DE CONTROLE TÁTICO */}
+      <div className={`p-4 md:p-5 rounded-2xl border shadow-lg transition-all ${
+        battle.isActive
+          ? 'bg-surface-card/95 border-accent shadow-[0_0_30px_rgba(220,38,38,0.15)] ring-1 ring-accent/30'
+          : 'bg-surface-elevated2 border-border-default'
+      }`}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Status do Combate & Rodada */}
+          <div className="flex items-center space-x-3.5">
+            <div className={`p-3 rounded-xl border flex items-center justify-center transition-all ${
+              battle.isActive 
+                ? 'bg-accent/20 border-accent text-accent-text animate-pulse shadow-md' 
+                : 'bg-surface-elevated border-border-subtle text-muted'
+            }`}>
+              <Swords size={26} />
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h3 className="text-xl md:text-2xl font-bold text-heading tracking-wide">
+                  Battle Helper
+                </h3>
+                {battle.isActive ? (
+                  <span className="px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-accent text-white flex items-center gap-1.5 shadow-sm">
+                    <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                    Combate Ativo • Rodada {battle.round}
+                  </span>
+                ) : (
+                  <span className="px-3 py-0.5 rounded-full text-xs font-medium bg-surface-elevated border border-border-subtle text-muted">
+                    Fase de Preparação
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted mt-0.5">
+                {battle.isActive 
+                  ? `Gerenciando iniciativas da Rodada ${battle.round}. Siga a fila de turnos abaixo.`
+                  : 'Monte os combatentes, role iniciativas e inicie o combate.'}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-heading">Battle Helper</h3>
-            <p className="text-xs text-muted">Gerenciador tático de iniciativa e turnos</p>
+
+          {/* Botões de Ação do Topo */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Se o combate estiver ativo: Controles de Turno */}
+            {battle.isActive ? (
+              <>
+                <button
+                  onClick={battle.prevTurn}
+                  title="Turno Anterior"
+                  className="px-3 py-2 bg-surface-elevated hover:bg-surface-hover border border-border-subtle text-secondary hover:text-heading rounded-lg text-sm font-medium transition-colors flex items-center space-x-1 cursor-pointer"
+                >
+                  <ChevronLeft size={16} />
+                  <span className="hidden sm:inline">Anterior</span>
+                </button>
+
+                <button
+                  onClick={battle.nextTurn}
+                  title="Avançar para o Próximo Turno da Fila"
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-text font-bold rounded-lg text-sm transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                >
+                  <span>Próximo Turno</span>
+                  <ChevronRight size={18} />
+                </button>
+
+                <button
+                  onClick={battle.endCombat}
+                  title="Finalizar Combate"
+                  className="px-3 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-600/40 text-rose-300 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1 cursor-pointer"
+                >
+                  <Square size={14} />
+                  <span className="hidden sm:inline">Finalizar</span>
+                </button>
+              </>
+            ) : (
+              /* Se estiver em preparação: Iniciar, Rolar todos, Importar */
+              <>
+                <button
+                  onClick={battle.startCombat}
+                  disabled={battle.combatants.length === 0}
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-accent-text font-bold rounded-lg text-sm transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                >
+                  <Play size={16} />
+                  <span>Iniciar Combate</span>
+                </button>
+
+                <button
+                  onClick={battle.rollAllInitiatives}
+                  disabled={battle.combatants.length === 0}
+                  title="Rolar d20 de iniciativa para todos os combatentes"
+                  className="px-3 py-2 bg-surface-elevated hover:bg-surface-hover disabled:opacity-40 border border-border-subtle text-secondary hover:text-heading rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer"
+                >
+                  <Dices size={16} className="text-secondary" />
+                  <span className="hidden sm:inline">Rolar Todas Iniciativas</span>
+                </button>
+              </>
+            )}
+
+            {/* Adicionar combatente */}
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-3 py-2 bg-surface-elevated hover:bg-surface-hover border border-border-hover text-heading rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer"
+            >
+              <Plus size={16} />
+              <span>Adicionar</span>
+            </button>
+
+            {/* Histórico Toggle */}
+            <button
+              onClick={() => setShowHistoryPanel(!showHistoryPanel)}
+              title="Registro de Ações da Batalha"
+              className={`p-2 rounded-lg border transition-colors cursor-pointer ${
+                showHistoryPanel 
+                  ? 'bg-accent/20 border-accent text-accent-text' 
+                  : 'bg-surface-elevated hover:bg-surface-hover border-border-subtle text-muted hover:text-heading'
+              }`}
+            >
+              <History size={18} />
+            </button>
+
+            {/* Limpar Fila */}
+            {battle.combatants.length > 0 && !battle.isActive && (
+              <button
+                onClick={battle.clearAll}
+                title="Limpar todos os combatentes"
+                className="p-2 text-muted hover:text-danger hover:bg-danger/10 border border-border-subtle rounded-lg transition-colors cursor-pointer"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            disabled
-            className="flex items-center space-x-2 px-3 py-2 bg-surface-hover opacity-50 rounded text-sm text-heading border border-border-hover cursor-not-allowed"
-          >
-            <Plus size={16} />
-            <span>Adicionar Combatente</span>
-          </button>
-          <button
-            disabled
-            className="flex items-center space-x-2 px-4 py-2 bg-accent/30 opacity-50 text-accent-text border border-accent/50 rounded text-sm font-medium cursor-not-allowed"
-          >
-            <Play size={16} />
-            <span>Iniciar Combate</span>
-          </button>
-        </div>
+        {/* CARDS DE RESUMO TÁTICO (STATS) */}
+        {battle.combatants.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 mt-4 border-t border-border-subtle/60">
+            {/* Aliados */}
+            <div className="bg-surface-elevated/50 p-2.5 rounded-xl border border-border-subtle flex items-center space-x-3">
+              <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400">
+                <Users size={16} />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-muted">Aliados Vivos</span>
+                <p className="text-sm font-bold text-heading">
+                  {battle.stats.aliveAllies} <span className="text-xs text-muted font-normal">/ {battle.stats.totalAllies}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Inimigos */}
+            <div className="bg-surface-elevated/50 p-2.5 rounded-xl border border-border-subtle flex items-center space-x-3">
+              <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400">
+                <Skull size={16} />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-muted">Inimigos Vivos</span>
+                <p className="text-sm font-bold text-heading">
+                  {battle.stats.aliveEnemies} <span className="text-xs text-muted font-normal">/ {battle.stats.totalEnemies}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Vez Atual */}
+            <div className="bg-surface-elevated/50 p-2.5 rounded-xl border border-border-subtle flex items-center space-x-3 col-span-2 sm:col-span-2">
+              <div className="p-2 rounded-lg bg-accent/10 border border-accent/30 text-accent-text">
+                <Zap size={16} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] uppercase font-bold text-muted">
+                  {battle.isActive ? 'Vez Atual (Na Fila)' : 'Líder de Iniciativa'}
+                </span>
+                <p className="text-sm font-bold text-heading truncate">
+                  {battle.activeCombatant ? (
+                    <span className={battle.activeCombatant.type === 'player' ? 'text-blue-300' : 'text-rose-300'}>
+                      {battle.activeCombatant.name} (Init: {battle.activeCombatant.initiative})
+                    </span>
+                  ) : (
+                    <span className="text-muted italic">Nenhum combatente ativo</span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Empty State / Stage Overview */}
-      <div className="text-center py-16 px-4 bg-surface-elevated2 rounded-lg border border-border-subtle flex flex-col items-center justify-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-text mb-2">
-          <Swords size={32} />
+      {/* PAINEL LATERAL DE HISTÓRICO EXPANSÍVEL */}
+      {showHistoryPanel && (
+        <div className="bg-surface-card border border-border-default rounded-2xl p-4 space-y-3 animate-fade-in shadow-lg">
+          <div className="flex justify-between items-center pb-2 border-b border-border-subtle">
+            <div className="flex items-center space-x-2 text-sm font-bold text-heading">
+              <History size={16} className="text-accent-text" />
+              <span>Registro de Batalha (Logs Recentes)</span>
+            </div>
+            <button
+              onClick={() => setShowHistoryPanel(false)}
+              className="text-muted hover:text-heading text-xs cursor-pointer"
+            >
+              Fechar
+            </button>
+          </div>
+
+          <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+            {battle.history.length === 0 ? (
+              <p className="text-xs text-muted italic text-center py-4">Nenhum evento registrado ainda.</p>
+            ) : (
+              battle.history.map(item => (
+                <div key={item.id} className="text-xs py-1 px-2 rounded bg-surface-elevated/60 flex items-start space-x-2">
+                  <span className="text-[10px] text-muted font-mono shrink-0 pt-0.5">{item.timestamp}</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-surface-card border border-border-subtle text-secondary shrink-0">
+                    R{item.round}
+                  </span>
+                  <span className={`flex-1 ${
+                    item.type === 'damage' ? 'text-rose-300' : item.type === 'heal' ? 'text-emerald-300' : item.type === 'round' ? 'text-accent-text font-bold' : 'text-primary'
+                  }`}>
+                    {item.message}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-        <h4 className="text-lg font-bold text-heading">Pronto para a Batalha</h4>
-        <p className="text-sm text-secondary max-w-md">
-          A aba <strong>Battle Helper</strong> foi configurada com sucesso na navegação. Na próxima etapa, implementaremos os combatentes (jogadores e monstros), controle de vida, AC e a fila dinâmica de iniciativa com turnos agrupados.
-        </p>
-      </div>
+      )}
+
+      {/* FILA DE COMBATE / INITIATIVE QUEUE */}
+      {battle.combatants.length === 0 ? (
+        /* EMPTY STATE */
+        <div className="text-center py-16 px-6 bg-surface-elevated2/60 rounded-2xl border border-dashed border-border-default flex flex-col items-center justify-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-text">
+            <Swords size={32} />
+          </div>
+
+          <div className="max-w-md space-y-1.5">
+            <h4 className="text-lg font-bold text-heading">Nenhum combatente na arena</h4>
+            <p className="text-xs text-secondary leading-relaxed">
+              Adicione jogadores e monstros para montar a ordem de iniciativa. Combatentes do mesmo time com iniciativas contíguas agirão em turnos agrupados.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-text font-bold rounded-xl text-sm transition-all shadow-md flex items-center space-x-2 cursor-pointer"
+            >
+              <Plus size={16} />
+              <span>Adicionar Combatente</span>
+            </button>
+
+            {characters.length > 0 && (
+              <button
+                onClick={() => battle.importCharacters(characters)}
+                className="px-4 py-2 bg-surface-elevated hover:bg-surface-hover border border-border-hover text-heading rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 cursor-pointer"
+              >
+                <Users size={16} className="text-blue-400" />
+                <span>Importar Todos Jogadores ({characters.length})</span>
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* LISTA DA FILA DE INICIATIVA */
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h4 className="text-sm font-bold text-secondary uppercase tracking-wider flex items-center gap-2">
+              <Dices size={16} className="text-accent-text" />
+              <span>Fila de Iniciativa ({battle.groups.length} Bloco{battle.groups.length > 1 ? 's' : ''} • {battle.combatants.length} Combatente{battle.combatants.length > 1 ? 's' : ''})</span>
+            </h4>
+            <span className="text-xs text-muted">
+              Ordenado da maior iniciativa para a menor
+            </span>
+          </div>
+
+          <div className="space-y-3.5">
+            {battle.groups.map((group, groupIdx) => {
+              const isGroupActive = battle.isActive && battle.currentGroupIndex === groupIdx;
+              return (
+                <CombatGroupContainer
+                  key={group.groupId}
+                  group={group}
+                  isGroupActive={isGroupActive}
+                  activeCombatantId={battle.activeCombatantId}
+                  onSelectActiveCombatant={battle.setActiveCombatantId}
+                  onAdjustHp={battle.adjustHp}
+                  onToggleCondition={battle.toggleCondition}
+                  onRollInitiative={battle.rollInitiative}
+                  onUpdateInitiative={(id, val) => battle.updateCombatant(id, { initiative: val })}
+                  onRemove={battle.removeCombatant}
+                  onDuplicate={battle.duplicateCombatant}
+                  theme={theme}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE ADIÇÃO DE COMBATENTE */}
+      <AddCombatantModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddCombatant={battle.addCombatant}
+        onImportCharacters={battle.importCharacters}
+        onImportMonster={battle.importMonster}
+        availableCharacters={characters}
+        theme={theme}
+      />
     </div>
   );
 };
