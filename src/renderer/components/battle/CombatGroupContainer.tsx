@@ -77,8 +77,8 @@ export const CombatGroupContainer: React.FC<CombatGroupContainerProps> = ({
       : 'border-[#3d3d4a]/60 bg-[#130f17]/60'
     : isMed
     ? isGroupActive
-      ? 'border-[#b71c1c] parchment shadow-lg ring-1 ring-[#b71c1c]/30'
-      : 'border-[#8b4513]/40 parchment'
+      ? 'border-[#b71c1c] parchment bg-[#f7eed4] shadow-lg ring-1 ring-[#b71c1c]/30 text-[#3e2723]'
+      : 'border-[#8b4513]/40 parchment bg-[#f7eed4] text-[#3e2723]'
     : isGroupActive
     ? isPlayerGroup
       ? 'bg-blue-950/20 border-blue-500/60 shadow-[0_0_25px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/40'

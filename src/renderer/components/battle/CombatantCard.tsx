@@ -99,8 +99,8 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
       : 'border-rose-900/40 bg-[#170a12]/90 hover:border-rose-600/50'
     : isMed
     ? isActiveTurn
-      ? 'border-[#b71c1c] ring-2 ring-[#b71c1c] shadow-[0_0_15px_rgba(183,28,28,0.3)] parchment'
-      : 'border-[#8b4513]/30 parchment hover:border-[#8b4513]'
+      ? 'border-[#b71c1c] ring-2 ring-[#b71c1c] shadow-[0_0_15px_rgba(183,28,28,0.3)] parchment bg-[#f7eed4] text-[#3e2723]'
+      : 'border-[#8b4513]/30 parchment bg-[#f7eed4] text-[#3e2723] hover:border-[#8b4513]'
     : isActiveTurn
     ? 'ring-2 ring-accent border-accent shadow-[0_0_20px_rgba(220,38,38,0.25)] bg-surface-card'
     : isCurrentGroup

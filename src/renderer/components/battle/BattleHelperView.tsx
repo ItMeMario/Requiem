@@ -66,7 +66,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
     : isVamp
     ? 'bg-[#121118]/90 border-[#ff3333]/30 shadow-[0_0_25px_rgba(255,51,51,0.15)] text-[#f4eacc]'
     : isMed
-    ? 'parchment border-[#8b4513]/40 shadow-md text-[#3e2723]'
+    ? 'parchment bg-[#f7eed4] border-[#8b4513]/40 shadow-md text-[#3e2723]'
     : 'bg-surface-elevated2 border-border-default';
 
   return (
@@ -78,6 +78,8 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
             ? 'cyber-metallic-panel border-[#0ff] shadow-[0_0_30px_rgba(0,255,255,0.3)] ring-1 ring-[#0ff]/50'
             : isVamp
             ? 'bg-[#18111b]/95 border-[#ff3333] shadow-[0_0_30px_rgba(255,51,51,0.25)] ring-1 ring-[#ff3333]/40'
+            : isMed
+            ? 'parchment bg-[#f7eed4] border-[#b71c1c] shadow-[0_0_30px_rgba(183,28,28,0.2)] ring-1 ring-[#b71c1c]/40 text-[#3e2723]'
             : 'bg-surface-card/95 border-accent shadow-[0_0_30px_rgba(220,38,38,0.15)] ring-1 ring-accent/30'
           : headerThemeClass
       }`}>

@@ -72,6 +72,16 @@
   background-size: 100% 100%;
 }
 
+/* Helper class for parchment texture */
+.parchment {
+  background-color: #f7eed4;
+  background-image: 
+    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.4) 0%, transparent 70%),
+    radial-gradient(circle at 10% 20%, rgba(139, 69, 19, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(139, 69, 19, 0.06) 0%, transparent 40%);
+  color: #3e2723;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }

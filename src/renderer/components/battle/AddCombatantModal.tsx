@@ -214,7 +214,7 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
     : isVamp
     ? 'font-serif text-[#f4eacc] bg-[#120a15] border-[#ff3333]/40 shadow-[0_0_35px_rgba(255,51,51,0.25)]'
     : isMed
-    ? 'font-serif text-[#3e2723] parchment border-[#8b4513]/50 shadow-2xl'
+    ? 'font-serif text-[#3e2723] bg-[#f7eed4] parchment border-2 border-[#8b4513]/60 shadow-2xl'
     : 'bg-surface-card border-border-hover';
 
   return (
@@ -224,10 +224,12 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
         className={`border rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden ${modalThemeClass}`}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 md:p-6 border-b border-border-subtle bg-surface-elevated">
+        <div className={`flex items-center justify-between p-4 md:p-6 border-b ${
+          isMed ? 'border-[#8b4513]/30 bg-[#efe3c3]' : 'border-border-subtle bg-surface-elevated'
+        }`}>
           <div className="flex items-center space-x-3">
             <div className={`p-2 rounded-lg ${
-              isCyber ? 'bg-[#0ff]/20 border border-[#0ff]/40 text-[#0ff]' : isVamp ? 'bg-rose-950/40 border border-rose-600/40 text-rose-300' : 'bg-accent/20 border border-accent/40 text-accent-text'
+              isCyber ? 'bg-[#0ff]/20 border border-[#0ff]/40 text-[#0ff]' : isVamp ? 'bg-rose-950/40 border border-rose-600/40 text-rose-300' : isMed ? 'bg-[#8b4513]/15 border border-[#8b4513]/30 text-[#8b4513]' : 'bg-accent/20 border border-accent/40 text-accent-text'
             }`}>
               <Plus size={20} />
             </div>
@@ -245,12 +247,14 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
         </div>
 
         {/* Modal Tabs */}
-        <div className="flex border-b border-border-subtle bg-surface-elevated2 px-4 md:px-6">
+        <div className={`flex border-b px-4 md:px-6 ${
+          isMed ? 'border-[#8b4513]/30 bg-[#e9dcbc]' : 'border-border-subtle bg-surface-elevated2'
+        }`}>
           <button
             onClick={() => setActiveTab('enemy')}
             className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
               activeTab === 'enemy'
-                ? 'border-rose-500 text-rose-400 font-bold'
+                ? isMed ? 'border-[#b71c1c] text-[#8b0000] font-bold' : 'border-rose-500 text-rose-400 font-bold'
                 : 'border-transparent text-muted hover:text-heading'
             }`}
           >
@@ -261,7 +265,7 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
             onClick={() => setActiveTab('player')}
             className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
               activeTab === 'player'
-                ? 'border-blue-500 text-blue-400 font-bold'
+                ? isMed ? 'border-[#1e3a8a] text-[#1e3a8a] font-bold' : 'border-blue-500 text-blue-400 font-bold'
                 : 'border-transparent text-muted hover:text-heading'
             }`}
           >
@@ -272,7 +276,7 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
             onClick={() => setActiveTab('import')}
             className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
               activeTab === 'import'
-                ? 'border-accent text-accent-text font-bold'
+                ? isMed ? 'border-[#8b4513] text-[#8b4513] font-bold' : isCyber ? 'border-[#0ff] text-[#0ff] font-bold' : 'border-accent text-accent-text font-bold'
                 : 'border-transparent text-muted hover:text-heading'
             }`}
           >
@@ -287,10 +291,12 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
           {activeTab === 'enemy' && (
             <div className="space-y-6">
               {/* Seletor Rápido do Bestiário */}
-              <div className="space-y-2 bg-surface-elevated/60 p-3.5 rounded-xl border border-border-subtle">
+              <div className={`space-y-2 p-3.5 rounded-xl border ${
+                isMed ? 'bg-[#ede0be]/80 border-[#8b4513]/30' : 'bg-surface-elevated/60 border-border-subtle'
+              }`}>
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-secondary uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-accent-text" />
+                    <Sparkles size={14} className={isMed ? 'text-[#8b4513]' : 'text-accent-text'} />
                     Preencher a partir do Bestiário (Opcional):
                   </label>
                   {selectedBestiaryMonster && (
@@ -329,12 +335,16 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
                       onClick={() => handleSelectBestiaryMonster(m)}
                       className={`text-left p-2 rounded-lg border text-xs transition-colors flex items-center justify-between cursor-pointer ${
                         selectedBestiaryMonster?.name === m.name
-                          ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 font-bold'
+                          ? isMed
+                            ? 'bg-[#b71c1c]/15 border-[#b71c1c] text-[#8b0000] font-bold shadow-sm'
+                            : 'bg-rose-500/20 border-rose-500/50 text-rose-300 font-bold'
+                          : isMed
+                          ? 'bg-[#f7eed4] border-[#8b4513]/20 hover:border-[#8b4513] text-[#3e2723]'
                           : 'bg-surface-elevated border-border-subtle hover:border-border-hover text-secondary hover:text-heading'
                       }`}
                     >
-                      <span className="truncate pr-2">{m.name}</span>
-                      <span className="text-[10px] text-muted shrink-0">AC {parseAcString(m.ac)} • {parseHpString(m.hp)} PV</span>
+                      <span className="truncate pr-2 font-medium">{m.name}</span>
+                      <span className={`text-[10px] shrink-0 ${isMed ? 'text-[#5d4037]' : 'text-muted'}`}>AC {parseAcString(m.ac)} • {parseHpString(m.hp)} PV</span>
                     </button>
                   ))}
                 </div>
