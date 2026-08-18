@@ -226,7 +226,9 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-border-subtle bg-surface-elevated">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-accent/20 border border-accent/40 rounded-lg text-accent-text">
+            <div className={`p-2 rounded-lg ${
+              isCyber ? 'bg-[#0ff]/20 border border-[#0ff]/40 text-[#0ff]' : isVamp ? 'bg-rose-950/40 border border-rose-600/40 text-rose-300' : 'bg-accent/20 border border-accent/40 text-accent-text'
+            }`}>
               <Plus size={20} />
             </div>
             <div>
@@ -597,7 +599,15 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
                   type="button"
                   onClick={handleConfirmImportChars}
                   disabled={selectedCharIds.length === 0}
-                  className="px-5 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-accent-text font-bold rounded-lg text-sm transition-colors flex items-center space-x-1.5 cursor-pointer shadow-md"
+                  className={`px-5 py-2 disabled:opacity-40 disabled:cursor-not-allowed text-sm rounded-lg transition-colors flex items-center space-x-1.5 cursor-pointer shadow-md ${
+                    isCyber
+                      ? 'bg-[#00ffff] hover:bg-[#00d8d8] text-black font-mono font-bold shadow-[0_0_15px_rgba(0,255,255,0.3)] border border-[#00ffff]'
+                      : isVamp
+                      ? 'bg-[#8b0000] hover:bg-[#b00000] text-white font-serif font-bold border border-[#ff3333]/40'
+                      : isMed
+                      ? 'bg-[#8b4513] hover:bg-[#a0522d] text-[#f4eacc] font-serif font-bold border border-[#5c2e0b]'
+                      : 'bg-accent hover:bg-accent-hover text-white font-bold'
+                  }`}
                 >
                   <Plus size={16} />
                   <span>Importar {selectedCharIds.length > 0 ? `(${selectedCharIds.length})` : ''}</span>

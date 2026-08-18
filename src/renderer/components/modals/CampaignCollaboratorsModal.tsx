@@ -151,7 +151,7 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
     ? "px-4 py-2 bg-[#8b4513] text-[#f4eacc] border border-[#5c2e0b] hover:bg-[#a0522d] flex items-center justify-center gap-1.5 transition-all text-sm font-medium shrink-0 w-full sm:w-auto"
     : isVamp
     ? "px-4 py-2 bg-[#500000] text-[#e0e0e0] border border-[#8b0000] hover:bg-[#8b0000] flex items-center justify-center gap-1.5 transition-all text-sm font-medium shrink-0 w-full sm:w-auto"
-    : "px-4 py-2 bg-accent text-accent-text hover:bg-accent-hover rounded flex items-center justify-center gap-1.5 transition-all text-sm font-medium shrink-0 w-full sm:w-auto";
+    : "px-4 py-2 bg-accent text-white hover:bg-accent-hover rounded flex items-center justify-center gap-1.5 transition-all text-sm font-medium shrink-0 w-full sm:w-auto";
 
   return createPortal(
     <>
@@ -213,7 +213,7 @@ export const CampaignCollaboratorsModal: React.FC<CampaignCollaboratorsModalProp
               {/* Campaign Owner (always show first) */}
               <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-border-subtle/5">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-accent-text">
+                  <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white">
                     M
                   </div>
                   <div>

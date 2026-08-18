@@ -43,6 +43,15 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
   const isMed = theme === 'medieval';
   const isVamp = theme === 'vampire';
 
+  // Estilo do botão de ação primária por tema
+  const primaryButtonClass = isCyber
+    ? 'bg-[#00ffff] hover:bg-[#00d8d8] text-black font-mono font-bold shadow-[0_0_15px_rgba(0,255,255,0.4)] border border-[#00ffff]'
+    : isVamp
+    ? 'bg-[#8b0000] hover:bg-[#b00000] text-white font-serif font-bold shadow-[0_0_15px_rgba(255,51,51,0.3)] border border-[#ff3333]/40'
+    : isMed
+    ? 'bg-[#8b4513] hover:bg-[#a0522d] text-[#f4eacc] font-serif font-bold shadow-md border border-[#5c2e0b]'
+    : 'bg-accent hover:bg-accent-hover text-white font-bold shadow-md';
+
   // Estilos de container temático
   const containerThemeClass = isCyber 
     ? 'font-mono text-cyan-300' 
@@ -130,7 +139,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
                 <button
                   onClick={battle.nextTurn}
                   title="Avançar para o Próximo Turno da Fila"
-                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-text font-bold rounded-lg text-sm transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                  className={`px-4 py-2 text-sm rounded-lg transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95 ${primaryButtonClass}`}
                 >
                   <span>Próximo Turno</span>
                   <ChevronRight size={18} />
@@ -150,9 +159,9 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
               <button
                 onClick={battle.startCombat}
                 disabled={battle.combatants.length === 0}
-                className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-40 text-accent-text font-bold rounded-lg text-sm transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
+                className={`px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm rounded-lg transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95 ${primaryButtonClass}`}
               >
-                <Play size={16} />
+                <Play size={16} className="fill-current" />
                 <span>Iniciar Combate</span>
               </button>
             )}
@@ -172,7 +181,11 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
               title="Registro de Ações da Batalha"
               className={`p-2 rounded-lg border transition-colors cursor-pointer ${
                 showHistoryPanel 
-                  ? 'bg-accent/20 border-accent text-accent-text' 
+                  ? isCyber
+                    ? 'bg-[#0ff]/20 border-[#0ff] text-[#0ff]'
+                    : isVamp
+                    ? 'bg-rose-900/40 border-rose-600/50 text-rose-300'
+                    : 'bg-accent/20 border-accent text-accent-text' 
                   : 'bg-surface-elevated hover:bg-surface-hover border-border-subtle text-muted hover:text-heading'
               }`}
             >
@@ -287,7 +300,15 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
       {battle.combatants.length === 0 ? (
         /* EMPTY STATE */
         <div className="text-center py-16 px-6 bg-surface-elevated2/60 rounded-2xl border border-dashed border-border-default flex flex-col items-center justify-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-text">
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+            isCyber 
+              ? 'bg-[#0ff]/10 border border-[#0ff]/30 text-[#0ff] shadow-[0_0_20px_rgba(0,255,255,0.2)]' 
+              : isVamp 
+              ? 'bg-rose-950/40 border border-rose-600/30 text-rose-400 shadow-md' 
+              : isMed 
+              ? 'bg-[#8b4513]/10 border border-[#8b4513]/30 text-[#8b4513]' 
+              : 'bg-accent/10 border border-accent/30 text-accent-text'
+          }`}>
             <Swords size={32} />
           </div>
 
@@ -301,7 +322,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-text font-bold rounded-xl text-sm transition-all shadow-md flex items-center space-x-2 cursor-pointer"
+              className={`px-4 py-2 text-sm rounded-xl transition-all flex items-center space-x-2 cursor-pointer hover:scale-105 active:scale-95 ${primaryButtonClass}`}
             >
               <Plus size={16} />
               <span>Adicionar Combatente</span>
@@ -312,7 +333,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
                 onClick={() => battle.importCharacters(characters)}
                 className="px-4 py-2 bg-surface-elevated hover:bg-surface-hover border border-border-hover text-heading rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 cursor-pointer"
               >
-                <Users size={16} className="text-blue-400" />
+                <Users size={16} className={isCyber ? "text-[#0ff]" : "text-blue-400"} />
                 <span>Importar Todos Jogadores ({characters.length})</span>
               </button>
             )}
