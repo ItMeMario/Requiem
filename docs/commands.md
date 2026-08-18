@@ -1,22 +1,35 @@
 # Comandos do Projeto (Requiem)
 
-Este documento descreve os comandos configurados no `package.json` para facilitar o desenvolvimento e a construção do projeto.
-
-## 1. Executando Localmente (Desenvolvimento e Visualização)
-
-### `npm run dev`
-- **Função**: Inicia o programa localmente em **Modo de Desenvolvimento / Teste**.
-- **O que faz**: Inicia o servidor local do Vite carregando as credenciais de teste (`.env.development.local`) e abre o Electron com Hot-Reload. Qualquer modificação de dados interage com o Firebase de desenvolvimento (`requiem-dev`).
-
-### `npm start`
-- **Função**: Inicia o programa localmente em **Modo de Produção**.
-- **O que faz**: Inicia o servidor local do Vite carregando as credenciais de produção reais (`.env.production.local`) e abre o Electron. Ideal para simular e testar localmente exatamente o que o usuário final verá em produção.
+Este documento descreve os comandos configurados no `package.json` para facilitar o desenvolvimento, testes isolados e geração de pacotes do projeto.
 
 ---
 
-## 2. Gerando Pacotes de Produção
+## 1. Executando Localmente (Desenvolvimento e Testes Seguros)
 
-### `npm run dist`
+### `npm start` ou `npm run dev`
+- **Função**: Inicia o programa localmente em **Modo de Desenvolvimento Seguro** (Padrão).
+- **O que faz**: Inicia o servidor local do Vite carregando as credenciais de teste (`.env.development.local`) e abre o Electron com Hot-Reload. Qualquer modificação de dados interage com o Firebase de desenvolvimento (`requiem-dev`) e com o banco SQLite isolado em `./dev-data/requiem.db`.
+- **Indicador Visual**: Exibe o badge animado `[DEV (requiem-dev)]` no cabeçalho e detalhamento de ambiente no painel de configurações.
+
+### `npm run dev:web`
+- **Função**: Inicia a versão Web/PWA em modo de desenvolvimento seguro (porta 5174).
+
+---
+
+## 2. Executando Localmente em Modo de Produção (Atenção / Uso Consciente)
+
+### `npm run start:prod` ou `npm run dev:prod`
+- **Função**: Inicia o programa localmente carregando o ambiente de **Produção**.
+- **O que faz**: Inicia o servidor local do Vite carregando as credenciais de produção reais (`.env.production.local`) e abre o Electron. Ideal para verificar bugs específicos de produção, mas **atenção**: alterações de dados afetarão a base de produção (`requiem-4886d`).
+
+### `npm run dev:web:prod`
+- **Função**: Inicia a versão Web/PWA carregando as credenciais de produção.
+
+---
+
+## 3. Gerando Pacotes de Produção
+
+### `npm run dist` (ou `npm run build`)
 - **Função**: Gera o instalador final de produção para Desktop (Windows/Linux/Mac).
 - **O que faz**: Compila os arquivos web em modo de produção (com credenciais do `requiem-4886d`) e os empacota via `electron-builder`.
 - **Saída**: Os arquivos instaláveis finais ficarão na pasta `dist/desktop`.
@@ -28,11 +41,11 @@ Este documento descreve os comandos configurados no `package.json` para facilita
 
 ---
 
-## 3. Gerando Pacotes de Desenvolvimento / Testes
+## 4. Gerando Pacotes de Desenvolvimento / Testes
 
-### `npm run dist dev`
+### `npm run dist:dev` (ou `npm run build:dev`)
 - **Função**: Gera o instalador de desenvolvimento para Desktop.
-- **O que faz**: Compila os arquivos web em modo de desenvolvimento (com chaves de teste) e os empacota.
+- **O que faz**: Compila os arquivos web em modo de desenvolvimento (com chaves de teste `requiem-dev`) e os empacota.
 - **Saída**: Os arquivos de teste ficarão na pasta `dist/desktop`.
 
 ### `npm run apk:dev` (ou `npm run dist apk dev`)
@@ -42,29 +55,33 @@ Este documento descreve os comandos configurados no `package.json` para facilita
 
 ---
 
-## 4. Comandos Firebase (Gerenciamento da Nuvem e Emuladores)
-Como as ferramentas do Firebase CLI foram instaladas localmente no projeto, você pode gerenciar seu backend de nuvem e rodar o emulador diretamente pelo terminal do IDE usando o prefixo `npx firebase`:
+## 5. Gerenciamento do Firebase CLI & Segurança do Banco
 
-- **Login no Firebase**:
-  ```bash
-  npx firebase login
-  ```
-  *(Abre o navegador para autenticar a linha de comando com a sua conta do Google)*
+Graças aos aliases configurados no `.firebaserc`, você pode alternar e implantar regras de segurança no Firestore sem risco de afetar a base errada:
 
-- **Vincular ao seu projeto do Firebase**:
+### Alternar Projeto Ativo no CLI:
+- **Selecionar Ambiente de Teste**:
   ```bash
-  npx firebase use --add
+  npm run firebase:use:dev
   ```
-  *(Permite selecionar qual dos seus projetos Firebase na nuvem este repositório deve interagir)*
+- **Selecionar Ambiente de Produção**:
+  ```bash
+  npm run firebase:use:prod
+  ```
 
-- **Implantar regras de segurança do Firestore (`firestore.rules`) na nuvem**:
+### Deploy de Regras de Segurança (`firestore.rules`):
+- **Deploy no Firebase de Desenvolvimento (`requiem-dev`)**:
   ```bash
-  npx firebase deploy --only firestore:rules
+  npm run firebase:deploy:rules:dev
   ```
-  *(Publica instantaneamente o arquivo `firestore.rules` criado na raiz do seu projeto sem que precise abrir o Console Web do Firebase)*
+- **Deploy no Firebase de Produção (`requiem-4886d`)**:
+  ```bash
+  npm run firebase:deploy:rules:prod
+  ```
 
-- **Iniciar o Firebase Local Emulator Suite**:
+### Firebase Local Emulator Suite:
+- **Iniciar Emuladores Locais (Auth e Firestore)**:
   ```bash
-  npx firebase emulators:start
+  npm run firebase:emulators
   ```
-  *(Inicia uma cópia offline do Firestore e Auth no seu computador. Permite que você acesse `http://localhost:4000` para gerenciar usuários de teste e documentos localmente)*
+  *(Inicia uma cópia offline no seu computador em `http://localhost:4000`)*

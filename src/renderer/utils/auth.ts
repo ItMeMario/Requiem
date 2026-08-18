@@ -13,21 +13,45 @@ const firebaseConfig = {
 };
 
 // Check if we have at least apiKey and projectId to initialize Firebase
-const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
+export const isFirebaseConfigured = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
+
+export function getFirebaseEnvInfo() {
+  const isDev = import.meta.env.DEV || firebaseConfig.projectId === 'requiem-dev';
+  return {
+    isConfigured: isFirebaseConfigured,
+    isDev,
+    projectId: firebaseConfig.projectId || 'Local / Offline',
+    authDomain: firebaseConfig.authDomain || 'N/A'
+  };
+}
 
 let app;
 let auth: ReturnType<typeof getAuth> | null = null;
 
 if (isFirebaseConfigured) {
   try {
-    console.log('[Requiem Auth] Initializing Firebase with Project ID:', firebaseConfig.projectId);
+    const isDev = import.meta.env.DEV || firebaseConfig.projectId === 'requiem-dev';
+    console.log(
+      `%c[Requiem]%c 🛡️ Firebase Initialized: %c${isDev ? 'DEVELOPMENT (requiem-dev)' : 'PRODUCTION (requiem-4886d)'}%c | Auth: %cActive`,
+      'background: #1e1e2e; color: #00ffff; font-weight: bold; padding: 3px 6px; border-radius: 4px;',
+      'color: #aaa;',
+      `color: ${isDev ? '#f59e0b' : '#10b981'}; font-weight: bold;`,
+      'color: #aaa;',
+      'color: #00ffff; font-weight: bold;'
+    );
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
   } catch (error) {
     console.error('[Requiem Auth] Failed to initialize Firebase:', error);
   }
 } else {
-  console.warn('[Requiem Auth] Firebase credentials are not configured. Running in local-only mode.');
+  console.log(
+    '%c[Requiem]%c 💾 Running in %cLOCAL-ONLY / OFFLINE%c mode (No Firebase credentials).',
+    'background: #1e1e2e; color: #00ffff; font-weight: bold; padding: 3px 6px; border-radius: 4px;',
+    'color: #aaa;',
+    'color: #a78bfa; font-weight: bold;',
+    'color: #aaa;'
+  );
 }
 
 export { auth };

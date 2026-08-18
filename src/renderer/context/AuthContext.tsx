@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { auth, loginWithGoogleWeb, logoutUser } from '../utils/auth';
+import { auth, loginWithGoogleWeb, logoutUser, getFirebaseEnvInfo } from '../utils/auth';
+
+export interface FirebaseEnvInfo {
+  isConfigured: boolean;
+  isDev: boolean;
+  projectId: string;
+  authDomain: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +16,7 @@ interface AuthContextType {
   login: () => Promise<void>;
   logout: () => Promise<void>;
   isConfigured: boolean;
+  envInfo: FirebaseEnvInfo;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -81,8 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const envInfo = getFirebaseEnvInfo();
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isConfigured }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, isConfigured, envInfo }}>
       {children}
     </AuthContext.Provider>
   );

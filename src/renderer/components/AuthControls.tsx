@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { WebDataService } from '../services/webDataService';
 import { ElectronDataService } from '../services/electronDataService';
 import { FirebaseDataService } from '../services/firebaseDataService';
+import { DevEnvironmentBadge } from './DevEnvironmentBadge';
 
 export function AuthControls() {
   const { user, login, logout, loading, isConfigured } = useAuth();
@@ -124,7 +125,8 @@ export function AuthControls() {
   }
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center space-x-3">
+      <DevEnvironmentBadge />
       {/* Migration Prompt Overlay */}
       {showMigrationPrompt && (
         <div className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-4">
