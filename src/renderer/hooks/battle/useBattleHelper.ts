@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Combatant, CombatGroup, BattleHistoryItem, CombatantType } from '../../types/battle';
+import { Combatant, CombatGroup, BattleHistoryItem, CombatantType, SavedEncounter } from '../../types/battle';
 import { sortCombatants, computeCombatGroups, rollD20, parseAcString, parseHpString } from '../../utils/battleUtils';
+import { battleStorageService } from '../../services/battleStorageService';
 
 interface UseBattleHelperProps {
   campaignId: number | null;
@@ -13,51 +14,61 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
   const [currentGroupIndex, setCurrentGroupIndex] = useState<number>(0);
   const [activeCombatantId, setActiveCombatantId] = useState<string | null>(null);
   const [history, setHistory] = useState<BattleHistoryItem[]>([]);
+  const [savedEncounters, setSavedEncounters] = useState<SavedEncounter[]>([]);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
-  // Chave de armazenamento local por campanha
-  const storageKey = useMemo(() => {
-    return campaignId !== null ? `requiem_battle_state_${campaignId}` : null;
+  // Carrega estado e presets salvos ao montar ou trocar de campanha
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoaded(false);
+
+    const load = async () => {
+      try {
+        const [state, encounters] = await Promise.all([
+          battleStorageService.loadBattleState(campaignId),
+          battleStorageService.getSavedEncounters(campaignId)
+        ]);
+
+        if (!isMounted) return;
+
+        if (state) {
+          setCombatants(state.combatants || []);
+          setIsActive(Boolean(state.isActive));
+          setRound(typeof state.round === 'number' ? state.round : 1);
+          setCurrentGroupIndex(typeof state.currentGroupIndex === 'number' ? state.currentGroupIndex : 0);
+          setActiveCombatantId(state.activeCombatantId || null);
+          setHistory(state.history || []);
+        } else {
+          setCombatants([]);
+          setIsActive(false);
+          setRound(1);
+          setCurrentGroupIndex(0);
+          setActiveCombatantId(null);
+          setHistory([]);
+        }
+
+        setSavedEncounters(encounters || []);
+      } catch (e) {
+        console.error('[Requiem Battle] Failed to load battle state from local storage:', e);
+      } finally {
+        if (isMounted) {
+          setIsLoaded(true);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
   }, [campaignId]);
 
-  // Carrega estado salvo ao montar ou trocar de campanha
+  // Salva automaticamente o estado com debounce de 400ms após carregamento inicial
   useEffect(() => {
-    if (!storageKey) {
-      setCombatants([]);
-      setIsActive(false);
-      setRound(1);
-      setCurrentGroupIndex(0);
-      setActiveCombatantId(null);
-      setHistory([]);
-      return;
-    }
+    if (!isLoaded) return;
 
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setCombatants(parsed.combatants || []);
-        setIsActive(parsed.isActive || false);
-        setRound(parsed.round || 1);
-        setCurrentGroupIndex(parsed.currentGroupIndex || 0);
-        setActiveCombatantId(parsed.activeCombatantId || null);
-        setHistory(parsed.history || []);
-      } else {
-        setCombatants([]);
-        setIsActive(false);
-        setRound(1);
-        setCurrentGroupIndex(0);
-        setActiveCombatantId(null);
-        setHistory([]);
-      }
-    } catch (e) {
-      console.error('[Requiem Battle] Failed to load battle state from localStorage:', e);
-    }
-  }, [storageKey]);
-
-  // Salva automaticamente o estado no localStorage
-  useEffect(() => {
-    if (!storageKey) return;
-    try {
+    const timer = setTimeout(() => {
       const stateToSave = {
         combatants,
         isActive,
@@ -66,11 +77,14 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
         activeCombatantId,
         history
       };
-      localStorage.setItem(storageKey, JSON.stringify(stateToSave));
-    } catch (e) {
-      console.error('[Requiem Battle] Failed to save battle state to localStorage:', e);
-    }
-  }, [storageKey, combatants, isActive, round, currentGroupIndex, activeCombatantId, history]);
+
+      battleStorageService.saveBattleState(campaignId, stateToSave).catch(err => {
+        console.error('[Requiem Battle] Failed to autosave battle state:', err);
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [campaignId, isLoaded, combatants, isActive, round, currentGroupIndex, activeCombatantId, history]);
 
   // Histórico de Ações
   const addHistoryLog = useCallback((message: string, type: BattleHistoryItem['type'] = 'info') => {
@@ -375,10 +389,86 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
     setCurrentGroupIndex(0);
     setActiveCombatantId(null);
     setHistory([]);
-    if (storageKey) {
-      localStorage.removeItem(storageKey);
+    battleStorageService.clearBattleState(campaignId).catch(e => {
+      console.error('[Requiem Battle] Error clearing battle state from storage:', e);
+    });
+  }, [campaignId]);
+
+  // === GERENCIAMENTO DE ENCONTROS SALVOS / PRESETS LOCAIS ===
+
+  const saveCurrentAsEncounter = useCallback(async (name: string, description?: string) => {
+    const saved = await battleStorageService.saveEncounter(campaignId, {
+      name: name.trim() || 'Encontro Sem Nome',
+      description: description?.trim() || undefined,
+      combatants,
+      round
+    });
+
+    setSavedEncounters(prev => [saved, ...prev.filter(e => e.id !== saved.id)]);
+    addHistoryLog(`💾 Encontro "${saved.name}" salvo na biblioteca local.`, 'info');
+    return saved;
+  }, [campaignId, combatants, round, addHistoryLog]);
+
+  const loadEncounter = useCallback((encounter: SavedEncounter, mode: 'replace' | 'merge' = 'replace') => {
+    if (mode === 'replace') {
+      setCombatants(encounter.combatants || []);
+      setIsActive(false);
+      setRound(encounter.round || 1);
+      setCurrentGroupIndex(0);
+      setActiveCombatantId(null);
+      addHistoryLog(`📂 Encontro "${encounter.name}" carregado na arena de combate.`, 'info');
+    } else {
+      // No modo merge, geramos novos IDs únicos para evitar colisões
+      const merged = (encounter.combatants || []).map(c => ({
+        ...c,
+        id: `cbt-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+      }));
+      setCombatants(prev => [...prev, ...merged]);
+      addHistoryLog(`📂 ${merged.length} combatente(s) do encontro "${encounter.name}" adicionados à arena.`, 'info');
     }
-  }, [storageKey]);
+  }, [addHistoryLog]);
+
+  const deleteEncounter = useCallback(async (encounterId: string) => {
+    await battleStorageService.deleteSavedEncounter(campaignId, encounterId);
+    setSavedEncounters(prev => prev.filter(e => e.id !== encounterId));
+    addHistoryLog('Encontro salvo removido dos presets locais.', 'info');
+  }, [campaignId, addHistoryLog]);
+
+  const exportBattleAsJson = useCallback(() => {
+    return battleStorageService.exportToJson({
+      combatants,
+      isActive,
+      round,
+      currentGroupIndex,
+      activeCombatantId,
+      history
+    });
+  }, [combatants, isActive, round, currentGroupIndex, activeCombatantId, history]);
+
+  const importBattleFromJson = useCallback((jsonStr: string, mode: 'replace' | 'merge' = 'replace') => {
+    const imported = battleStorageService.importFromJson(jsonStr);
+    if (!imported || !imported.combatants || imported.combatants.length === 0) {
+      return false;
+    }
+
+    if (mode === 'replace') {
+      setCombatants(imported.combatants);
+      setIsActive(false);
+      setRound(1);
+      setCurrentGroupIndex(0);
+      setActiveCombatantId(null);
+      addHistoryLog(`📥 Combate importado com sucesso (${imported.combatants.length} combatentes).`, 'info');
+    } else {
+      const merged = imported.combatants.map(c => ({
+        ...c,
+        id: `cbt-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+      }));
+      setCombatants(prev => [...prev, ...merged]);
+      addHistoryLog(`📥 ${merged.length} combatente(s) mesclados a partir do JSON importado.`, 'info');
+    }
+
+    return true;
+  }, [addHistoryLog]);
 
   return {
     combatants,
@@ -393,6 +483,8 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
     round,
     stats,
     history,
+    savedEncounters,
+    isLoaded,
     // Ações
     addCombatant,
     updateCombatant,
@@ -409,6 +501,12 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
     resetCombat,
     nextTurn,
     prevTurn,
-    clearAll
+    clearAll,
+    // Encontros Salvos & Backup
+    saveCurrentAsEncounter,
+    loadEncounter,
+    deleteEncounter,
+    exportBattleAsJson,
+    importBattleFromJson
   };
 }

@@ -65,4 +65,16 @@ export interface BattleState {
   currentGroupIndex: number;
   activeCombatantId: string | null;
   history: BattleHistoryItem[];
+  lastSaved?: string;
+}
+
+export interface SavedEncounter {
+  id: string;
+  campaignId: number | null;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  combatants: Combatant[];
+  round?: number;
 }

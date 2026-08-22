@@ -17,11 +17,15 @@ import {
   Zap, 
   AlertCircle,
   Clock,
-  Sparkles
+  Sparkles,
+  Bookmark,
+  FolderOpen,
+  HardDrive
 } from 'lucide-react';
 import { useBattleHelper } from '../../hooks/battle/useBattleHelper';
 import { CombatGroupContainer } from './CombatGroupContainer';
 import { AddCombatantModal } from './AddCombatantModal';
+import { SavedEncountersModal } from './SavedEncountersModal';
 
 interface BattleHelperViewProps {
   theme: string;
@@ -35,6 +39,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
   characters
 }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSavedEncountersModalOpen, setIsSavedEncountersModalOpen] = useState(false);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
 
   const battle = useBattleHelper({ campaignId: selectedCampaign?.id || null });
@@ -111,10 +116,17 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
                     Combate Ativo • Rodada {battle.round}
                   </span>
                 ) : (
-                  <span className="px-3 py-0.5 rounded-full text-xs font-medium bg-surface-elevated border border-border-subtle text-muted">
+                  <span className="px-3 py-0.5 rounded-full text-xs font-medium bg-surface-elevated border border-border-subtle text-muted flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     Fase de Preparação
                   </span>
                 )}
+
+                {/* Indicador de persistência local */}
+                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-muted opacity-80" title="Todas as alterações são salvas automaticamente no armazenamento local deste dispositivo">
+                  <HardDrive size={12} className="text-emerald-400" />
+                  <span>Persistência Local Ativa</span>
+                </span>
               </div>
               <p className="text-xs text-muted mt-0.5">
                 {battle.isActive 
@@ -177,6 +189,23 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
               <span>Adicionar</span>
             </button>
 
+            {/* Biblioteca de Encontros Salvos */}
+            <button
+              onClick={() => setIsSavedEncountersModalOpen(true)}
+              title="Biblioteca de Encontros Salvos e Backup JSON"
+              className="px-3 py-2 bg-surface-elevated hover:bg-surface-hover border border-border-hover text-heading rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 cursor-pointer"
+            >
+              <Bookmark size={16} className={isCyber ? 'text-[#0ff]' : isVamp ? 'text-rose-400' : isMed ? 'text-[#8b4513]' : 'text-accent-text'} />
+              <span>Encontros</span>
+              {battle.savedEncounters.length > 0 && (
+                <span className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full ${
+                  isCyber ? 'bg-[#0ff]/20 text-[#0ff]' : isVamp ? 'bg-rose-900/60 text-rose-200' : 'bg-accent/20 text-accent-text'
+                }`}>
+                  {battle.savedEncounters.length}
+                </span>
+              )}
+            </button>
+
             {/* Histórico Toggle */}
             <button
               onClick={() => setShowHistoryPanel(!showHistoryPanel)}
@@ -198,7 +227,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
             {battle.combatants.length > 0 && !battle.isActive && (
               <button
                 onClick={battle.clearAll}
-                title="Limpar todos os combatentes"
+                title="Limpar todos os combatentes da arena"
                 className="p-2 text-muted hover:text-danger hover:bg-danger/10 border border-border-subtle rounded-lg transition-colors cursor-pointer"
               >
                 <Trash2 size={16} />
@@ -317,7 +346,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
           <div className="max-w-md space-y-1.5">
             <h4 className="text-lg font-bold text-heading">Nenhum combatente na arena</h4>
             <p className="text-xs text-secondary leading-relaxed">
-              Adicione jogadores e monstros para montar a ordem de iniciativa. Combatentes do mesmo time com iniciativas contíguas agirão em turnos agrupados.
+              Adicione jogadores e monstros para montar a ordem de iniciativa ou carregue um encontro salvo da sua biblioteca.
             </p>
           </div>
 
@@ -329,6 +358,16 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
               <Plus size={16} />
               <span>Adicionar Combatente</span>
             </button>
+
+            {battle.savedEncounters.length > 0 && (
+              <button
+                onClick={() => setIsSavedEncountersModalOpen(true)}
+                className="px-4 py-2 bg-surface-elevated hover:bg-surface-hover border border-border-hover text-heading rounded-xl text-sm font-medium transition-colors flex items-center space-x-2 cursor-pointer"
+              >
+                <FolderOpen size={16} className={isCyber ? "text-[#0ff]" : isVamp ? "text-rose-400" : isMed ? "text-[#8b4513]" : "text-accent-text"} />
+                <span>Carregar Encontro Salvo ({battle.savedEncounters.length})</span>
+              </button>
+            )}
 
             {characters.length > 0 && (
               <button
@@ -386,6 +425,21 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
         onImportCharacters={battle.importCharacters}
         onImportMonster={battle.importMonster}
         availableCharacters={characters}
+        theme={theme}
+      />
+
+      {/* MODAL DE ENCONTROS SALVOS & BACKUP */}
+      <SavedEncountersModal
+        isOpen={isSavedEncountersModalOpen}
+        onClose={() => setIsSavedEncountersModalOpen(false)}
+        savedEncounters={battle.savedEncounters}
+        currentCombatants={battle.combatants}
+        currentRound={battle.round}
+        onSaveCurrentAsEncounter={battle.saveCurrentAsEncounter}
+        onLoadEncounter={battle.loadEncounter}
+        onDeleteEncounter={battle.deleteEncounter}
+        onExportBattleJson={battle.exportBattleAsJson}
+        onImportBattleJson={battle.importBattleFromJson}
         theme={theme}
       />
     </div>
