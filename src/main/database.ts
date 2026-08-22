@@ -86,6 +86,13 @@ export function initDb() {
     // Column already exists
   }
 
+  // Migrations for missing columns in existing installations
+  try { db.exec("ALTER TABLE campaigns ADD COLUMN genre TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE campaigns ADD COLUMN system TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE characters ADD COLUMN image_url TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE characters ADD COLUMN personal_notes TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE locations ADD COLUMN image_url TEXT;"); } catch (e) {}
+
   // Migrations for sharing/collaboration columns
   try { db.exec("ALTER TABLE campaigns ADD COLUMN ownerId TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE campaigns ADD COLUMN collaborators TEXT;"); } catch (e) {}

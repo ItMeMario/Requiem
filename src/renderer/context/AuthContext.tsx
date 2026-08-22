@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { auth, loginWithGoogleWeb, logoutUser } from '../utils/auth';
+import { auth, loginWithGoogleWeb, logoutUser, getFirebaseEnvInfo } from '../utils/auth';
+
+export interface FirebaseEnvInfo {
+  isConfigured: boolean;
+  isDev: boolean;
+  projectId: string;
+  authDomain: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -9,6 +16,7 @@ interface AuthContextType {
   login: () => Promise<void>;
   logout: () => Promise<void>;
   isConfigured: boolean;
+  envInfo: FirebaseEnvInfo;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,7 +62,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await loginWithGoogleWeb();
     } catch (error) {
       console.error('[AuthContext] Login failed:', error);
-      alert(error instanceof Error ? error.message : 'Login failed');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Ignore user cancellation errors to avoid showing an alert when users cancel or deny permissions
+      if (
+        errorMessage.toLowerCase().includes('cancel') ||
+        errorMessage.toLowerCase().includes('cancelled')
+      ) {
+        return;
+      }
+
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -71,8 +89,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const envInfo = getFirebaseEnvInfo();
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isConfigured }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, isConfigured, envInfo }}>
       {children}
     </AuthContext.Provider>
   );

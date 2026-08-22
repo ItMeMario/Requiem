@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { WebDataService } from '../services/webDataService';
 import { ElectronDataService } from '../services/electronDataService';
 import { FirebaseDataService } from '../services/firebaseDataService';
+import { DevEnvironmentBadge } from './DevEnvironmentBadge';
 
 export function AuthControls() {
   const { user, login, logout, loading, isConfigured } = useAuth();
@@ -124,7 +125,8 @@ export function AuthControls() {
   }
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center space-x-3">
+      <DevEnvironmentBadge />
       {/* Migration Prompt Overlay */}
       {showMigrationPrompt && (
         <div className="fixed inset-0 z-[2000] bg-black/80 flex items-center justify-center p-4">
@@ -147,7 +149,7 @@ export function AuthControls() {
               <button 
                 onClick={handleMigrate}
                 disabled={isMigrating}
-                className={`px-4 py-2 text-sm flex items-center space-x-2 ${isCyber ? 'bg-[#0ff]/20 text-[#0ff] border border-[#0ff] font-mono hover:bg-[#0ff]/40 shadow-[0_0_10px_rgba(0,255,255,0.4)]' : isVamp ? 'bg-[#500000] text-[#e0e0e0] border border-[#8b0000] hover:bg-[#8b0000]' : isMed ? 'bg-[#8b4513] text-[#f4eacc] border border-[#5c2e0b] hover:bg-[#a0522d]' : 'bg-accent text-accent-text rounded-md font-medium hover:bg-accent/80'} transition-all`}
+                className={`px-4 py-2 text-sm flex items-center space-x-2 ${isCyber ? 'bg-[#0ff]/20 text-[#0ff] border border-[#0ff] font-mono hover:bg-[#0ff]/40 shadow-[0_0_10px_rgba(0,255,255,0.4)]' : isVamp ? 'bg-[#500000] text-[#e0e0e0] border border-[#8b0000] hover:bg-[#8b0000]' : isMed ? 'bg-[#8b4513] text-[#f4eacc] border border-[#5c2e0b] hover:bg-[#a0522d]' : 'bg-accent text-white rounded-md font-medium hover:bg-accent/80'} transition-all`}
               >
                 {isMigrating ? (
                   <>
@@ -157,7 +159,7 @@ export function AuthControls() {
                 ) : (
                   <>
                     <CloudUpload size={16} />
-                    <span>Sync to Cloud</span>
+                    <span>Yes, Sync Local Data</span>
                   </>
                 )}
               </button>
@@ -177,7 +179,7 @@ export function AuthControls() {
             {user.photoURL ? (
               <img src={user.photoURL} alt="Profile" className="w-6 h-6 rounded-full" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-[10px] font-bold text-accent-text">
+              <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-[10px] font-bold text-white">
                 {user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}
               </div>
             )}

@@ -1,3 +1,47 @@
+📌 Patch Notes - Version 1.0.9
+
+✨ New Features
+
+- **Battle Helper (Combat Tracker)**:
+  - Added a dedicated Battle Helper tab to the active campaign view (accessible via the Swords icon and horizontal swipe gestures).
+  - Implemented manual initiative input directly on combatant cards, automatic descending initiative sorting, and contiguous group turn grouping for shared initiatives.
+  - Created `CombatantCard` featuring active turn highlights, dynamic health bars, armor class (AC) badges, condition tracking (Blinded, Charmed, Stunned, etc.), and quick damage/healing modifiers.
+  - Added inline editing for current and maximum HP directly on combatant cards, with automatic synchronization of current HP when editing full-health targets.
+  - Implemented `AddCombatantModal` with multi-source creation: manual entry, direct import of campaign characters (with per-character and global default HP customization), and instant autofill from the D&D 5e XML Bestiary compendium.
+  - Implemented `CombatGroupContainer` for managing simultaneous turns for combatants sharing the same initiative count.
+  - Added round tracking, turn advancement (Next/Prev Turn), round reset, and live interactive combat activity logs in `BattleHelperView`.
+- **Local Data Persistence & Saved Encounter Presets**:
+  - Implemented `battleStorageService` with cross-platform offline persistence using `@capacitor/preferences` with `localStorage` fallback across Desktop, Android, and Web platforms.
+  - Added automatic debounced (400ms) combat state persistence per campaign (and standalone mode) to retain combatants, HP, initiatives, active conditions, round counts, and logs across app restarts and tab navigation.
+  - Introduced `SavedEncountersModal` enabling Game Masters to save encounter templates, load presets, merge them into active combat, and delete obsolete encounters.
+  - Added JSON encounter preset export and import for battle backup and cross-device sharing.
+- **Isolated Development Environment & Multi-Environment Support**:
+  - Isolated development and testing workflows, routing local development to `requiem-dev` by default to safeguard the production Firebase database (`requiem-4886d`).
+  - Created `DevEnvironmentBadge` component with animated status indicator and diagnostic environment details modal for development mode.
+  - Added active Firebase environment/project metadata status cards to `SettingsPanel` and `AuthControls`.
+  - Added explicit npm scripts for production inspection (`start:prod`, `dev:prod`, `dev:web:prod`), development desktop builds (`dist:dev`), and Firebase CLI commands (`firebase:use:dev`, `firebase:use:prod`, `firebase:deploy:rules:dev`, `firebase:deploy:rules:prod`, `firebase:emulators`).
+
+🛠️ Improvements
+
+- **Themed UI & Visual Polish for Battle Helper**:
+  - Implemented custom responsive theme styling for Battle Helper, Add Combatant Modal, and Saved Encounters across Medieval (authentic parchment paper texture, wax-red borders), Cyberpunk (neon borders, HUD scanline controls), Vampire (crimson accents, dark stone framing), and Modern Dark themes.
+  - Standardized combat health terminology from "PV" to "HP" across all Battle Helper cards, modals, and combat activity logs.
+- **Database Table Column Migrations**:
+  - Added automated SQLite column migrations in `src/main/database.ts` and `src/renderer/services/webDataService.ts` for missing columns (`genre`, `system`, `image_url`, `personal_notes`), ensuring backward compatibility with older database schemas.
+
+🐛 Bug Fixes
+
+- **Google Login Cancellation Alert**:
+  - Suppressed error alert popups when users cancel the Google OAuth sign-in flow on desktop or mobile.
+- **Cyberpunk Theme Contrast & Text Visibility**:
+  - Fixed button text colors and low-contrast UI elements in `BattleHelperView`, `AddCombatantModal`, `AuthControls`, and `CampaignCollaboratorsModal`.
+- **Medieval Theme Parchment & Transparency Artifacts**:
+  - Resolved transparent backgrounds and visibility glitches in `BattleHelperView`, `CombatGroupContainer`, `CombatantCard`, and `AddCombatantModal` by applying authentic parchment styling and opaque background layers.
+
+📅 Release Date: 08/22/2026
+
+---
+
 📌 Patch Notes - Version 1.0.8
 
 ✨ New Features

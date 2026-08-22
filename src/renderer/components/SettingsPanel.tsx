@@ -9,7 +9,7 @@ import { AuthControls } from './AuthControls';
 export function SettingsPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme } = useTheme();
-  const { isConfigured } = useAuth();
+  const { isConfigured, envInfo } = useAuth();
 
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -146,8 +146,14 @@ export function SettingsPanel() {
               <hr className={getDividerClass()} />
               <div>
                 <h4 className={getSectionTitleClass()}>Sincronização Nuvem</h4>
-                <div className="flex justify-center p-1">
+                <div className="flex flex-col items-center gap-3 p-1">
                   <AuthControls />
+                  <div className={`w-full flex items-center justify-between px-3 py-2 rounded text-xs ${isCyber ? 'cyber-metallic-panel text-amber-300' : isVamp ? 'bg-[#180a0a] border border-[#a83232]/40 text-[#d1d1d6]' : isMed ? 'bg-[#2b1f14] border border-[#8b4513]/50 text-[#f4eacc]' : 'bg-surface-app border border-border-default'}`}>
+                    <span className="opacity-70">Projeto Firebase:</span>
+                    <span className={`font-mono font-semibold ${envInfo.isDev ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      {envInfo.projectId} {envInfo.isDev ? '(Dev)' : '(Prod)'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </>

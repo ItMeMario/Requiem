@@ -1,6 +1,8 @@
 {
   "projects": {
-    "requiem": "requiem-4886d"
+    "default": "requiem-dev",
+    "development": "requiem-dev",
+    "production": "requiem-4886d"
   },
   "targets": {},
   "etags": {}
