@@ -404,6 +404,7 @@ export const BattleHelperView: React.FC<BattleHelperViewProps> = ({
                   activeCombatantId={battle.activeCombatantId}
                   onSelectActiveCombatant={battle.setActiveCombatantId}
                   onAdjustHp={battle.adjustHp}
+                  onUpdateCombatant={battle.updateCombatant}
                   onToggleCondition={battle.toggleCondition}
                   onRollInitiative={battle.rollInitiative}
                   onUpdateInitiative={(id, val) => battle.updateCombatant(id, { initiative: val })}

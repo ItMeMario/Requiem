@@ -100,6 +100,8 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
 
   // Estado para Importação de Personagens
   const [selectedCharIds, setSelectedCharIds] = useState<number[]>([]);
+  const [defaultImportHp, setDefaultImportHp] = useState('25');
+  const [customCharHp, setCustomCharHp] = useState<Record<number, string>>({});
 
   // Carrega lista de monstros do bestiário em cache
   const allMonsters = useMemo(() => parseAllMonstersFromXml(), []);
@@ -175,7 +177,17 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
   // Submeter Importação de Personagens
   const handleConfirmImportChars = () => {
     if (selectedCharIds.length === 0) return;
-    const charsToImport = availableCharacters.filter(c => selectedCharIds.includes(c.id));
+    const baseDefaultHp = parseInt(defaultImportHp, 10) || 25;
+    const charsToImport = availableCharacters
+      .filter(c => selectedCharIds.includes(c.id))
+      .map(c => {
+        const hpVal = Math.max(1, parseInt(customCharHp[c.id] || defaultImportHp, 10) || baseDefaultHp);
+        return {
+          ...c,
+          maxHp: hpVal,
+          currentHp: hpVal
+        };
+      });
     onImportCharacters(charsToImport);
     onClose();
     resetForm();
@@ -202,6 +214,8 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
     setPlayerInit('0');
     setPlayerNotes('');
     setSelectedCharIds([]);
+    setDefaultImportHp('25');
+    setCustomCharHp({});
     setBestiarySearch('');
   };
 
@@ -344,7 +358,7 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
                       }`}
                     >
                       <span className="truncate pr-2 font-medium">{m.name}</span>
-                      <span className={`text-[10px] shrink-0 ${isMed ? 'text-[#5d4037]' : 'text-muted'}`}>AC {parseAcString(m.ac)} • {parseHpString(m.hp)} PV</span>
+                      <span className={`text-[10px] shrink-0 ${isMed ? 'text-[#5d4037]' : 'text-muted'}`}>AC {parseAcString(m.ac)} • {parseHpString(m.hp)} HP</span>
                     </button>
                   ))}
                 </div>
@@ -536,19 +550,40 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
           {/* TAB: IMPORTAR DA CAMPANHA */}
           {activeTab === 'import' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-secondary">
-                  Selecione os personagens já criados nesta campanha para importar automaticamente:
-                </p>
-                {availableCharacters.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={toggleSelectAllChars}
-                    className="text-xs text-accent hover:underline font-medium cursor-pointer"
-                  >
-                    {selectedCharIds.length === availableCharacters.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
-                  </button>
-                )}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-surface-elevated/40 border border-border-subtle">
+                <div>
+                  <p className="text-xs font-semibold text-heading">
+                    Importar Personagens da Campanha
+                  </p>
+                  <p className="text-[11px] text-muted">
+                    Selecione os jogadores e ajuste o HP inicial desejado para cada um:
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-2 shrink-0">
+                  <div className="flex items-center space-x-1.5 bg-surface-input px-2 py-1 rounded-lg border border-border-subtle">
+                    <Heart size={13} className="text-rose-500" />
+                    <span className="text-[11px] text-muted font-medium">HP Padrão:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={defaultImportHp}
+                      onChange={(e) => setDefaultImportHp(e.target.value)}
+                      title="HP Padrão para personagens importados"
+                      className="w-11 bg-transparent text-heading text-center font-bold font-mono outline-none text-xs"
+                    />
+                  </div>
+
+                  {availableCharacters.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={toggleSelectAllChars}
+                      className="text-xs text-accent hover:underline font-medium cursor-pointer ml-1"
+                    >
+                      {selectedCharIds.length === availableCharacters.length ? 'Desmarcar Todos' : 'Selecionar Todos'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {availableCharacters.length === 0 ? (
@@ -590,6 +625,25 @@ export const AddCombatantModal: React.FC<AddCombatantModalProps> = ({
                         <div className="min-w-0 flex-1">
                           <h5 className="font-bold text-sm text-heading truncate">{char.name}</h5>
                           <p className="text-xs text-muted truncate">{char.race || 'Personagem'} {char.status && `• ${char.status}`}</p>
+                        </div>
+
+                        {/* Input individual de HP */}
+                        <div 
+                          className="flex items-center space-x-1 shrink-0 bg-surface-card px-2 py-1 rounded-lg border border-border-subtle" 
+                          onClick={(e) => e.stopPropagation()}
+                          title="Vida Máxima (HP) deste jogador"
+                        >
+                          <Heart size={12} className="text-rose-500" />
+                          <span className="text-[10px] text-muted font-bold">HP</span>
+                          <input
+                            type="number"
+                            min="1"
+                            value={customCharHp[char.id] ?? defaultImportHp}
+                            onChange={(e) => {
+                              setCustomCharHp(prev => ({ ...prev, [char.id]: e.target.value }));
+                            }}
+                            className="w-11 bg-surface-input border border-border-subtle focus:border-accent text-heading text-center font-bold font-mono rounded px-1 py-0.5 outline-none text-xs"
+                          />
                         </div>
                       </div>
                     );

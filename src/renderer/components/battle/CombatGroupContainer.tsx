@@ -10,6 +10,7 @@ interface CombatGroupContainerProps {
   onSelectActiveCombatant: (id: string) => void;
   onAdjustHp: (id: string, delta: number) => void;
   onSetHp?: (id: string, currentHp: number) => void;
+  onUpdateCombatant?: (id: string, updates: Partial<Combatant>) => void;
   onToggleCondition: (id: string, conditionId: string) => void;
   onRollInitiative: (id: string) => void;
   onUpdateInitiative: (id: string, val: number) => void;
@@ -24,6 +25,8 @@ export const CombatGroupContainer: React.FC<CombatGroupContainerProps> = ({
   activeCombatantId,
   onSelectActiveCombatant,
   onAdjustHp,
+  onSetHp,
+  onUpdateCombatant,
   onToggleCondition,
   onRollInitiative,
   onUpdateInitiative,
@@ -50,6 +53,8 @@ export const CombatGroupContainer: React.FC<CombatGroupContainerProps> = ({
           isActiveTurn={isActiveTurn}
           isCurrentGroup={isGroupActive}
           onAdjustHp={onAdjustHp}
+          onSetHp={onSetHp}
+          onUpdateCombatant={onUpdateCombatant}
           onToggleCondition={onToggleCondition}
           onRollInitiative={onRollInitiative}
           onUpdateInitiative={onUpdateInitiative}
@@ -155,6 +160,8 @@ export const CombatGroupContainer: React.FC<CombatGroupContainerProps> = ({
               isActiveTurn={isActiveTurn}
               isCurrentGroup={isGroupActive}
               onAdjustHp={onAdjustHp}
+              onSetHp={onSetHp}
+              onUpdateCombatant={onUpdateCombatant}
               onToggleCondition={onToggleCondition}
               onRollInitiative={onRollInitiative}
               onUpdateInitiative={onUpdateInitiative}

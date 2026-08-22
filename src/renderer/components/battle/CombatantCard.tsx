@@ -13,7 +13,9 @@ import {
   ChevronDown,
   X,
   Zap,
-  Activity
+  Activity,
+  Edit2,
+  Check
 } from 'lucide-react';
 import { Combatant, DEFAULT_CONDITIONS } from '../../types/battle';
 
@@ -23,6 +25,7 @@ interface CombatantCardProps {
   isCurrentGroup: boolean;
   onAdjustHp: (id: string, delta: number) => void;
   onSetHp?: (id: string, currentHp: number) => void;
+  onUpdateCombatant?: (id: string, updates: Partial<Combatant>) => void;
   onToggleCondition: (id: string, conditionId: string) => void;
   onRollInitiative: (id: string) => void;
   onUpdateInitiative: (id: string, val: number) => void;
@@ -37,6 +40,8 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
   isActiveTurn,
   isCurrentGroup,
   onAdjustHp,
+  onSetHp,
+  onUpdateCombatant,
   onToggleCondition,
   onRollInitiative,
   onUpdateInitiative,
@@ -49,6 +54,9 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
   const [customHpDelta, setCustomHpDelta] = useState<string>('');
   const [isEditingInit, setIsEditingInit] = useState(false);
   const [initInput, setInitInput] = useState(combatant.initiative.toString());
+  const [isEditingHp, setIsEditingHp] = useState(false);
+  const [hpInput, setHpInput] = useState(combatant.currentHp.toString());
+  const [maxHpInput, setMaxHpInput] = useState(combatant.maxHp.toString());
 
   const isCyber = theme === 'cyberpunk';
   const isMed = theme === 'medieval';
@@ -82,6 +90,20 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
       onUpdateInitiative(combatant.id, val);
     }
     setIsEditingInit(false);
+  };
+
+  const handleSaveHp = () => {
+    const newCurrent = parseInt(hpInput, 10);
+    const newMax = parseInt(maxHpInput, 10);
+    if (!isNaN(newMax) && newMax > 0) {
+      const validCurrent = !isNaN(newCurrent) ? Math.max(0, newCurrent) : combatant.currentHp;
+      if (onUpdateCombatant) {
+        onUpdateCombatant(combatant.id, { currentHp: validCurrent, maxHp: newMax });
+      } else if (onSetHp) {
+        onSetHp(combatant.id, validCurrent);
+      }
+    }
+    setIsEditingHp(false);
   };
 
   // Card theme classes
@@ -236,13 +258,95 @@ export const CombatantCard: React.FC<CombatantCardProps> = ({
               <Heart size={14} className={isDead ? 'text-neutral-500' : 'text-rose-500 fill-rose-500/30'} />
               <span>Pontos de Vida (HP):</span>
             </div>
-            <div className="font-mono font-bold">
-              <span className={isDead ? 'text-neutral-500' : combatant.currentHp <= (combatant.maxHp * 0.25) ? 'text-rose-400' : 'text-heading'}>
-                {combatant.currentHp}
-              </span>
-              <span className="text-muted font-normal"> / {combatant.maxHp} PV</span>
-              <span className="text-[10px] text-muted ml-1.5 font-normal">({hpPercent}%)</span>
-            </div>
+            
+            {isEditingHp ? (
+              <div className="flex items-center space-x-1 font-mono" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="number"
+                  min="0"
+                  value={hpInput}
+                  onChange={(e) => setHpInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveHp();
+                    if (e.key === 'Escape') setIsEditingHp(false);
+                  }}
+                  title="HP Atual"
+                  className="w-12 bg-surface-input border border-border-subtle focus:border-accent text-heading text-center font-bold rounded px-1 py-0.5 outline-none text-xs"
+                  autoFocus
+                />
+                <span className="text-muted font-normal text-xs">/</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={maxHpInput}
+                  onChange={(e) => setMaxHpInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveHp();
+                    if (e.key === 'Escape') setIsEditingHp(false);
+                  }}
+                  title="HP Máximo"
+                  className="w-12 bg-surface-input border border-border-subtle focus:border-accent text-heading text-center font-bold rounded px-1 py-0.5 outline-none text-xs"
+                />
+                <span className="text-xs text-muted font-normal">HP</span>
+                <button
+                  type="button"
+                  onClick={handleSaveHp}
+                  title="Salvar HP"
+                  className="p-1 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 rounded cursor-pointer transition-colors"
+                >
+                  <Check size={13} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingHp(false)}
+                  title="Cancelar"
+                  className="p-1 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 rounded cursor-pointer transition-colors"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            ) : (
+              <div className="font-mono font-bold flex items-center space-x-1.5">
+                <span 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setHpInput(combatant.currentHp.toString());
+                    setMaxHpInput(combatant.maxHp.toString());
+                    setIsEditingHp(true);
+                  }}
+                  title="Clique para editar HP / HP Máximo"
+                  className={`cursor-pointer hover:underline ${isDead ? 'text-neutral-500' : combatant.currentHp <= (combatant.maxHp * 0.25) ? 'text-rose-400' : 'text-heading'}`}
+                >
+                  {combatant.currentHp}
+                </span>
+                <span 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setHpInput(combatant.currentHp.toString());
+                    setMaxHpInput(combatant.maxHp.toString());
+                    setIsEditingHp(true);
+                  }}
+                  title="Clique para editar HP Máximo"
+                  className="text-muted font-normal cursor-pointer hover:text-heading transition-colors"
+                >
+                  / {combatant.maxHp} HP
+                </span>
+                <span className="text-[10px] text-muted font-normal">({hpPercent}%)</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setHpInput(combatant.currentHp.toString());
+                    setMaxHpInput(combatant.maxHp.toString());
+                    setIsEditingHp(true);
+                  }}
+                  title="Editar HP / HP Máximo"
+                  className="p-1 text-muted hover:text-accent-text hover:bg-surface-hover rounded transition-colors cursor-pointer"
+                >
+                  <Edit2 size={12} />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Barra Visual */}

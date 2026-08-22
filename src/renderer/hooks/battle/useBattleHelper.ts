@@ -164,7 +164,28 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
 
   // Atualizar combatente
   const updateCombatant = useCallback((id: string, updates: Partial<Combatant>) => {
-    setCombatants(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    setCombatants(prev => prev.map(c => {
+      if (c.id !== id) return c;
+      const updated = { ...c, ...updates };
+
+      // Se maxHp foi atualizado sem currentHp explícito e o combatente estava com vida cheia
+      if (updates.maxHp !== undefined && updates.currentHp === undefined && c.currentHp === c.maxHp) {
+        updated.currentHp = updates.maxHp;
+      }
+
+      // Atualiza status dead de acordo com o HP
+      const currentHp = updated.currentHp;
+      const isDead = currentHp <= 0;
+      let conditions = [...updated.conditions];
+      if (isDead && !conditions.includes('dead')) {
+        conditions.push('dead');
+      } else if (!isDead && conditions.includes('dead')) {
+        conditions = conditions.filter(cond => cond !== 'dead');
+      }
+      updated.conditions = conditions;
+
+      return updated;
+    }));
   }, []);
 
   // Remover combatente
@@ -199,14 +220,16 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
   }, [combatants, addHistoryLog]);
 
   // Importar personagens da campanha
-  const importCharacters = useCallback((charsToImport: any[]) => {
+  const importCharacters = useCallback((charsToImport: any[], defaultHp: number = 20) => {
     const newCombatants: Combatant[] = charsToImport.map(char => {
+      const charHp = char.maxHp || char.customHp || char.hp || defaultHp;
+      const parsedHp = typeof charHp === 'number' ? charHp : (parseInt(charHp, 10) || defaultHp);
       return {
         id: `cbt-char-${char.id}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
         name: char.name,
         type: 'player',
-        currentHp: 20, // Default base HP para jogadores
-        maxHp: 20,
+        currentHp: parsedHp,
+        maxHp: parsedHp,
         initiative: 0,
         conditions: [],
         sourceCharacterId: char.id,
@@ -262,8 +285,8 @@ export function useBattleHelper({ campaignId }: UseBattleHelperProps) {
         conditions = conditions.filter(cond => cond !== 'dead');
       }
 
-      const actionText = delta < 0 ? `sofreu ${Math.abs(delta)} de dano` : `recuperou ${delta} PV`;
-      addHistoryLog(`${c.name} ${actionText} (${newHp}/${c.maxHp} PV).`, delta < 0 ? 'damage' : 'heal');
+      const actionText = delta < 0 ? `sofreu ${Math.abs(delta)} de dano` : `recuperou ${delta} HP`;
+      addHistoryLog(`${c.name} ${actionText} (${newHp}/${c.maxHp} HP).`, delta < 0 ? 'damage' : 'heal');
 
       return {
         ...c,
