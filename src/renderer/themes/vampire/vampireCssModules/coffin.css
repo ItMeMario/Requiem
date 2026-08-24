@@ -1,15 +1,8 @@
 /* ═══════════════════════════════════════════
-   COFFIN CLIP PATH
+   VAMPIRE COFFIN INTRO - 3D GOTHIC REVISION
    ═══════════════════════════════════════════ */
 
-.clip-coffin {
-  clip-path: polygon(30% 0%, 70% 0%, 100% 15%, 80% 100%, 20% 100%, 0% 15%);
-}
-
-/* ═══════════════════════════════════════════
-   COFFIN INTRO OVERLAY
-   ═══════════════════════════════════════════ */
-
+/* ── Overlay Container ── */
 .coffin-intro-overlay {
   position: fixed;
   inset: 0;
@@ -17,305 +10,467 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: #040003;
   overflow: hidden;
   perspective: 1200px;
-  transition: opacity 1.2s ease-out;
+  user-select: none;
+  transition: opacity 0.8s ease-out;
 }
 
-.coffin-intro-overlay.coffin-intro-reveal {
-  animation: coffin-reveal-out 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.coffin-intro-overlay.coffin-intro-opening {
+  animation: vampire-scene-zoom 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes coffin-reveal-out {
+@keyframes vampire-scene-zoom {
   0% {
-    opacity: 1;
     transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
   }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.3);
+  75% {
+    transform: scale(1.08);
+    opacity: 0.95;
+    filter: brightness(1.2);
   }
   100% {
+    transform: scale(1.25);
     opacity: 0;
-    transform: scale(3);
+    filter: brightness(1.8) contrast(1.2);
     pointer-events: none;
   }
 }
 
-/* ═══════════════════════════════════════════
-   BLOOD AMBIENT BACKGROUND
-   ═══════════════════════════════════════════ */
-
+/* ── Blood Ambient & Moon Backdrop ── */
 .coffin-intro-ambient {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, #4a0000 0%, #000000 65%);
-  opacity: 0.6;
+  background: 
+    radial-gradient(circle at 50% 38%, rgba(120, 0, 15, 0.25) 0%, rgba(20, 0, 5, 0.85) 60%, #030002 100%),
+    linear-gradient(to bottom, rgba(10, 0, 2, 0.9), #030002);
+  pointer-events: none;
 }
 
-/* ═══════════════════════════════════════════
-   COFFIN BODY (CONTAINER)
-   ═══════════════════════════════════════════ */
+/* Blood Moon */
+.vampire-blood-moon {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #7a0a0a 0%, #3d0000 65%, transparent 75%);
+  filter: blur(16px);
+  opacity: 0.45;
+  pointer-events: none;
+  animation: bloodMoonPulse 6s ease-in-out infinite alternate;
+}
 
+@keyframes bloodMoonPulse {
+  0% { opacity: 0.35; transform: translateX(-50%) scale(0.95); }
+  100% { opacity: 0.55; transform: translateX(-50%) scale(1.05); }
+}
+
+/* Floating Red Embers / Dust */
+.vampire-ember {
+  position: absolute;
+  border-radius: 50%;
+  background: #ff2222;
+  box-shadow: 0 0 6px #ff0000;
+  pointer-events: none;
+  animation: emberFloat 4s ease-in-out infinite;
+}
+
+@keyframes emberFloat {
+  0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0; }
+  50% { opacity: 0.7; transform: translateY(-40px) translateX(10px) scale(1.1); }
+  100% { transform: translateY(-90px) translateX(-10px) scale(0.5); opacity: 0; }
+}
+
+/* ── Coffin Main Body Container ── */
 .coffin-body {
   position: relative;
-  width: 300px;
-  height: 500px;
+  width: 280px;
+  height: 480px;
   cursor: pointer;
   transform-style: preserve-3d;
-  perspective: 900px;
+  transition: transform 0.4s ease;
 }
 
-/* ═══════════════════════════════════════════
-   COFFIN SHAKE (IDLE HOVER)
-   ═══════════════════════════════════════════ */
-
-@keyframes coffinShake {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(1deg); }
-  50% { transform: rotate(-1deg); }
-  75% { transform: rotate(0.5deg); }
-  100% { transform: rotate(0deg); }
+@media (min-width: 640px) {
+  .coffin-body {
+    width: 310px;
+    height: 520px;
+  }
 }
 
-.coffin-shake:hover {
-  animation: coffinShake 0.4s ease-in-out infinite;
+.coffin-body:hover:not(.is-open) {
+  transform: translateY(-4px) scale(1.01);
 }
 
-/* ═══════════════════════════════════════════
-   PULSATING AURA BEHIND COFFIN
-   ═══════════════════════════════════════════ */
-
+/* ── Pulsating Aura ── */
 .coffin-aura {
   position: absolute;
-  inset: -48px;
-  background: #ff0000;
-  border-radius: 100px;
-  filter: blur(70px);
-  opacity: 0.4;
-  animation: pulse 2s ease-in-out infinite;
-  transition: all 1.5s ease;
-}
-.coffin-aura-burst {
-  opacity: 0.8;
-  filter: blur(100px);
-  inset: -80px;
-  animation: aura-burst 2s ease-out forwards;
-}
-
-@keyframes aura-burst {
-  0% { opacity: 0.8; filter: blur(100px); background: #ff0000; }
-  50% { opacity: 1; filter: blur(120px); background: #ff2200; }
-  100% { opacity: 0.15; filter: blur(150px); background: #330000; }
-}
-
-/* ═══════════════════════════════════════════
-   LIGHT SPILLING OUT (WHEN OPEN)
-   ═══════════════════════════════════════════ */
-
-.coffin-light-spill {
-  position: absolute;
-  top: -10%;
-  left: 15%;
-  width: 70%;
-  height: 50%;
-  background: radial-gradient(ellipse at center bottom, rgba(255, 30, 0, 0.6) 0%, transparent 70%);
-  filter: blur(30px);
-  opacity: 0;
-  transform: scaleY(0.3);
-  transition: all 2s ease;
-  z-index: 5;
-  pointer-events: none;
-}
-.coffin-light-spill-active {
-  opacity: 1;
-  transform: scaleY(1.5);
-  animation: light-spill-flicker 1.5s ease-in-out infinite alternate;
-}
-
-@keyframes light-spill-flicker {
-  0% { opacity: 0.7; filter: blur(30px); }
-  100% { opacity: 1; filter: blur(40px); }
-}
-
-/* ═══════════════════════════════════════════
-   RISING MIST WHEN COFFIN OPENS
-   ═══════════════════════════════════════════ */
-
-.coffin-mist {
-  position: absolute;
-  left: 30%;
-  bottom: 30%;
-  width: 40%;
-  height: 30%;
-  background: radial-gradient(ellipse at center, rgba(100, 0, 0, 0.3) 0%, transparent 70%);
-  filter: blur(25px);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 150;
-  transition: opacity 1s ease;
-}
-.coffin-mist-2 {
-  left: 20%;
-  width: 60%;
-  height: 40%;
-  bottom: 25%;
-  background: radial-gradient(ellipse at center, rgba(50, 0, 0, 0.2) 0%, transparent 70%);
+  inset: -30px;
+  background: radial-gradient(ellipse at center, rgba(200, 0, 0, 0.4) 0%, transparent 70%);
+  border-radius: 80px;
   filter: blur(40px);
-}
-.coffin-mist-active {
-  opacity: 1;
-  animation: mist-rise 3s ease-out forwards;
-}
-
-@keyframes mist-rise {
-  0% {
-    opacity: 0;
-    transform: translateY(0) scaleX(0.5);
-  }
-  30% {
-    opacity: 0.8;
-    transform: translateY(-20px) scaleX(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-120px) scaleX(2);
-  }
+  opacity: 0.4;
+  animation: auraPulse 3s ease-in-out infinite;
+  transition: opacity 1s ease;
+  pointer-events: none;
 }
 
-/* ═══════════════════════════════════════════
-   COFFIN INTERIOR
-   ═══════════════════════════════════════════ */
+.coffin-body.is-open .coffin-aura {
+  opacity: 0.8;
+  filter: blur(60px);
+  animation: auraBurst 1.5s ease-out forwards;
+}
 
-.coffin-interior {
+@keyframes auraPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.96); }
+  50% { opacity: 0.55; transform: scale(1.04); }
+}
+
+@keyframes auraBurst {
+  0% { opacity: 0.6; transform: scale(1); }
+  60% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0.2; transform: scale(1.6); }
+}
+
+/* ── Coffin Shape Polygon (Classic Gothic Hexagonal Sarcophagus) ── */
+.coffin-clip {
+  clip-path: polygon(26% 0%, 74% 0%, 100% 18%, 80% 100%, 20% 100%, 0% 18%);
+}
+
+/* ── Coffin Interior / Base ── */
+.coffin-interior-box {
   position: absolute;
   inset: 0;
-  background: #020000;
-  border: 6px solid #110000;
-  box-shadow: 0 0 100px rgba(255, 0, 0, 0.5);
-  clip-path: polygon(30% 0%, 70% 0%, 100% 15%, 80% 100%, 20% 100%, 0% 15%);
+  background: #020002;
+  border: 4px solid #140508;
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.98),
+    inset 0 0 50px rgba(0, 0, 0, 1),
+    0 0 35px rgba(180, 0, 0, 0.25);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  z-index: 1;
 }
 
-.coffin-interior-velvet {
+/* Deep Obsidian / Black Velvet with Subtle Graphite Quilted Pattern */
+.coffin-velvet {
+  position: absolute;
+  inset: 6px;
+  background: 
+    radial-gradient(circle at 50% 30%, #141115 0%, #070507 55%, #000000 95%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 12px, rgba(18,16,20,0.3) 12px, rgba(18,16,20,0.3) 24px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 12px, rgba(18,16,20,0.3) 12px, rgba(18,16,20,0.3) 24px);
+  box-shadow: 
+    inset 0 0 45px rgba(0, 0, 0, 1),
+    inset 0 0 15px rgba(0, 0, 0, 0.9);
+}
+
+/* Velvet Diamond Tufting Pins - Subtle Dark Graphite */
+.coffin-velvet-tufting {
   position: absolute;
   inset: 0;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wIDBMODggTTggMEwwIDgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIwLjUiLz4KPC9zdmc+');
-  mix-blend-mode: multiply;
-  opacity: 0.3;
-  background-color: #3a0000;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+  opacity: 0.35;
+  mix-blend-mode: screen;
 }
 
-.coffin-interior-frame {
-  width: 88%;
-  height: 92%;
-  border: 4px solid #0a0000;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 15%, 80% 100%, 20% 100%, 0% 15%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, 1);
-  background: #050000;
-  position: relative;
-}
-
-.coffin-interior-darkness {
+/* Vampire Glowing Crimson Eyes - High Contrast SVG against black */
+.coffin-eyes {
   position: absolute;
-  inset: 0;
-  background: black;
-  opacity: 0.9;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 105px;
+  height: 35px;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease-in 0.25s;
+  filter: drop-shadow(0 0 10px #ff0011) drop-shadow(0 0 22px #ff0000);
 }
 
-.coffin-interior-glow {
-  width: 50%;
-  height: 100%;
-  background: radial-gradient(ellipse at center, #5a0000 0%, transparent 60%);
-  opacity: 0.2;
+.coffin-body.is-open .coffin-eyes {
+  opacity: 1;
+  animation: vampireEyesGlow 1.2s ease-in-out infinite alternate;
 }
 
-/* ═══════════════════════════════════════════
-   COFFIN LID – 3D HINGE OPEN FROM TOP
-   ═══════════════════════════════════════════ */
+@keyframes vampireEyesGlow {
+  0% {
+    filter: drop-shadow(0 0 8px #ff0000) drop-shadow(0 0 18px #ff0022);
+    transform: translateX(-50%) scale(0.98);
+  }
+  100% {
+    filter: drop-shadow(0 0 16px #ff2233) drop-shadow(0 0 32px #ff0000);
+    transform: translateX(-50%) scale(1.05);
+  }
+}
 
+/* Interior Runic Sigil - Dark Shadow Maroon */
+.coffin-interior-sigil {
+  position: absolute;
+  bottom: 18%;
+  opacity: 0.15;
+  filter: drop-shadow(0 0 6px rgba(180, 0, 0, 0.4));
+  animation: sigilPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes sigilPulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.45; }
+}
+
+/* ── Coffin Lid (3D Side-Hinged Door) ── */
 .coffin-lid {
   position: absolute;
   inset: 0;
-  background: #050000;
-  border: 10px solid #1a0000;
-  border-top-width: 8px;
-  border-bottom-width: 8px;
-  box-shadow:
-    inset 0 0 80px rgba(0, 0, 0, 1),
-    0 20px 60px rgba(0, 0, 0, 0.9);
-  clip-path: polygon(30% 0%, 70% 0%, 100% 15%, 80% 100%, 20% 100%, 0% 15%);
-  z-index: 10;
+  background: 
+    radial-gradient(ellipse at 50% 35%, #1f080c 0%, #0e0204 70%, #050001 100%);
+  border: 4px solid #330c12;
+  box-shadow: 
+    inset 0 0 40px rgba(0, 0, 0, 0.9),
+    0 15px 35px rgba(0, 0, 0, 0.8);
+  z-index: 20;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  /* 3D hinge from the top */
-  transform-origin: top center;
-  transform: rotateX(0deg);
-  transition: transform 2s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 2s ease;
+  transform-origin: left center;
+  transform: rotateY(0deg);
+  transition: 
+    transform 1.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 1.5s ease;
   backface-visibility: hidden;
 }
 
-.coffin-lid-open {
-  transform: rotateX(-115deg);
-  box-shadow:
-    inset 0 0 80px rgba(0, 0, 0, 1),
-    0 -30px 60px rgba(139, 0, 0, 0.3);
+/* Open state: realistic 3D left swing like a door/book cover */
+.coffin-body.is-open .coffin-lid {
+  transform: rotateY(-112deg) rotateZ(1deg);
+  box-shadow: 
+    inset 0 0 60px rgba(0, 0, 0, 1),
+    -20px 20px 50px rgba(0, 0, 0, 0.9),
+    -5px 0 20px rgba(180, 0, 0, 0.2);
 }
 
-/* ═══════════════════════════════════════════
-   COFFIN LID TEXTURE
-   ═══════════════════════════════════════════ */
-
-.coffin-lid-texture {
+/* Beveled Inner Border for Gothic Depth */
+.coffin-lid-bevel {
   position: absolute;
-  width: 86%;
-  height: 93%;
-  border: 2px solid rgba(74, 0, 0, 0.4);
-  clip-path: polygon(30% 0%, 70% 0%, 100% 15%, 80% 100%, 20% 100%, 0% 15%);
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik0wIDBMODggTTggMEwwIDgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIwLjUiLz4KPC9zdmc+');
-  mix-blend-mode: multiply;
-  opacity: 0.7;
+  inset: 8px;
+  border: 2px solid rgba(160, 20, 35, 0.35);
+  box-shadow: 
+    inset 0 0 15px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 
-/* ═══════════════════════════════════════════
-   ROSARY ON THE LID
-   ═══════════════════════════════════════════ */
-
-.coffin-rosary {
-  position: relative;
-  z-index: 20;
-  filter: drop-shadow(0 0 12px rgba(255, 0, 0, 0.8));
-}
-
-/* ═══════════════════════════════════════════
-   AWAKEN TEXT
-   ═══════════════════════════════════════════ */
-
-.coffin-awaken-text {
+/* Corner Gothic Brackets / Rivets */
+.coffin-rivet {
   position: absolute;
-  bottom: 64px;
-  color: #cc0000;
-  font-family: serif;
-  letter-spacing: 0.5em;
-  font-size: 0.875rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  text-shadow: 0 0 20px #ff0000, 0 0 10px #ff0000;
-  animation: pulse 2s ease-in-out infinite;
-  transition: opacity 0.8s ease;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a82020, #400808);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2);
 }
-.coffin-text-fade {
+
+/* Rosary & Gothic Cross Medallion */
+.coffin-medallion {
+  position: relative;
+  z-index: 25;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.9));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.coffin-body:hover:not(.is-open) .coffin-medallion {
+  transform: scale(1.03);
+  filter: drop-shadow(0 0 16px rgba(255, 0, 0, 0.8));
+}
+
+/* Blood Ruby Pulse */
+.coffin-blood-ruby {
+  animation: rubyPulse 2s infinite ease-in-out;
+}
+
+@keyframes rubyPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px #ff0000) drop-shadow(0 0 8px #990000);
+    opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 8px #ff3333) drop-shadow(0 0 16px #ff0000);
+    opacity: 1;
+  }
+}
+
+/* "UNSEAL / AWAKEN" prompt text */
+.coffin-prompt {
+  margin-top: 24px;
+  color: #c92a2a;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(255, 0, 0, 0.7);
+  animation: promptFade 2s infinite ease-in-out;
+  transition: opacity 0.4s ease;
+}
+
+@keyframes promptFade {
+  0%, 100% { opacity: 0.7; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+
+.coffin-body.is-open .coffin-prompt {
   opacity: 0 !important;
-  animation: none;
+}
+
+/* ── Bat Burst Animation (Fast Flurry on Open) ── */
+.bat-burst-container {
+  position: absolute;
+  inset: -100px;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 50;
+}
+
+.bat-burst-item {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  opacity: 0;
+  color: #1a0204;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.9));
+}
+
+.coffin-body.is-open .bat-1 {
+  animation: batFly1 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.coffin-body.is-open .bat-2 {
+  animation: batFly2 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) 0.1s forwards;
+}
+
+.coffin-body.is-open .bat-3 {
+  animation: batFly3 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) 0.15s forwards;
+}
+
+.coffin-body.is-open .bat-4 {
+  animation: batFly4 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) 0.2s forwards;
+}
+
+.coffin-body.is-open .bat-5 {
+  animation: batFly5 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) 0.25s forwards;
+}
+
+@keyframes batFly1 {
+  0% {
+    top: 40%;
+    left: 40%;
+    transform: scale(0.2) rotate(15deg);
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  100% {
+    top: -20%;
+    left: -35%;
+    transform: scale(2.4) rotate(-35deg);
+    opacity: 0;
+  }
+}
+
+@keyframes batFly2 {
+  0% {
+    top: 45%;
+    left: 50%;
+    transform: scale(0.2) rotate(-10deg);
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  100% {
+    top: -30%;
+    left: 110%;
+    transform: scale(2.8) rotate(40deg);
+    opacity: 0;
+  }
+}
+
+@keyframes batFly3 {
+  0% {
+    top: 35%;
+    left: 45%;
+    transform: scale(0.2) rotate(0deg);
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  100% {
+    top: -50%;
+    left: 40%;
+    transform: scale(3.2) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes batFly4 {
+  0% {
+    top: 55%;
+    left: 45%;
+    transform: scale(0.2) rotate(20deg);
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  100% {
+    top: 110%;
+    left: -20%;
+    transform: scale(2.2) rotate(-25deg);
+    opacity: 0;
+  }
+}
+
+@keyframes batFly5 {
+  0% {
+    top: 50%;
+    left: 55%;
+    transform: scale(0.2) rotate(-20deg);
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  100% {
+    top: 105%;
+    left: 105%;
+    transform: scale(2.5) rotate(30deg);
+    opacity: 0;
+  }
+}
+
+/* ── Red Mist Spilling Out ── */
+.coffin-spill-mist {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 60%, rgba(200, 0, 20, 0.45) 0%, transparent 70%);
+  filter: blur(25px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  z-index: 15;
+}
+
+.coffin-body.is-open .coffin-spill-mist {
+  opacity: 1;
+  animation: spillMistRise 1.4s ease-out forwards;
+}
+
+@keyframes spillMistRise {
+  0% { opacity: 0; transform: scale(0.8) translateY(0); }
+  40% { opacity: 0.85; transform: scale(1.2) translateY(-20px); }
+  100% { opacity: 0; transform: scale(1.8) translateY(-60px); }
 }
