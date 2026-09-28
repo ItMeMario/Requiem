@@ -1,3 +1,45 @@
+📌 Patch Notes - Version 1.1.0
+
+✨ New Features
+
+- **Player Entity Assignment & Shared Permissions (`assignedTo`)**:
+  - Implemented entity assignment across characters, locations, and journal entries, allowing Game Masters to grant editing permissions to specific assigned players.
+  - Added `AssignPlayersSelect` UI component with multi-selection badges and player avatars, integrated into `CharacterModal`, `LocationModal`, and `EntryModal` for campaign owners.
+  - Added assigned player indicator badges across cards in `CharacterList`, `LocationList`, and `JournalList`, as well as inside detail view modals.
+  - Updated Firestore security rules with helper functions (`isAssigned`, `assignedToNotModified`, `canCreateEntity`) to permit assigned players to read and update campaign entities while enforcing `assignedTo` immutability for non-GMs.
+  - Implemented real-time Firestore collaboration sync for assigned entities via array-contains queries, alongside offline SQLite and SQLite WASM (`WebDataService`) schema migrations and IPC serialization.
+- **Offline Star Wars 5e (SW5e) Bestiary Compendium**:
+  - Integrated an offline compendium containing 141 playable species and 271 monsters/NPCs from the Star Wars 5e (SW5e) system.
+  - Created `StarWarsBestiary` component with instant in-memory filtering by Challenge Rating (CR), creature size, type, and keyword search.
+  - Created `StarWarsDetailModal` presenting full D&D 5e-compatible statblocks, traits, actions, legendary actions, and species lore dossiers.
+  - Added a segmented source toggle in `MonsterList` to seamlessly switch between the traditional D&D 5e XML Bestiary and the SW5e Compendium.
+  - Added campaign-level `bestiarySource` configuration (`dnd5e` | `sw5e`) with persistent storage across SQLite, IndexedDB, and active campaign state.
+
+🛠️ Improvements
+
+- **Revamped 3D Vampire Theme Awakening Animation**:
+  - Redesigned the Vampire theme awakening intro animation in `VampireIntro.tsx` featuring a 3D side-hinged coffin lid opening along the Y-axis (`rotateY(-120deg)`).
+  - Added realistic interior depth with tufted blood-velvet padding, brass button rivets, and glowing crimson vampire eyes that fade in from the shadows.
+  - Implemented explosive opening visual effects, including a fast bat flurry burst and rising ambient red mist.
+  - Enhanced exterior gothic details with corner brackets, ornate rivets, and a pulsing blood-ruby medallion centerpiece.
+- **Database Schema & Backup Routines**:
+  - Added automated SQLite migrations in `database.ts` and `webDataService.ts` for the `assignedTo` and `bestiarySource` columns.
+  - Updated cloud and local backup export/import routines in `backupHandlersIpc.ts` to preserve player assignment metadata across backups.
+
+🐛 Bug Fixes
+
+- **Entity Modification & Deletion Segregation**:
+  - Separated edit and delete actions on list cards so assigned non-authors can edit assigned entities without exposing destructive deletion options.
+  - Enforced delete protection in Firestore rules and frontend handlers, preventing non-author collaborators from deleting shared campaign items.
+- **Personal Notes Privacy for Assigned Entities**:
+  - Ensured that assigning entities to players preserves strict personal notes isolation in private subcollections, preventing notes from being shared or overwritten.
+- **Content Security Policy for External Images**:
+  - Updated Content Security Policy (CSP) in `index.html` to allow loading official SW5e illustration assets from remote domains.
+
+📅 Release Date: 09/28/2026
+
+---
+
 📌 Patch Notes - Version 1.0.9
 
 ✨ New Features
