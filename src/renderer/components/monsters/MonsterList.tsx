@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, X, Shield, Heart, Swords, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Shield, Heart, Swords, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Info, Rocket } from 'lucide-react';
 import { MonsterDetailModal } from '../modals/MonsterDetailModal';
+import { StarWarsBestiary } from '../starwars/StarWarsBestiary';
 
 // Type definition for Monster
 interface Monster {
@@ -212,6 +213,7 @@ const monstersData: Monster[] = Object.values(xmlModules).flatMap((xmlStr) => {
 
 interface MonsterListProps {
   theme: string;
+  bestiarySource?: 'dnd5e' | 'starwars';
 }
 
 const CR_OPTIONS = [
@@ -251,7 +253,19 @@ const CR_OPTIONS = [
   { label: '30', value: 30 },
 ];
 
-export const MonsterList: React.FC<MonsterListProps> = ({ theme }) => {
+export const MonsterList: React.FC<MonsterListProps> = ({ theme, bestiarySource: propBestiarySource }) => {
+  // Bestiary Source Toggle State (persisted locally)
+  const [localBestiarySource, setLocalBestiarySource] = useState<'dnd5e' | 'starwars'>(() => {
+    return (localStorage.getItem('requiem_bestiary_source') as 'dnd5e' | 'starwars') || 'dnd5e';
+  });
+
+  const bestiarySource = propBestiarySource || localBestiarySource;
+
+  const handleSwitchSource = (source: 'dnd5e' | 'starwars') => {
+    setLocalBestiarySource(source);
+    localStorage.setItem('requiem_bestiary_source', source);
+  };
+
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -352,16 +366,50 @@ export const MonsterList: React.FC<MonsterListProps> = ({ theme }) => {
 
   return (
     <div className="space-y-6">
-      {/* Page Title & Stats */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-        <div>
-          <h3 className="text-xl font-bold text-secondary tracking-wide flex items-center gap-2">
-            <Swords className="text-accent" size={22} /> Bestiary
-          </h3>
-          <p className="text-xs text-muted mt-1">
-            Browse and filter through {filteredMonsters.length} of {monstersData.length} available RPG monsters.
-          </p>
+      {/* Compendium / Bestiary Source Selector Pill Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border-subtle">
+        <div className="flex items-center gap-1.5 p-1 bg-surface-card border border-border-default rounded-lg w-fit">
+          <button
+            type="button"
+            onClick={() => handleSwitchSource('dnd5e')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              bestiarySource === 'dnd5e'
+                ? 'bg-accent text-accent-fg shadow-sm'
+                : 'text-muted hover:text-heading hover:bg-surface-hover'
+            }`}
+          >
+            <Swords size={14} />
+            <span>D&D 5e Bestiary</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSwitchSource('starwars')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              bestiarySource === 'starwars'
+                ? 'bg-accent text-accent-fg shadow-sm'
+                : 'text-muted hover:text-heading hover:bg-surface-hover'
+            }`}
+          >
+            <Rocket size={14} />
+            <span>Star Wars (SW5e)</span>
+          </button>
         </div>
+      </div>
+
+      {bestiarySource === 'starwars' ? (
+        <StarWarsBestiary theme={theme} />
+      ) : (
+        <>
+          {/* Page Title & Stats */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <div>
+              <h3 className="text-xl font-bold text-secondary tracking-wide flex items-center gap-2">
+                <Swords className="text-accent" size={22} /> Bestiary
+              </h3>
+              <p className="text-xs text-muted mt-1">
+                Browse and filter through {filteredMonsters.length} of {monstersData.length} available RPG monsters.
+              </p>
+            </div>
 
         {/* Search Input and Collapsible Button */}
         <div className="flex gap-2 w-full sm:w-auto">
@@ -595,6 +643,8 @@ export const MonsterList: React.FC<MonsterListProps> = ({ theme }) => {
         monster={selectedMonster}
         theme={theme}
       />
+        </>
+      )}
     </div>
   );
 };

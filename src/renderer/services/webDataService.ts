@@ -122,13 +122,15 @@ export class WebDataService implements IDataService {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         genre TEXT,
-        system TEXT
+        system TEXT,
+        bestiarySource TEXT
       );
     `);
 
     // Migrations for existing users (adding columns if they don't exist)
     try { this.db.run("ALTER TABLE campaigns ADD COLUMN genre TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE campaigns ADD COLUMN system TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE campaigns ADD COLUMN bestiarySource TEXT;"); } catch (e) {}
 
     this.db.run(`
       CREATE TABLE IF NOT EXISTS entries (
@@ -275,11 +277,11 @@ export class WebDataService implements IDataService {
     return res[0];
   }
   async createCampaign(data: Omit<Campaign, 'id'>): Promise<number> {
-    const id = await this.execute('INSERT INTO campaigns (name, genre, system) VALUES (?, ?, ?)', [data.name, data.genre ?? null, data.system ?? null]);
+    const id = await this.execute('INSERT INTO campaigns (name, genre, system, bestiarySource) VALUES (?, ?, ?, ?)', [data.name, data.genre ?? null, data.system ?? null, data.bestiarySource ?? null]);
     return id || 0;
   }
   async updateCampaign(id: number, data: Partial<Campaign>): Promise<boolean> {
-    await this.execute('UPDATE campaigns SET name = ?, genre = ?, system = ? WHERE id = ?', [data.name, data.genre ?? null, data.system ?? null, id]);
+    await this.execute('UPDATE campaigns SET name = ?, genre = ?, system = ?, bestiarySource = ? WHERE id = ?', [data.name, data.genre ?? null, data.system ?? null, data.bestiarySource ?? null, id]);
     return true;
   }
   async deleteCampaign(id: number): Promise<boolean> {

@@ -20,25 +20,27 @@ export function setupCampaignHandlersIpc() {
   });
 
   ipcMain.handle('create-campaign', (_, data: any) => {
-    const stmt = db.prepare('INSERT INTO campaigns (name, genre, system, ownerId, collaborators) VALUES (?, ?, ?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO campaigns (name, genre, system, ownerId, collaborators, bestiarySource) VALUES (?, ?, ?, ?, ?, ?)');
     const info = stmt.run(
       data.name, 
       data.genre ?? null, 
       data.system ?? null,
       data.ownerId ?? null,
-      data.collaborators ? JSON.stringify(data.collaborators) : null
+      data.collaborators ? JSON.stringify(data.collaborators) : null,
+      data.bestiarySource ?? null
     );
     return info.lastInsertRowid;
   });
 
   ipcMain.handle('update-campaign', (_, id: number, data: any) => {
-    const stmt = db.prepare('UPDATE campaigns SET name = ?, genre = ?, system = ?, ownerId = ?, collaborators = ? WHERE id = ?');
+    const stmt = db.prepare('UPDATE campaigns SET name = ?, genre = ?, system = ?, ownerId = ?, collaborators = ?, bestiarySource = ? WHERE id = ?');
     stmt.run(
       data.name, 
       data.genre ?? null, 
       data.system ?? null, 
       data.ownerId ?? null,
       data.collaborators ? JSON.stringify(data.collaborators) : null,
+      data.bestiarySource ?? null,
       id
     );
     return true;

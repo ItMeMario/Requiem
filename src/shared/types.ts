@@ -6,10 +6,19 @@ export const CampaignSchema = z.object({
   genre: z.string().optional().nullable(),
   system: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable(),
-  collaborators: z.array(z.string()).optional().nullable()
+  collaborators: z.array(z.string()).optional().nullable(),
+  bestiarySource: z.string().optional().nullable()
 });
 
-export type Campaign = z.infer<typeof CampaignSchema>;
+export interface Campaign {
+  id?: number;
+  name: string;
+  genre?: string | null;
+  system?: string | null;
+  ownerId?: string | null;
+  collaborators?: string[] | null;
+  bestiarySource?: 'dnd5e' | 'starwars' | null;
+}
 
 export const EntrySchema = z.object({
   id: z.number().optional(),

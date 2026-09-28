@@ -243,7 +243,10 @@ export function ActiveCampaignView({
           />
         )}
         {activeTab === 'monsters' && (
-          <MonsterList theme={theme} />
+          <MonsterList 
+            theme={theme} 
+            bestiarySource={selectedCampaign?.bestiarySource || undefined} 
+          />
         )}
         {activeTab === 'battle' && (
           <BattleHelperView

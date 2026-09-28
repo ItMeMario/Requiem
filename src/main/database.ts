@@ -26,7 +26,8 @@ export function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       genre TEXT,
-      system TEXT
+      system TEXT,
+      bestiarySource TEXT
     );
   `;
 
@@ -89,6 +90,7 @@ export function initDb() {
   // Migrations for missing columns in existing installations
   try { db.exec("ALTER TABLE campaigns ADD COLUMN genre TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE campaigns ADD COLUMN system TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE campaigns ADD COLUMN bestiarySource TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE characters ADD COLUMN image_url TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE characters ADD COLUMN personal_notes TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE locations ADD COLUMN image_url TEXT;"); } catch (e) {}
