@@ -5,6 +5,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { InputField } from '../ui/InputField';
 import { Checkbox } from '../ui/Checkbox';
+import { AssignPlayersSelect } from '../ui/AssignPlayersSelect';
 import { parseMentions } from '../../utils/mentionParser';
 import DOMPurify from 'dompurify';
 import { useAuth } from '../../context/AuthContext';
@@ -114,7 +115,11 @@ export const EntryModal: React.FC<EntryModalProps> = ({
 
   if (!showEntryModal) return null;
 
-  const canEditOrDelete = !user || !selectedCampaign || !editingEntryId || newEntry.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+  const isOwner = Boolean(user && selectedCampaign && selectedCampaign.ownerId === user.uid);
+  const isAuthor = Boolean(user && newEntry?.authorId === user.uid);
+  const isAssigned = Boolean(user && Array.isArray(newEntry?.assignedTo) && newEntry.assignedTo.includes(user.uid));
+  const canEdit = !user || !selectedCampaign || !editingEntryId || isAuthor || isOwner || isAssigned;
+  const canDelete = !user || !selectedCampaign || !editingEntryId || isAuthor || isOwner;
 
   return createPortal(
     <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
@@ -129,14 +134,18 @@ export const EntryModal: React.FC<EntryModalProps> = ({
             <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 bg-surface-hover text-muted hover:text-heading rounded border border-border-subtle" title="Show References">
               <MapIcon size={18} />
             </button>
-            {isViewingEntry && canEditOrDelete && (
+            {isViewingEntry && (
               <div className="flex space-x-2">
-                <button onClick={() => setIsViewingEntry(false)} className="px-3 sm:px-4 py-2 bg-accent hover:bg-accent-hover rounded text-heading text-xs sm:text-sm font-medium transition-colors flex items-center gap-2">
-                  <Edit2 size={16} className="hidden sm:block" /> Edit
-                </button>
-                <button onClick={() => handleDeleteEntry(editingEntryId!)} className="px-3 sm:px-4 py-2 bg-danger-muted-bg hover:bg-danger-muted-hover text-danger-text border border-danger-border rounded text-xs sm:text-sm font-medium transition-colors">
-                  Delete
-                </button>
+                {canEdit && (
+                  <button onClick={() => setIsViewingEntry(false)} className="px-3 sm:px-4 py-2 bg-accent hover:bg-accent-hover rounded text-heading text-xs sm:text-sm font-medium transition-colors flex items-center gap-2">
+                    <Edit2 size={16} className="hidden sm:block" /> Edit
+                  </button>
+                )}
+                {canDelete && (
+                  <button onClick={() => handleDeleteEntry(editingEntryId!)} className="px-3 sm:px-4 py-2 bg-danger-muted-bg hover:bg-danger-muted-hover text-danger-text border border-danger-border rounded text-xs sm:text-sm font-medium transition-colors">
+                    Delete
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -157,6 +166,16 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                           : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
                       }`}>
                         {newEntry.shared === true ? 'Grupo' : 'Pessoal'}
+                      </span>
+                    )}
+                    {isAssigned && (
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-blue-500/15 text-blue-400 border-blue-500/30 flex items-center gap-1">
+                        Atribuído a você
+                      </span>
+                    )}
+                    {isOwner && Array.isArray(newEntry.assignedTo) && newEntry.assignedTo.length > 0 && (
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-purple-500/15 text-purple-300 border-purple-500/30 flex items-center gap-1">
+                        Atribuído ({newEntry.assignedTo.length})
                       </span>
                     )}
                   </div>
@@ -194,6 +213,22 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                     </div>
                   )}
                 </div>
+                
+                {user && isOwner && selectedCampaign?.id && (
+                  <div className="pt-1 pb-2">
+                    <AssignPlayersSelect
+                      campaignId={selectedCampaign.id}
+                      assignedTo={newEntry.assignedTo}
+                      onChange={(assigned) => {
+                        setNewEntry({
+                          ...newEntry,
+                          assignedTo: assigned,
+                          shared: assigned.length > 0 ? true : newEntry.shared
+                        });
+                      }}
+                    />
+                  </div>
+                )}
                 
                 <div className="flex-1 flex flex-col min-h-[400px]">
                   <label className="block text-sm text-muted mb-1">Content <span className="text-xs text-faint ml-2">(Tip: Select text and press Ctrl+L or right-click to link!)</span></label>

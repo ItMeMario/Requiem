@@ -28,7 +28,10 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
 
   if (!showCharViewModal || !char) return null;
 
-  const canEditCore = !user || !selectedCampaign || char.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+  const isOwner = Boolean(user && selectedCampaign && selectedCampaign.ownerId === user.uid);
+  const isAuthor = Boolean(user && char?.authorId === user.uid);
+  const isAssigned = Boolean(user && Array.isArray(char?.assignedTo) && char.assignedTo.includes(user.uid));
+  const canEditCore = !user || !selectedCampaign || isAuthor || isOwner || isAssigned;
 
   const handleDownloadAttachment = async (attachment: any) => {
     try {
@@ -82,13 +85,15 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
             <User className="text-accent-text" /> Character Details
           </h3>
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleEditChar(char)}
-              className="px-3 py-1.5 bg-surface-hover hover:opacity-90 rounded text-secondary hover:text-heading transition-colors border border-border-hover flex items-center space-x-1.5 text-sm font-medium"
-            >
-              <Edit2 size={14} />
-              <span>Edit</span>
-            </button>
+            {canEditCore && (
+              <button
+                onClick={() => handleEditChar(char)}
+                className="px-3 py-1.5 bg-surface-hover hover:opacity-90 rounded text-secondary hover:text-heading transition-colors border border-border-hover flex items-center space-x-1.5 text-sm font-medium"
+              >
+                <Edit2 size={14} />
+                <span>Edit</span>
+              </button>
+            )}
             <button
               onClick={handleCloseCharViewModal}
               className="p-1.5 text-muted hover:text-heading transition-colors rounded-full hover:bg-surface-hover"
@@ -153,6 +158,16 @@ export const CharacterViewModal: React.FC<CharacterViewModalProps> = ({
                         : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
                     }`}>
                       {char.shared === true ? 'Grupo' : 'Pessoal'}
+                    </span>
+                  )}
+                  {isAssigned && (
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-blue-500/15 text-blue-400 border-blue-500/30 flex items-center gap-1">
+                      Atribuído a você
+                    </span>
+                  )}
+                  {isOwner && Array.isArray(char.assignedTo) && char.assignedTo.length > 0 && (
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-purple-500/15 text-purple-300 border-purple-500/30 flex items-center gap-1">
+                      Atribuído ({char.assignedTo.length})
                     </span>
                   )}
                 </div>

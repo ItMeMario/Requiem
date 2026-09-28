@@ -26,7 +26,10 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
 
   if (!showLocViewModal || !loc) return null;
 
-  const canEdit = !user || !selectedCampaign || loc.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+  const isOwner = Boolean(user && selectedCampaign && selectedCampaign.ownerId === user.uid);
+  const isAuthor = Boolean(user && loc?.authorId === user.uid);
+  const isAssigned = Boolean(user && Array.isArray(loc?.assignedTo) && loc.assignedTo.includes(user.uid));
+  const canEdit = !user || !selectedCampaign || isAuthor || isOwner || isAssigned;
 
   const handleDownloadPortrait = async () => {
     try {
@@ -141,6 +144,16 @@ export const LocationViewModal: React.FC<LocationViewModalProps> = ({
                         : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
                     }`}>
                       {loc.shared === true ? 'Grupo' : 'Pessoal'}
+                    </span>
+                  )}
+                  {isAssigned && (
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-blue-500/15 text-blue-400 border-blue-500/30 flex items-center gap-1">
+                      Atribuído a você
+                    </span>
+                  )}
+                  {isOwner && Array.isArray(loc.assignedTo) && loc.assignedTo.length > 0 && (
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border bg-purple-500/15 text-purple-300 border-purple-500/30 flex items-center gap-1">
+                      Atribuído ({loc.assignedTo.length})
                     </span>
                   )}
                 </div>

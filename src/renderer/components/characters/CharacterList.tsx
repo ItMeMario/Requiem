@@ -16,6 +16,10 @@ export const CharacterList: React.FC<CharacterListProps> = ({
 }) => {
   const { user } = useAuth();
 
+  const canEdit = (char: any) => {
+    return !user || !selectedCampaign || char.authorId === user.uid || selectedCampaign.ownerId === user.uid || (Array.isArray(char.assignedTo) && char.assignedTo.includes(user.uid));
+  };
+
   const canDelete = (char: any) => {
     return !user || !selectedCampaign || char.authorId === user.uid || selectedCampaign.ownerId === user.uid;
   };
@@ -46,9 +50,11 @@ export const CharacterList: React.FC<CharacterListProps> = ({
               className="bg-surface-card border border-border-default rounded-lg overflow-hidden hover:border-border-hover transition-colors group relative cursor-pointer"
             >
               <div className="absolute top-2 right-2 flex space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
-                <button onClick={(e) => { e.stopPropagation(); handleEditChar(char); }} className="p-2 bg-surface-card/80 hover:bg-accent rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
-                  <Edit2 size={16} />
-                </button>
+                {canEdit(char) && (
+                  <button onClick={(e) => { e.stopPropagation(); handleEditChar(char); }} className="p-2 bg-surface-card/80 hover:bg-accent rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                    <Edit2 size={16} />
+                  </button>
+                )}
                 {canDelete(char) && (
                   <button onClick={(e) => { e.stopPropagation(); handleDeleteChar(char.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
                     <Trash2 size={16} />
@@ -67,7 +73,19 @@ export const CharacterList: React.FC<CharacterListProps> = ({
                 </div>
               )}
               <div className={`p-4 ${char.image_url ? 'relative -mt-12' : ''}`}>
-                <h4 className={`text-lg font-bold ${char.image_url ? 'text-heading drop-shadow-md' : 'text-primary'}`}>{char.name}</h4>
+                <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+                  <h4 className={`text-lg font-bold ${char.image_url ? 'text-heading drop-shadow-md' : 'text-primary'}`}>{char.name}</h4>
+                  {user && Array.isArray(char.assignedTo) && char.assignedTo.includes(user.uid) && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                      Atribuído a você
+                    </span>
+                  )}
+                  {user && selectedCampaign?.ownerId === user.uid && Array.isArray(char.assignedTo) && char.assignedTo.length > 0 && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Atribuído ({char.assignedTo.length})
+                    </span>
+                  )}
+                </div>
                 <div className="text-sm text-accent-text mb-2 font-medium">{char.race} {char.status && `• ${char.status}`}</div>
                 <div className="space-y-1 text-sm text-muted">
                   {char.faction && <div><span className="text-faint">Faction:</span> {char.faction}</div>}

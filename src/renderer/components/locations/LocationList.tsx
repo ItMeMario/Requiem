@@ -16,7 +16,11 @@ export const LocationList: React.FC<LocationListProps> = ({
 }) => {
   const { user } = useAuth();
 
-  const canEditOrDelete = (loc: any) => {
+  const canEdit = (loc: any) => {
+    return !user || !selectedCampaign || loc.authorId === user.uid || selectedCampaign.ownerId === user.uid || (Array.isArray(loc.assignedTo) && loc.assignedTo.includes(user.uid));
+  };
+
+  const canDelete = (loc: any) => {
     return !user || !selectedCampaign || loc.authorId === user.uid || selectedCampaign.ownerId === user.uid;
   };
 
@@ -46,15 +50,15 @@ export const LocationList: React.FC<LocationListProps> = ({
               className="bg-surface-card border border-border-default rounded-lg overflow-hidden flex flex-col sm:flex-row hover:border-border-hover transition-colors group relative cursor-pointer"
             >
               <div className="absolute top-2 right-2 flex space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
-                {canEditOrDelete(loc) && (
-                  <>
-                    <button onClick={(e) => { e.stopPropagation(); handleEditLoc(loc); }} className="p-2 bg-surface-card/80 hover:bg-accent2 rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
-                      <Edit2 size={16} />
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDeleteLoc(loc.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
-                      <Trash2 size={16} />
-                    </button>
-                  </>
+                {canEdit(loc) && (
+                  <button onClick={(e) => { e.stopPropagation(); handleEditLoc(loc); }} className="p-2 bg-surface-card/80 hover:bg-accent2 rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                    <Edit2 size={16} />
+                  </button>
+                )}
+                {canDelete(loc) && (
+                  <button onClick={(e) => { e.stopPropagation(); handleDeleteLoc(loc.id); }} className="p-2 bg-surface-card/80 hover:bg-danger rounded text-secondary hover:text-heading backdrop-blur-sm transition-colors shadow-sm">
+                    <Trash2 size={16} />
+                  </button>
                 )}
               </div>
               <div className="sm:w-1/3 h-48 sm:h-auto bg-surface-hover/50 relative">
@@ -67,7 +71,19 @@ export const LocationList: React.FC<LocationListProps> = ({
                 )}
               </div>
               <div className="p-5 sm:w-2/3 flex flex-col">
-                <h4 className="text-xl font-bold text-accent2-heading">{loc.name}</h4>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h4 className="text-xl font-bold text-accent2-heading">{loc.name}</h4>
+                  {user && Array.isArray(loc.assignedTo) && loc.assignedTo.includes(user.uid) && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                      Atribuído a você
+                    </span>
+                  )}
+                  {user && selectedCampaign?.ownerId === user.uid && Array.isArray(loc.assignedTo) && loc.assignedTo.length > 0 && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Atribuído ({loc.assignedTo.length})
+                    </span>
+                  )}
+                </div>
                 <div className="text-sm text-accent2-text mb-3">{loc.region} {loc.type && `• ${loc.type}`}</div>
                 {loc.description && (
                   <p className="text-sm text-secondary flex-1 line-clamp-3 mb-2">{loc.description}</p>

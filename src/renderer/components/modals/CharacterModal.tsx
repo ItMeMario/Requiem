@@ -4,6 +4,7 @@ import { User, X, Plus, Trash2, FileText, Eye, Download } from 'lucide-react';
 import { InputField } from '../ui/InputField';
 import { TextAreaField } from '../ui/TextAreaField';
 import { Checkbox } from '../ui/Checkbox';
+import { AssignPlayersSelect } from '../ui/AssignPlayersSelect';
 import { compressBase64Image } from '../../utils/imageCompressor';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -28,7 +29,10 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
   if (!showCharModal) return null;
 
-  const canEditCore = !user || !selectedCampaign || !editingCharId || newChar?.authorId === user.uid || selectedCampaign.ownerId === user.uid;
+  const isOwner = Boolean(user && selectedCampaign && selectedCampaign.ownerId === user.uid);
+  const isAuthor = Boolean(user && newChar?.authorId === user.uid);
+  const isAssigned = Boolean(user && Array.isArray(newChar?.assignedTo) && newChar.assignedTo.includes(user.uid));
+  const canEditCore = !user || !selectedCampaign || !editingCharId || isAuthor || isOwner || isAssigned;
 
   const handleAddAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -118,6 +122,22 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                   checked={newChar.shared === true}
                   onChange={(checked) => setNewChar({...newChar, shared: checked})}
                   label="Compartilhar com o grupo (Personagem)"
+                  disabled={!canEditCore}
+                />
+              </div>
+            )}
+            {user && isOwner && selectedCampaign?.id && (
+              <div className="col-span-1 sm:col-span-2 pt-1 pb-2">
+                <AssignPlayersSelect
+                  campaignId={selectedCampaign.id}
+                  assignedTo={newChar.assignedTo}
+                  onChange={(assigned) => {
+                    setNewChar({
+                      ...newChar,
+                      assignedTo: assigned,
+                      shared: assigned.length > 0 ? true : newChar.shared
+                    });
+                  }}
                   disabled={!canEditCore}
                 />
               </div>
