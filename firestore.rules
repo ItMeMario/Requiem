@@ -25,6 +25,33 @@ service cloud.firestore {
       );
     }
 
+    // Helper: Verifica se o usuário logado está na lista de atribuídos do item
+    function isAssigned(resourceData) {
+      return isAuthenticated() && 
+        ('assignedTo' in resourceData) && 
+        (resourceData.assignedTo is list) && 
+        (request.auth.uid in resourceData.assignedTo);
+    }
+
+    // Helper: Verifica se o campo assignedTo não foi modificado
+    function assignedToNotModified() {
+      return (
+        (!('assignedTo' in request.resource.data) && !('assignedTo' in resource.data)) ||
+        (('assignedTo' in request.resource.data) && ('assignedTo' in resource.data) && request.resource.data.assignedTo == resource.data.assignedTo) ||
+        (!('assignedTo' in resource.data) && ('assignedTo' in request.resource.data) && request.resource.data.assignedTo == [])
+      );
+    }
+
+    // Helper: Valida criação de entidade (apenas o Mestre pode pré-atribuir jogadores)
+    function canCreateEntity(campaignId) {
+      return isCampaignMember(campaignId) && (
+        isCampaignOwner(campaignId) ||
+        !('assignedTo' in request.resource.data) ||
+        request.resource.data.assignedTo == [] ||
+        request.resource.data.assignedTo == null
+      );
+    }
+
     // Regras para Perfis de Usuários
     match /users/{userId} {
       // Qualquer usuário autenticado pode ler os perfis para buscar outros por e-mail/ID
@@ -54,16 +81,25 @@ service cloud.firestore {
 
       // Subcoleção: Diários (Entries)
       match /entries/{entryId} {
-        // Leitura: Mestre lê tudo. Jogador lê apenas se a nota for compartilhada ou se ele for o autor da nota.
+        // Leitura: Mestre lê tudo. Jogador lê se compartilhado, se for autor ou se estiver atribuído.
         allow read: if isCampaignMember(campaignId) && (
           resource.data.shared == true || 
           resource.data.authorId == request.auth.uid ||
-          isCampaignOwner(campaignId)
+          isCampaignOwner(campaignId) ||
+          isAssigned(resource.data)
         );
-        // Criação: Qualquer membro (Mestre ou Jogador) da campanha pode criar notas.
-        allow create: if isCampaignMember(campaignId);
-        // Atualização/Exclusão: Apenas o autor original ou o Mestre podem alterar/deletar a nota.
-        allow update, delete: if isCampaignMember(campaignId) && (
+        // Criação: Qualquer membro da campanha
+        allow create: if canCreateEntity(campaignId);
+        // Atualização: Mestre, autor ou jogador atribuído (este sem alterar assignedTo)
+        allow update: if isCampaignMember(campaignId) && (
+          isCampaignOwner(campaignId) ||
+          (
+            (resource.data.authorId == request.auth.uid || isAssigned(resource.data)) &&
+            assignedToNotModified()
+          )
+        );
+        // Exclusão: Apenas o autor original ou o Mestre
+        allow delete: if isCampaignMember(campaignId) && (
           resource.data.authorId == request.auth.uid ||
           isCampaignOwner(campaignId)
         );
@@ -71,32 +107,51 @@ service cloud.firestore {
 
       // Subcoleção: Personagens (Characters)
       match /characters/{charId} {
-        // Leitura: Mestre ou jogador só leem se for compartilhado ou se for o autor.
+        // Leitura: Mestre lê tudo. Jogador lê se compartilhado, se for autor ou se estiver atribuído.
         allow read: if isCampaignMember(campaignId) && (
           resource.data.shared == true || 
-          resource.data.authorId == request.auth.uid
+          resource.data.authorId == request.auth.uid ||
+          isCampaignOwner(campaignId) ||
+          isAssigned(resource.data)
         );
         // Criação: Qualquer membro da campanha
-        allow create: if isCampaignMember(campaignId);
-        // Edição/Deleção: Apenas o autor ou o Mestre (se compartilhado)
-        allow update, delete: if isCampaignMember(campaignId) && (
+        allow create: if canCreateEntity(campaignId);
+        // Atualização: Mestre, autor ou jogador atribuído (este sem alterar assignedTo)
+        allow update: if isCampaignMember(campaignId) && (
+          isCampaignOwner(campaignId) ||
+          (
+            (resource.data.authorId == request.auth.uid || isAssigned(resource.data)) &&
+            assignedToNotModified()
+          )
+        );
+        // Exclusão: Apenas o autor original ou o Mestre
+        allow delete: if isCampaignMember(campaignId) && (
           resource.data.authorId == request.auth.uid ||
-          (isCampaignOwner(campaignId) && resource.data.shared == true)
+          isCampaignOwner(campaignId)
         );
       }
 
       // Subcoleção: Lugares (Locations)
       match /locations/{locId} {
-        // Leitura: Mestre lê tudo. Jogador lê apenas se estiver marcado como compartilhado (shared == true) ou se for o autor.
+        // Leitura: Mestre lê tudo. Jogador lê se compartilhado, se for autor ou se estiver atribuído.
         allow read: if isCampaignMember(campaignId) && (
           resource.data.shared == true || 
           resource.data.authorId == request.auth.uid ||
-          isCampaignOwner(campaignId)
+          isCampaignOwner(campaignId) ||
+          isAssigned(resource.data)
         );
         // Criação: Qualquer membro da campanha
-        allow create: if isCampaignMember(campaignId);
-        // Edição/Deleção: Apenas o autor ou o Mestre
-        allow update, delete: if isCampaignMember(campaignId) && (
+        allow create: if canCreateEntity(campaignId);
+        // Atualização: Mestre, autor ou jogador atribuído (este sem alterar assignedTo)
+        allow update: if isCampaignMember(campaignId) && (
+          isCampaignOwner(campaignId) ||
+          (
+            (resource.data.authorId == request.auth.uid || isAssigned(resource.data)) &&
+            assignedToNotModified()
+          )
+        );
+        // Exclusão: Apenas o autor original ou o Mestre
+        allow delete: if isCampaignMember(campaignId) && (
           resource.data.authorId == request.auth.uid ||
           isCampaignOwner(campaignId)
         );
