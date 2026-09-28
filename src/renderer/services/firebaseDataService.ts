@@ -73,6 +73,20 @@ export class FirebaseDataService implements IDataService {
     return this.findDocRef('entries', Number(id));
   }
 
+  private async getCampaignForEntity(campaignId?: number, entityMapCampaignId?: number): Promise<Campaign | null> {
+    const id = campaignId || entityMapCampaignId;
+    if (!id) return null;
+    try {
+      const snap = await getDoc(doc(this.db, 'campaigns', id.toString()));
+      if (snap.exists()) {
+        return snap.data() as Campaign;
+      }
+    } catch (e) {
+      console.warn('[FirebaseDataService] Failed to get campaign for entity:', e);
+    }
+    return null;
+  }
+
   // Campaigns
   async getCampaigns(): Promise<Campaign[]> {
     const colRef = collection(this.db, 'campaigns');
@@ -183,7 +197,8 @@ export class FirebaseDataService implements IDataService {
         colRef,
         or(
           where('shared', '==', true),
-          where('authorId', '==', this.userId)
+          where('authorId', '==', this.userId),
+          where('assignedTo', 'array-contains', this.userId)
         )
       );
     }
@@ -195,6 +210,7 @@ export class FirebaseDataService implements IDataService {
       this.entryCampaignMap.set(entryId, campaignId);
       return {
         ...data,
+        assignedTo: data.assignedTo || [],
         id: entryId
       };
     });
@@ -208,6 +224,7 @@ export class FirebaseDataService implements IDataService {
     const data = snap.data() as Entry;
     return {
       ...data,
+      assignedTo: data.assignedTo || [],
       id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
     };
   }
@@ -220,7 +237,8 @@ export class FirebaseDataService implements IDataService {
       id,
       authorId: this.userId,
       authorName: userName,
-      shared: data.shared === true
+      shared: data.shared === true,
+      assignedTo: data.assignedTo || []
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'entries', id.toString());
     await setDoc(docRef, entry);
@@ -233,12 +251,43 @@ export class FirebaseDataService implements IDataService {
     const snap = await getDoc(ref);
     if (!snap.exists()) return false;
     const existing = snap.data() as Entry;
-    await setDoc(ref, { ...existing, ...data });
+
+    const campaignId = ref.parent?.parent?.id ? Number(ref.parent.parent.id) : (data.campaign_id || this.entryCampaignMap.get(id));
+    const campaign = await this.getCampaignForEntity(campaignId);
+    const isOwner = campaign ? campaign.ownerId === this.userId : false;
+    const isAuthor = existing.authorId === this.userId;
+    const isAssigned = (existing.assignedTo || []).includes(this.userId);
+
+    if (!isOwner && !isAuthor && !isAssigned) {
+      console.warn('[FirebaseDataService] Cannot update entry: insufficient permissions.');
+      return false;
+    }
+
+    const updateData = { ...data };
+    if (!isOwner) {
+      updateData.assignedTo = existing.assignedTo || [];
+    }
+
+    await setDoc(ref, { ...existing, ...updateData });
     return true;
   }
 
   async deleteEntry(id: number): Promise<boolean> {
     const ref = await this.getEntryDocRef(id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return false;
+    const existing = snap.data() as Entry;
+
+    const campaignId = ref.parent?.parent?.id ? Number(ref.parent.parent.id) : this.entryCampaignMap.get(id);
+    const campaign = await this.getCampaignForEntity(campaignId);
+    const isOwner = campaign ? campaign.ownerId === this.userId : false;
+    const isAuthor = existing.authorId === this.userId;
+
+    if (!isOwner && !isAuthor) {
+      console.warn('[FirebaseDataService] Cannot delete entry: user is neither owner nor author.');
+      return false;
+    }
+
     await deleteDoc(ref);
     return true;
   }
@@ -247,15 +296,20 @@ export class FirebaseDataService implements IDataService {
   async getCharacters(campaignId: number): Promise<Character[]> {
     const campaignDoc = await getDoc(doc(this.db, 'campaigns', campaignId.toString()));
     if (!campaignDoc.exists()) return [];
+    const campaign = campaignDoc.data() as Campaign;
+    const isOwner = campaign.ownerId === this.userId;
 
     const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
-    const q = query(
-      colRef,
-      or(
-        where('shared', '==', true),
-        where('authorId', '==', this.userId)
-      )
-    );
+    const q = isOwner
+      ? query(colRef)
+      : query(
+          colRef,
+          or(
+            where('shared', '==', true),
+            where('authorId', '==', this.userId),
+            where('assignedTo', 'array-contains', this.userId)
+          )
+        );
 
     const snapshot = await getDocs(q);
 
@@ -279,6 +333,7 @@ export class FirebaseDataService implements IDataService {
         ...data,
         personal_notes: personalNotesMap[charId.toString()] || '',
         attachments: data.attachments || [],
+        assignedTo: data.assignedTo || [],
         id: charId
       };
     });
@@ -306,6 +361,7 @@ export class FirebaseDataService implements IDataService {
       ...data,
       personal_notes: personalNotes,
       attachments: data.attachments || [],
+      assignedTo: data.assignedTo || [],
       id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
     };
   }
@@ -324,7 +380,8 @@ export class FirebaseDataService implements IDataService {
       id,
       authorId: this.userId,
       authorName: userName,
-      shared: data.shared === true
+      shared: data.shared === true,
+      assignedTo: data.assignedTo || []
     };
 
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'characters', id.toString());
@@ -368,17 +425,19 @@ export class FirebaseDataService implements IDataService {
     const charData = { ...data };
     delete charData.personal_notes;
 
-    // Check if the user is the author or owner before saving main character doc
-    const campaignId = data.campaign_id || this.characterCampaignMap.get(id);
+    // Check if the user is the author, owner, or assigned player before saving main character doc
+    const campaignId = ref.parent?.parent?.id ? Number(ref.parent.parent.id) : (data.campaign_id || this.characterCampaignMap.get(id));
     let canUpdateMainDoc = true;
+    let isOwner = false;
     if (campaignId) {
       try {
         const campaignDoc = await getDoc(doc(this.db, 'campaigns', campaignId.toString()));
         if (campaignDoc.exists()) {
           const campaign = campaignDoc.data() as Campaign;
-          const isOwner = campaign.ownerId === this.userId;
+          isOwner = campaign.ownerId === this.userId;
           const isAuthor = existing.authorId === this.userId;
-          if (!isOwner && !isAuthor) {
+          const isAssigned = (existing.assignedTo || []).includes(this.userId);
+          if (!isOwner && !isAuthor && !isAssigned) {
             canUpdateMainDoc = false;
           }
         }
@@ -388,6 +447,9 @@ export class FirebaseDataService implements IDataService {
     }
 
     if (canUpdateMainDoc) {
+      if (!isOwner) {
+        charData.assignedTo = existing.assignedTo || [];
+      }
       // Remove personal_notes from the existing doc if it is stored there
       const existingClean = { ...existing };
       delete existingClean.personal_notes;
@@ -401,6 +463,20 @@ export class FirebaseDataService implements IDataService {
 
   async deleteCharacter(id: number): Promise<boolean> {
     const ref = await this.getCharacterDocRef(id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return false;
+    const existing = snap.data() as Character;
+
+    const campaignId = ref.parent?.parent?.id ? Number(ref.parent.parent.id) : this.characterCampaignMap.get(id);
+    const campaign = await this.getCampaignForEntity(campaignId);
+    const isOwner = campaign ? campaign.ownerId === this.userId : false;
+    const isAuthor = existing.authorId === this.userId;
+
+    if (!isOwner && !isAuthor) {
+      console.warn('[FirebaseDataService] Cannot delete character: user is neither owner nor author.');
+      return false;
+    }
+
     await deleteDoc(ref);
     
     // Also delete user's private personal notes doc
@@ -430,7 +506,8 @@ export class FirebaseDataService implements IDataService {
         colRef,
         or(
           where('shared', '==', true),
-          where('authorId', '==', this.userId)
+          where('authorId', '==', this.userId),
+          where('assignedTo', 'array-contains', this.userId)
         )
       );
     }
@@ -442,6 +519,7 @@ export class FirebaseDataService implements IDataService {
       this.locationCampaignMap.set(locId, campaignId);
       return {
         ...data,
+        assignedTo: data.assignedTo || [],
         id: locId
       };
     });
@@ -454,6 +532,7 @@ export class FirebaseDataService implements IDataService {
     const data = snap.data() as Location;
     return {
       ...data,
+      assignedTo: data.assignedTo || [],
       id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
     };
   }
@@ -466,7 +545,8 @@ export class FirebaseDataService implements IDataService {
       id,
       authorId: this.userId,
       authorName: userName,
-      shared: data.shared === true
+      shared: data.shared === true,
+      assignedTo: data.assignedTo || []
     };
     const docRef = doc(this.db, 'campaigns', data.campaign_id.toString(), 'locations', id.toString());
     await setDoc(docRef, loc);
@@ -479,12 +559,43 @@ export class FirebaseDataService implements IDataService {
     const snap = await getDoc(ref);
     if (!snap.exists()) return false;
     const existing = snap.data() as Location;
-    await setDoc(ref, { ...existing, ...data });
+
+    const campaignId = ref.parent?.parent?.id ? Number(ref.parent.parent.id) : (data.campaign_id || this.locationCampaignMap.get(id));
+    const campaign = await this.getCampaignForEntity(campaignId);
+    const isOwner = campaign ? campaign.ownerId === this.userId : false;
+    const isAuthor = existing.authorId === this.userId;
+    const isAssigned = (existing.assignedTo || []).includes(this.userId);
+
+    if (!isOwner && !isAuthor && !isAssigned) {
+      console.warn('[FirebaseDataService] Cannot update location: insufficient permissions.');
+      return false;
+    }
+
+    const updateData = { ...data };
+    if (!isOwner) {
+      updateData.assignedTo = existing.assignedTo || [];
+    }
+
+    await setDoc(ref, { ...existing, ...updateData });
     return true;
   }
 
   async deleteLocation(id: number): Promise<boolean> {
     const ref = await this.getLocationDocRef(id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return false;
+    const existing = snap.data() as Location;
+
+    const campaignId = ref.parent?.parent?.id ? Number(ref.parent.parent.id) : this.locationCampaignMap.get(id);
+    const campaign = await this.getCampaignForEntity(campaignId);
+    const isOwner = campaign ? campaign.ownerId === this.userId : false;
+    const isAuthor = existing.authorId === this.userId;
+
+    if (!isOwner && !isAuthor) {
+      console.warn('[FirebaseDataService] Cannot delete location: user is neither owner nor author.');
+      return false;
+    }
+
     await deleteDoc(ref);
     return true;
   }
@@ -682,7 +793,8 @@ export class FirebaseDataService implements IDataService {
             personal_notes: char.personal_notes ?? null,
             image_url: compressedImg,
             attachments: parsedAttachments,
-            shared: char.shared === true
+            shared: char.shared === true,
+            assignedTo: char.assignedTo || []
           });
         }
       }
@@ -703,7 +815,8 @@ export class FirebaseDataService implements IDataService {
             present_npcs: loc.present_npcs ?? null,
             atmosphere: loc.atmosphere ?? null,
             image_url: compressedImg,
-            shared: loc.shared === true
+            shared: loc.shared === true,
+            assignedTo: loc.assignedTo || []
           });
         }
       }
@@ -718,7 +831,8 @@ export class FirebaseDataService implements IDataService {
             title: entry.title,
             content: entry.content ?? null,
             creation_date: entry.creation_date || new Date().toISOString(),
-            shared: entry.shared === true
+            shared: entry.shared === true,
+            assignedTo: entry.assignedTo || []
           });
         }
       }
@@ -781,14 +895,10 @@ export class FirebaseDataService implements IDataService {
     if (!auth || !auth.currentUser) {
       return () => {};
     }
-    const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
-    const q = query(
-      colRef,
-      or(
-        where('shared', '==', true),
-        where('authorId', '==', this.userId)
-      )
-    );
+
+    let unsubNotes: (() => void) | null = null;
+    let unsubChars: (() => void) | null = null;
+    let isCancelled = false;
 
     let personalNotes: Record<string, string> = {};
     let charsData: any[] = [];
@@ -801,13 +911,14 @@ export class FirebaseDataService implements IDataService {
           ...c,
           personal_notes: personalNotes[charId.toString()] || '',
           attachments: c.attachments || [],
+          assignedTo: c.assignedTo || [],
           id: charId
         };
       });
       callback(mapped);
     };
 
-    const unsubNotes = onSnapshot(collection(this.db, 'users', this.userId, 'personal_notes'), (notesSnap) => {
+    unsubNotes = onSnapshot(collection(this.db, 'users', this.userId, 'personal_notes'), (notesSnap) => {
       personalNotes = {};
       notesSnap.docs.forEach(d => {
         personalNotes[d.id] = d.data().notes || '';
@@ -817,23 +928,45 @@ export class FirebaseDataService implements IDataService {
       console.warn('[FirebaseDataService] Failed to subscribe to personal notes:', err);
     });
 
-    const unsubChars = onSnapshot(q, (snapshot) => {
-      charsData = snapshot.docs.map(doc => {
-        const data = doc.data() as Character;
-        return {
-          ...data,
-          id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
-        };
+    getDoc(doc(this.db, 'campaigns', campaignId.toString())).then((campaignDoc) => {
+      if (isCancelled) return;
+      if (!campaignDoc.exists()) return;
+      const campaign = campaignDoc.data() as Campaign;
+      const isOwner = campaign.ownerId === this.userId;
+      const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
+      const q = isOwner
+        ? query(colRef)
+        : query(
+            colRef,
+            or(
+              where('shared', '==', true),
+              where('authorId', '==', this.userId),
+              where('assignedTo', 'array-contains', this.userId)
+            )
+          );
+
+      unsubChars = onSnapshot(q, (snapshot) => {
+        charsData = snapshot.docs.map(doc => {
+          const data = doc.data() as Character;
+          return {
+            ...data,
+            id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+          };
+        });
+        updateCallback();
+      }, (error) => {
+        console.error('[FirebaseDataService] subscribeCharacters error:', error);
+        if (onError) onError(error);
       });
-      updateCallback();
-    }, (error) => {
-      console.error('[FirebaseDataService] subscribeCharacters error:', error);
+    }).catch((error) => {
+      console.error('[FirebaseDataService] Failed to fetch campaign for characters subscription:', error);
       if (onError) onError(error);
     });
 
     return () => {
-      unsubNotes();
-      unsubChars();
+      isCancelled = true;
+      if (unsubNotes) unsubNotes();
+      if (unsubChars) unsubChars();
     };
   }
 
@@ -850,14 +983,23 @@ export class FirebaseDataService implements IDataService {
       const campaign = campaignDoc.data() as Campaign;
       const isOwner = campaign.ownerId === this.userId;
       const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'locations');
-      const q = isOwner ? query(colRef) : query(colRef, or(where('shared', '==', true), where('authorId', '==', this.userId)));
+      const q = isOwner 
+        ? query(colRef) 
+        : query(
+            colRef, 
+            or(
+              where('shared', '==', true), 
+              where('authorId', '==', this.userId),
+              where('assignedTo', 'array-contains', this.userId)
+            )
+          );
       
       unsubLocations = onSnapshot(q, (snapshot) => {
         const locs = snapshot.docs.map(doc => {
           const data = doc.data() as Location;
           const locId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
           this.locationCampaignMap.set(locId, campaignId);
-          return { ...data, id: locId };
+          return { ...data, assignedTo: data.assignedTo || [], id: locId };
         });
         callback(locs);
       }, (error) => {
@@ -890,14 +1032,23 @@ export class FirebaseDataService implements IDataService {
       const campaign = campaignDoc.data() as Campaign;
       const isOwner = campaign.ownerId === this.userId;
       const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'entries');
-      const q = isOwner ? query(colRef) : query(colRef, or(where('shared', '==', true), where('authorId', '==', this.userId)));
+      const q = isOwner 
+        ? query(colRef) 
+        : query(
+            colRef, 
+            or(
+              where('shared', '==', true), 
+              where('authorId', '==', this.userId),
+              where('assignedTo', 'array-contains', this.userId)
+            )
+          );
       
       unsubEntries = onSnapshot(q, (snapshot) => {
         const entries = snapshot.docs.map(doc => {
           const data = doc.data() as Entry;
           const entryId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
           this.entryCampaignMap.set(entryId, campaignId);
-          return { ...data, id: entryId };
+          return { ...data, assignedTo: data.assignedTo || [], id: entryId };
         });
         entries.sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
         callback(entries);
