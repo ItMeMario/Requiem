@@ -6,6 +6,7 @@ export function setupLocationHandlersIpc() {
     const rows = db.prepare('SELECT * FROM locations WHERE campaign_id = ?').all(campaignId);
     return rows.map((row: any) => ({
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     }));
   });
@@ -15,6 +16,7 @@ export function setupLocationHandlersIpc() {
     if (!row) return row;
     return {
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     };
   });
@@ -22,8 +24,8 @@ export function setupLocationHandlersIpc() {
   ipcMain.handle('create-location', (_, data: any) => {
     const stmt = db.prepare(`
       INSERT INTO locations (
-        campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url, shared, authorId, authorName
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url, shared, authorId, authorName, assignedTo
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
       data.campaign_id,
@@ -37,7 +39,8 @@ export function setupLocationHandlersIpc() {
       data.image_url ?? null,
       data.shared ? 1 : 0,
       data.authorId ?? null,
-      data.authorName ?? null
+      data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null
     );
     return info.lastInsertRowid;
   });
@@ -47,7 +50,7 @@ export function setupLocationHandlersIpc() {
       UPDATE locations SET 
         name = ?, region = ?, type = ?, description = ?, 
         lore = ?, present_npcs = ?, atmosphere = ?, image_url = ?,
-        shared = ?, authorId = ?, authorName = ?
+        shared = ?, authorId = ?, authorName = ?, assignedTo = ?
       WHERE id = ?
     `);
     stmt.run(
@@ -62,6 +65,7 @@ export function setupLocationHandlersIpc() {
       data.shared ? 1 : 0,
       data.authorId ?? null,
       data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null,
       id
     );
     return true;

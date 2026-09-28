@@ -6,6 +6,7 @@ export function setupEntryHandlersIpc() {
     const rows = db.prepare('SELECT * FROM entries WHERE campaign_id = ? ORDER BY creation_date DESC').all(campaignId);
     return rows.map((row: any) => ({
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     }));
   });
@@ -15,12 +16,13 @@ export function setupEntryHandlersIpc() {
     if (!row) return row;
     return {
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     };
   });
 
   ipcMain.handle('create-entry', (_, data: any) => {
-    const stmt = db.prepare('INSERT INTO entries (campaign_id, title, content, creation_date, shared, authorId, authorName) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const stmt = db.prepare('INSERT INTO entries (campaign_id, title, content, creation_date, shared, authorId, authorName, assignedTo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
     const info = stmt.run(
       data.campaign_id, 
       data.title, 
@@ -28,19 +30,21 @@ export function setupEntryHandlersIpc() {
       data.creation_date,
       data.shared ? 1 : 0,
       data.authorId ?? null,
-      data.authorName ?? null
+      data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null
     );
     return info.lastInsertRowid;
   });
 
   ipcMain.handle('update-entry', (_, id: number, data: any) => {
-    const stmt = db.prepare('UPDATE entries SET title = ?, content = ?, shared = ?, authorId = ?, authorName = ? WHERE id = ?');
+    const stmt = db.prepare('UPDATE entries SET title = ?, content = ?, shared = ?, authorId = ?, authorName = ?, assignedTo = ? WHERE id = ?');
     stmt.run(
       data.title, 
       data.content ?? null, 
       data.shared ? 1 : 0,
       data.authorId ?? null,
       data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null,
       id
     );
     return true;

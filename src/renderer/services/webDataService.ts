@@ -183,18 +183,20 @@ export class WebDataService implements IDataService {
     try { this.db.run("ALTER TABLE locations ADD COLUMN image_url TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE characters ADD COLUMN personal_notes TEXT;"); } catch (e) {}
 
-    // Migrations for sharing/collaboration columns
     try { this.db.run("ALTER TABLE campaigns ADD COLUMN ownerId TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE campaigns ADD COLUMN collaborators TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE entries ADD COLUMN shared INTEGER;"); } catch (e) {}
     try { this.db.run("ALTER TABLE entries ADD COLUMN authorId TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE entries ADD COLUMN authorName TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE entries ADD COLUMN assignedTo TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE characters ADD COLUMN shared INTEGER;"); } catch (e) {}
     try { this.db.run("ALTER TABLE characters ADD COLUMN authorId TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE characters ADD COLUMN authorName TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE characters ADD COLUMN assignedTo TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE locations ADD COLUMN shared INTEGER;"); } catch (e) {}
     try { this.db.run("ALTER TABLE locations ADD COLUMN authorId TEXT;"); } catch (e) {}
     try { this.db.run("ALTER TABLE locations ADD COLUMN authorName TEXT;"); } catch (e) {}
+    try { this.db.run("ALTER TABLE locations ADD COLUMN assignedTo TEXT;"); } catch (e) {}
 
     await this.saveToIndexedDB();
   }
@@ -294,6 +296,7 @@ export class WebDataService implements IDataService {
     const rows = await this.query<any>('SELECT * FROM entries WHERE campaign_id = ? ORDER BY creation_date DESC', [campaignId]);
     return rows.map(row => ({
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     }));
   }
@@ -303,12 +306,13 @@ export class WebDataService implements IDataService {
     if (!row) return row;
     return {
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     };
   }
   async createEntry(data: Omit<Entry, 'id'>): Promise<number> {
     const id = await this.execute(
-      'INSERT INTO entries (campaign_id, title, content, creation_date, shared, authorId, authorName) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO entries (campaign_id, title, content, creation_date, shared, authorId, authorName, assignedTo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         data.campaign_id,
         data.title,
@@ -316,20 +320,22 @@ export class WebDataService implements IDataService {
         data.creation_date,
         data.shared ? 1 : 0,
         data.authorId ?? null,
-        data.authorName ?? null
+        data.authorName ?? null,
+        data.assignedTo ? JSON.stringify(data.assignedTo) : null
       ]
     );
     return id || 0;
   }
   async updateEntry(id: number, data: Partial<Entry>): Promise<boolean> {
     await this.execute(
-      'UPDATE entries SET title = ?, content = ?, shared = ?, authorId = ?, authorName = ? WHERE id = ?',
+      'UPDATE entries SET title = ?, content = ?, shared = ?, authorId = ?, authorName = ?, assignedTo = ? WHERE id = ?',
       [
         data.title,
         data.content ?? null,
         data.shared ? 1 : 0,
         data.authorId ?? null,
         data.authorName ?? null,
+        data.assignedTo ? JSON.stringify(data.assignedTo) : null,
         id
       ]
     );
@@ -346,6 +352,7 @@ export class WebDataService implements IDataService {
     return rows.map(row => ({
       ...row,
       attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     }));
   }
@@ -356,14 +363,15 @@ export class WebDataService implements IDataService {
     return {
       ...row,
       attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     };
   }
   async createCharacter(data: Omit<Character, 'id'>): Promise<number> {
     const id = await this.execute(`
       INSERT INTO characters (
-        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName, assignedTo
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       data.campaign_id,
       data.name,
@@ -378,7 +386,8 @@ export class WebDataService implements IDataService {
       data.attachments ? JSON.stringify(data.attachments) : null,
       data.shared ? 1 : 0,
       data.authorId ?? null,
-      data.authorName ?? null
+      data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null
     ]);
     return id || 0;
   }
@@ -387,7 +396,7 @@ export class WebDataService implements IDataService {
       UPDATE characters SET 
         name = ?, race = ?, status = ?, age = ?, 
         faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?, attachments = ?,
-        shared = ?, authorId = ?, authorName = ?
+        shared = ?, authorId = ?, authorName = ?, assignedTo = ?
       WHERE id = ?
     `, [
       data.name,
@@ -403,6 +412,7 @@ export class WebDataService implements IDataService {
       data.shared ? 1 : 0,
       data.authorId ?? null,
       data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null,
       id
     ]);
     return true;
@@ -417,6 +427,7 @@ export class WebDataService implements IDataService {
     const rows = await this.query<any>('SELECT * FROM locations WHERE campaign_id = ?', [campaignId]);
     return rows.map(row => ({
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     }));
   }
@@ -426,14 +437,15 @@ export class WebDataService implements IDataService {
     if (!row) return row;
     return {
       ...row,
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     };
   }
   async createLocation(data: Omit<Location, 'id'>): Promise<number> {
     const id = await this.execute(`
       INSERT INTO locations (
-        campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url, shared, authorId, authorName
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url, shared, authorId, authorName, assignedTo
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       data.campaign_id,
       data.name,
@@ -446,7 +458,8 @@ export class WebDataService implements IDataService {
       data.image_url ?? null,
       data.shared ? 1 : 0,
       data.authorId ?? null,
-      data.authorName ?? null
+      data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null
     ]);
     return id || 0;
   }
@@ -455,7 +468,7 @@ export class WebDataService implements IDataService {
       UPDATE locations SET 
         name = ?, region = ?, type = ?, description = ?, 
         lore = ?, present_npcs = ?, atmosphere = ?, image_url = ?,
-        shared = ?, authorId = ?, authorName = ?
+        shared = ?, authorId = ?, authorName = ?, assignedTo = ?
       WHERE id = ?
     `, [
       data.name,
@@ -469,6 +482,7 @@ export class WebDataService implements IDataService {
       data.shared ? 1 : 0,
       data.authorId ?? null,
       data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null,
       id
     ]);
     return true;

@@ -110,7 +110,8 @@ export function setupBackupHandlersIpc() {
           creation_date TEXT NOT NULL,
           shared INTEGER,
           authorId TEXT,
-          authorName TEXT
+          authorName TEXT,
+          assignedTo TEXT
         );
         CREATE TABLE characters (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -127,7 +128,8 @@ export function setupBackupHandlersIpc() {
           attachments TEXT,
           shared INTEGER,
           authorId TEXT,
-          authorName TEXT
+          authorName TEXT,
+          assignedTo TEXT
         );
         CREATE TABLE locations (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -142,14 +144,15 @@ export function setupBackupHandlersIpc() {
           image_url TEXT,
           shared INTEGER,
           authorId TEXT,
-          authorName TEXT
+          authorName TEXT,
+          assignedTo TEXT
         );
       `);
       
       const insertCamp = tempDb.prepare('INSERT INTO campaigns (id, name, genre, system, ownerId, collaborators) VALUES (?, ?, ?, ?, ?, ?)');
-      const insertEntry = tempDb.prepare('INSERT INTO entries (id, campaign_id, title, content, creation_date, shared, authorId, authorName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-      const insertChar = tempDb.prepare('INSERT INTO characters (id, campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-      const insertLoc = tempDb.prepare('INSERT INTO locations (id, campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url, shared, authorId, authorName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      const insertEntry = tempDb.prepare('INSERT INTO entries (id, campaign_id, title, content, creation_date, shared, authorId, authorName, assignedTo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      const insertChar = tempDb.prepare('INSERT INTO characters (id, campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName, assignedTo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      const insertLoc = tempDb.prepare('INSERT INTO locations (id, campaign_id, name, region, type, description, lore, present_npcs, atmosphere, image_url, shared, authorId, authorName, assignedTo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
       
       tempDb.transaction(() => {
         for (const camp of data.campaigns) {
@@ -157,14 +160,17 @@ export function setupBackupHandlersIpc() {
           insertCamp.run(camp.id, camp.name, camp.genre ?? null, camp.system ?? null, camp.ownerId ?? null, collabStr);
         }
         for (const entry of data.entries) {
-          insertEntry.run(entry.id, entry.campaign_id, entry.title, entry.content ?? null, entry.creation_date, entry.shared !== false ? 1 : 0, entry.authorId ?? null, entry.authorName ?? null);
+          const assignStr = Array.isArray(entry.assignedTo) ? JSON.stringify(entry.assignedTo) : (entry.assignedTo || null);
+          insertEntry.run(entry.id, entry.campaign_id, entry.title, entry.content ?? null, entry.creation_date, entry.shared !== false ? 1 : 0, entry.authorId ?? null, entry.authorName ?? null, assignStr);
         }
         for (const char of data.characters) {
           const attachStr = Array.isArray(char.attachments) ? JSON.stringify(char.attachments) : (char.attachments || null);
-          insertChar.run(char.id, char.campaign_id, char.name, char.race ?? null, char.status ?? null, char.age ?? null, char.faction ?? null, char.lore ?? null, char.bonds ?? null, char.personal_notes ?? null, char.image_url ?? null, attachStr, char.shared !== false ? 1 : 0, char.authorId ?? null, char.authorName ?? null);
+          const assignStr = Array.isArray(char.assignedTo) ? JSON.stringify(char.assignedTo) : (char.assignedTo || null);
+          insertChar.run(char.id, char.campaign_id, char.name, char.race ?? null, char.status ?? null, char.age ?? null, char.faction ?? null, char.lore ?? null, char.bonds ?? null, char.personal_notes ?? null, char.image_url ?? null, attachStr, char.shared !== false ? 1 : 0, char.authorId ?? null, char.authorName ?? null, assignStr);
         }
         for (const loc of data.locations) {
-          insertLoc.run(loc.id, loc.campaign_id, loc.name, loc.region ?? null, loc.type ?? null, loc.description ?? null, loc.lore ?? null, loc.present_npcs ?? null, loc.atmosphere ?? null, loc.image_url ?? null, loc.shared !== false ? 1 : 0, loc.authorId ?? null, loc.authorName ?? null);
+          const assignStr = Array.isArray(loc.assignedTo) ? JSON.stringify(loc.assignedTo) : (loc.assignedTo || null);
+          insertLoc.run(loc.id, loc.campaign_id, loc.name, loc.region ?? null, loc.type ?? null, loc.description ?? null, loc.lore ?? null, loc.present_npcs ?? null, loc.atmosphere ?? null, loc.image_url ?? null, loc.shared !== false ? 1 : 0, loc.authorId ?? null, loc.authorName ?? null, assignStr);
         }
       })();
       

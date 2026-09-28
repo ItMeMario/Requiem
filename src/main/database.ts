@@ -38,6 +38,10 @@ export function initDb() {
       title TEXT NOT NULL,
       content TEXT,
       creation_date TEXT NOT NULL,
+      shared INTEGER,
+      authorId TEXT,
+      authorName TEXT,
+      assignedTo TEXT,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
     );
   `;
@@ -56,6 +60,10 @@ export function initDb() {
       personal_notes TEXT,
       image_url TEXT,
       attachments TEXT,
+      shared INTEGER,
+      authorId TEXT,
+      authorName TEXT,
+      assignedTo TEXT,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
     );
   `;
@@ -72,6 +80,10 @@ export function initDb() {
       present_npcs TEXT,
       atmosphere TEXT,
       image_url TEXT,
+      shared INTEGER,
+      authorId TEXT,
+      authorName TEXT,
+      assignedTo TEXT,
       FOREIGN KEY (campaign_id) REFERENCES campaigns (id) ON DELETE CASCADE
     );
   `;
@@ -101,10 +113,13 @@ export function initDb() {
   try { db.exec("ALTER TABLE entries ADD COLUMN shared INTEGER;"); } catch (e) {}
   try { db.exec("ALTER TABLE entries ADD COLUMN authorId TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE entries ADD COLUMN authorName TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE entries ADD COLUMN assignedTo TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE characters ADD COLUMN shared INTEGER;"); } catch (e) {}
   try { db.exec("ALTER TABLE characters ADD COLUMN authorId TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE characters ADD COLUMN authorName TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE characters ADD COLUMN assignedTo TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE locations ADD COLUMN shared INTEGER;"); } catch (e) {}
   try { db.exec("ALTER TABLE locations ADD COLUMN authorId TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE locations ADD COLUMN authorName TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE locations ADD COLUMN assignedTo TEXT;"); } catch (e) {}
 }

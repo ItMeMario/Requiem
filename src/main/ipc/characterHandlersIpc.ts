@@ -7,6 +7,7 @@ export function setupCharacterHandlersIpc() {
     return rows.map((row: any) => ({
       ...row,
       attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     }));
   });
@@ -17,6 +18,7 @@ export function setupCharacterHandlersIpc() {
     return {
       ...row,
       attachments: row.attachments ? JSON.parse(row.attachments) : [],
+      assignedTo: row.assignedTo ? JSON.parse(row.assignedTo) : [],
       shared: row.shared === 1 || row.shared === true
     };
   });
@@ -24,8 +26,8 @@ export function setupCharacterHandlersIpc() {
   ipcMain.handle('create-character', (_, data: any) => {
     const stmt = db.prepare(`
       INSERT INTO characters (
-        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        campaign_id, name, race, status, age, faction, lore, bonds, personal_notes, image_url, attachments, shared, authorId, authorName, assignedTo
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const info = stmt.run(
       data.campaign_id,
@@ -41,7 +43,8 @@ export function setupCharacterHandlersIpc() {
       data.attachments ? JSON.stringify(data.attachments) : null,
       data.shared ? 1 : 0,
       data.authorId ?? null,
-      data.authorName ?? null
+      data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null
     );
     return info.lastInsertRowid;
   });
@@ -51,7 +54,7 @@ export function setupCharacterHandlersIpc() {
       UPDATE characters SET 
         name = ?, race = ?, status = ?, age = ?, 
         faction = ?, lore = ?, bonds = ?, personal_notes = ?, image_url = ?, attachments = ?,
-        shared = ?, authorId = ?, authorName = ?
+        shared = ?, authorId = ?, authorName = ?, assignedTo = ?
       WHERE id = ?
     `);
     stmt.run(
@@ -68,6 +71,7 @@ export function setupCharacterHandlersIpc() {
       data.shared ? 1 : 0,
       data.authorId ?? null,
       data.authorName ?? null,
+      data.assignedTo ? JSON.stringify(data.assignedTo) : null,
       id
     );
     return true;

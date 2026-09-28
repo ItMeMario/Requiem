@@ -28,7 +28,8 @@ export const EntrySchema = z.object({
   creation_date: z.string(), // ISO date string
   shared: z.boolean().optional().nullable(),
   authorId: z.string().optional().nullable(),
-  authorName: z.string().optional().nullable()
+  authorName: z.string().optional().nullable(),
+  assignedTo: z.array(z.string()).optional().nullable()
 });
 
 export type Entry = z.infer<typeof EntrySchema>;
@@ -48,6 +49,7 @@ export const CharacterSchema = z.object({
   shared: z.boolean().optional().nullable(),
   authorId: z.string().optional().nullable(),
   authorName: z.string().optional().nullable(),
+  assignedTo: z.array(z.string()).optional().nullable(),
   attachments: z.array(
     z.object({
       id: z.string(),
@@ -74,7 +76,8 @@ export const LocationSchema = z.object({
   image_url: z.string().optional().nullable(),
   shared: z.boolean().optional().nullable(),
   authorId: z.string().optional().nullable(),
-  authorName: z.string().optional().nullable()
+  authorName: z.string().optional().nullable(),
+  assignedTo: z.array(z.string()).optional().nullable()
 });
 
 export type Location = z.infer<typeof LocationSchema>;
