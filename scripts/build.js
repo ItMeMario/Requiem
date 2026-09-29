@@ -8,8 +8,63 @@ const isDev = args.includes('dev');
 
 const rootDir = path.resolve(__dirname, '..');
 
+function setupAndroidEnvironment() {
+  if (!process.env.JAVA_HOME) {
+    const javaCandidates = [
+      'C:\\Program Files\\Android\\Android Studio\\jbr',
+      'C:\\Program Files\\Java\\jdk-21',
+      'C:\\Program Files\\Java\\jdk-17',
+      process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Programs', 'Android Studio', 'jbr') : null,
+    ].filter(Boolean);
+
+    for (const candidate of javaCandidates) {
+      if (fs.existsSync(candidate)) {
+        process.env.JAVA_HOME = candidate;
+        console.log(`[build] Usando JAVA_HOME detectado: ${candidate}`);
+        break;
+      }
+    }
+  }
+
+  if (process.env.JAVA_HOME) {
+    const javaBin = path.join(process.env.JAVA_HOME, 'bin');
+    if (fs.existsSync(javaBin) && !process.env.PATH.split(path.delimiter).includes(javaBin)) {
+      process.env.PATH = `${javaBin}${path.delimiter}${process.env.PATH}`;
+    }
+  }
+
+  if (!process.env.ANDROID_HOME) {
+    const localPropsPath = path.join(rootDir, 'android', 'local.properties');
+    if (fs.existsSync(localPropsPath)) {
+      const content = fs.readFileSync(localPropsPath, 'utf8');
+      const match = content.match(/sdk\.dir=(.+)/);
+      if (match && match[1]) {
+        const sdkDir = match[1].trim().replace(/\\\\/g, '\\').replace(/\\:/g, ':');
+        if (fs.existsSync(sdkDir)) {
+          process.env.ANDROID_HOME = sdkDir;
+        }
+      }
+    }
+
+    if (!process.env.ANDROID_HOME) {
+      const sdkCandidates = [
+        process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Android', 'Sdk') : null,
+        'C:\\Android\\sdk',
+      ].filter(Boolean);
+
+      for (const candidate of sdkCandidates) {
+        if (fs.existsSync(candidate)) {
+          process.env.ANDROID_HOME = candidate;
+          break;
+        }
+      }
+    }
+  }
+}
+
 try {
   if (target === 'apk') {
+    setupAndroidEnvironment();
     console.log(isDev ? 'Building Mobile APK (Development)...' : 'Building Mobile APK (Production)...');
     
     // Sync capacitor and build APK
