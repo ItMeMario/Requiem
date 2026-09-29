@@ -67,8 +67,8 @@ service cloud.firestore {
     match /campaigns/{campaignId} {
       // Leitura permitida para Mestre ou Jogadores da campanha
       allow read: if isAuthenticated() && (
-        (('ownerId' in resource.data) && resource.data.ownerId == request.auth.uid) || 
-        (('collaborators' in resource.data) && (resource.data.collaborators is list) && (request.auth.uid in resource.data.collaborators))
+        resource.data.ownerId == request.auth.uid || 
+        request.auth.uid in resource.data.collaborators
       );
       
       // Criação permitida para qualquer usuário autenticado
