@@ -1,6 +1,6 @@
 import { IDataService } from '../../shared/dataService';
 import { Campaign, Entry, Character, Location } from '../../shared/types';
-import { auth } from '../utils/auth';
+import { auth, db } from '../utils/auth';
 import { exportToSQLite, importFromSQLite } from '../utils/sqliteParser';
 import { compressBase64Image } from '../utils/imageCompressor';
 import { 
@@ -15,15 +15,18 @@ import {
   where,
   or,
   collectionGroup,
-  onSnapshot
+  onSnapshot,
+  Firestore
 } from 'firebase/firestore';
 
 export class FirebaseDataService implements IDataService {
   private characterCampaignMap = new Map<number, number>();
   private locationCampaignMap = new Map<number, number>();
   private entryCampaignMap = new Map<number, number>();
+  private campaignsCache = new Map<number, Campaign>();
 
-  private get db() {
+  private get db(): Firestore {
+    if (db) return db;
     return getFirestore();
   }
 
@@ -76,10 +79,19 @@ export class FirebaseDataService implements IDataService {
   private async getCampaignForEntity(campaignId?: number, entityMapCampaignId?: number): Promise<Campaign | null> {
     const id = campaignId || entityMapCampaignId;
     if (!id) return null;
+    const numId = Number(id);
+    if (this.campaignsCache.has(numId)) {
+      return this.campaignsCache.get(numId)!;
+    }
     try {
-      const snap = await getDoc(doc(this.db, 'campaigns', id.toString()));
+      const snap = await getDoc(doc(this.db, 'campaigns', numId.toString()));
       if (snap.exists()) {
-        return snap.data() as Campaign;
+        const camp: Campaign = {
+          ...(snap.data() as Campaign),
+          id: numId
+        };
+        this.campaignsCache.set(numId, camp);
+        return camp;
       }
     } catch (e) {
       console.warn('[FirebaseDataService] Failed to get campaign for entity:', e);
@@ -100,22 +112,28 @@ export class FirebaseDataService implements IDataService {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => {
       const data = doc.data() as Campaign;
-      return {
+      const campId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
+      const camp: Campaign = {
         ...data,
-        id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+        id: campId
       };
+      this.campaignsCache.set(campId, camp);
+      return camp;
     });
   }
 
   async getCampaign(id: number): Promise<Campaign> {
-    const docRef = doc(this.db, 'campaigns', id.toString());
+    const numId = Number(id);
+    const docRef = doc(this.db, 'campaigns', numId.toString());
     const snap = await getDoc(docRef);
-    if (!snap.exists()) throw new Error(`Campaign with ID ${id} not found.`);
+    if (!snap.exists()) throw new Error(`Campaign with ID ${numId} not found.`);
     const data = snap.data() as Campaign;
-    return {
+    const camp: Campaign = {
       ...data,
-      id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(snap.id)
+      id: numId
     };
+    this.campaignsCache.set(numId, camp);
+    return camp;
   }
 
   async createCampaign(data: Omit<Campaign, 'id'>): Promise<number> {
@@ -128,20 +146,25 @@ export class FirebaseDataService implements IDataService {
     };
     const docRef = doc(this.db, 'campaigns', id.toString());
     await setDoc(docRef, campaign);
+    this.campaignsCache.set(id, campaign);
     return id;
   }
 
   async updateCampaign(id: number, data: Partial<Campaign>): Promise<boolean> {
-    const docRef = doc(this.db, 'campaigns', id.toString());
+    const numId = Number(id);
+    const docRef = doc(this.db, 'campaigns', numId.toString());
     const snap = await getDoc(docRef);
     if (!snap.exists()) return false;
     const existing = snap.data() as Campaign;
-    await setDoc(docRef, { ...existing, ...data });
+    const updated = { ...existing, ...data, id: numId };
+    await setDoc(docRef, updated);
+    this.campaignsCache.set(numId, updated);
     return true;
   }
 
   async deleteCampaign(id: number): Promise<boolean> {
     const numericId = Number(id);
+    this.campaignsCache.delete(numericId);
 
     // 1. Delete campaign document directly
     const docRef = doc(this.db, 'campaigns', numericId.toString());
@@ -642,39 +665,17 @@ export class FirebaseDataService implements IDataService {
       throw new Error('Você não pode adicionar o próprio mestre como colaborador.');
     }
     
-    // Reset campaign items sharing settings to private if this is the first collaborator
-    if (collaborators.length === 0) {
-      await this.resetCampaignItemsSharing(campaignId);
-    }
-
+    const updatedCollaborators = [...collaborators, targetUserUid];
     await setDoc(campaignRef, {
-      collaborators: [...collaborators, targetUserUid]
+      collaborators: updatedCollaborators
     }, { merge: true });
+
+    if (this.campaignsCache.has(campaignId)) {
+      const cached = this.campaignsCache.get(campaignId)!;
+      this.campaignsCache.set(campaignId, { ...cached, collaborators: updatedCollaborators });
+    }
     
     return true;
-  }
-
-  private async resetCampaignItemsSharing(campaignId: number) {
-    // 1. Entries
-    const entriesRef = collection(this.db, 'campaigns', campaignId.toString(), 'entries');
-    const entriesSnap = await getDocs(entriesRef);
-    await Promise.all(entriesSnap.docs.map(doc => 
-      setDoc(doc.ref, { shared: false }, { merge: true })
-    ));
-    
-    // 2. Characters
-    const charsRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
-    const charsSnap = await getDocs(charsRef);
-    await Promise.all(charsSnap.docs.map(doc => 
-      setDoc(doc.ref, { shared: false }, { merge: true })
-    ));
-    
-    // 3. Locations
-    const locsRef = collection(this.db, 'campaigns', campaignId.toString(), 'locations');
-    const locsSnap = await getDocs(locsRef);
-    await Promise.all(locsSnap.docs.map(doc => 
-      setDoc(doc.ref, { shared: false }, { merge: true })
-    ));
   }
 
   async removeCollaborator(campaignId: number, uid: string): Promise<boolean> {
@@ -685,9 +686,15 @@ export class FirebaseDataService implements IDataService {
     const campaign = campaignSnap.data() as Campaign;
     const collaborators = campaign.collaborators || [];
     
+    const updatedCollaborators = collaborators.filter(id => id !== uid);
     await setDoc(campaignRef, {
-      collaborators: collaborators.filter(id => id !== uid)
+      collaborators: updatedCollaborators
     }, { merge: true });
+
+    if (this.campaignsCache.has(campaignId)) {
+      const cached = this.campaignsCache.get(campaignId)!;
+      this.campaignsCache.set(campaignId, { ...cached, collaborators: updatedCollaborators });
+    }
     
     return true;
   }
@@ -879,10 +886,13 @@ export class FirebaseDataService implements IDataService {
     return onSnapshot(q, (snapshot) => {
       const camps = snapshot.docs.map(doc => {
         const data = doc.data() as Campaign;
-        return {
+        const campId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
+        const camp: Campaign = {
           ...data,
-          id: data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id)
+          id: campId
         };
+        this.campaignsCache.set(campId, camp);
+        return camp;
       });
       callback(camps);
     }, (error) => {
@@ -896,6 +906,7 @@ export class FirebaseDataService implements IDataService {
       return () => {};
     }
 
+    const numCampaignId = Number(campaignId);
     let unsubNotes: (() => void) | null = null;
     let unsubChars: (() => void) | null = null;
     let isCancelled = false;
@@ -904,9 +915,10 @@ export class FirebaseDataService implements IDataService {
     let charsData: any[] = [];
 
     const updateCallback = () => {
+      if (isCancelled) return;
       const mapped = charsData.map(c => {
         const charId = c.id !== undefined && c.id !== null ? Number(c.id) : c.id;
-        this.characterCampaignMap.set(Number(charId), campaignId);
+        this.characterCampaignMap.set(Number(charId), numCampaignId);
         return {
           ...c,
           personal_notes: personalNotes[charId.toString()] || '',
@@ -928,13 +940,9 @@ export class FirebaseDataService implements IDataService {
       console.warn('[FirebaseDataService] Failed to subscribe to personal notes:', err);
     });
 
-    getDoc(doc(this.db, 'campaigns', campaignId.toString())).then((campaignDoc) => {
-      if (isCancelled) return;
-      if (!campaignDoc.exists()) return;
-      const campaign = campaignDoc.data() as Campaign;
-      const isOwner = campaign.ownerId === this.userId;
-      const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'characters');
-      const q = isOwner
+    const colRef = collection(this.db, 'campaigns', numCampaignId.toString(), 'characters');
+    const buildQuery = (isOwner: boolean) => {
+      return isOwner
         ? query(colRef)
         : query(
             colRef,
@@ -944,7 +952,15 @@ export class FirebaseDataService implements IDataService {
               where('assignedTo', 'array-contains', this.userId)
             )
           );
+    };
 
+    const attachListener = (isOwner: boolean) => {
+      if (isCancelled) return;
+      if (unsubChars) {
+        unsubChars();
+        unsubChars = null;
+      }
+      const q = buildQuery(isOwner);
       unsubChars = onSnapshot(q, (snapshot) => {
         charsData = snapshot.docs.map(doc => {
           const data = doc.data() as Character;
@@ -958,10 +974,31 @@ export class FirebaseDataService implements IDataService {
         console.error('[FirebaseDataService] subscribeCharacters error:', error);
         if (onError) onError(error);
       });
-    }).catch((error) => {
-      console.error('[FirebaseDataService] Failed to fetch campaign for characters subscription:', error);
-      if (onError) onError(error);
-    });
+    };
+
+    const cached = this.campaignsCache.get(numCampaignId);
+    if (cached) {
+      attachListener(cached.ownerId === this.userId);
+    } else {
+      // Default to collaborator permissions immediately so onSnapshot attaches on tick 0
+      attachListener(false);
+      getDoc(doc(this.db, 'campaigns', numCampaignId.toString())).then((campaignDoc) => {
+        if (isCancelled) return;
+        if (!campaignDoc.exists()) return;
+        const campaign = campaignDoc.data() as Campaign;
+        const camp: Campaign = {
+          ...campaign,
+          id: campaign.id !== undefined && campaign.id !== null ? Number(campaign.id) : Number(campaignDoc.id)
+        };
+        this.campaignsCache.set(numCampaignId, camp);
+        if (camp.ownerId === this.userId) {
+          attachListener(true);
+        }
+      }).catch((error) => {
+        console.warn('[FirebaseDataService] Failed to fetch campaign for characters subscription:', error);
+        if (onError) onError(error);
+      });
+    }
 
     return () => {
       isCancelled = true;
@@ -974,16 +1011,13 @@ export class FirebaseDataService implements IDataService {
     if (!auth || !auth.currentUser) {
       return () => {};
     }
+    const numCampaignId = Number(campaignId);
     let unsubLocations: (() => void) | null = null;
     let isCancelled = false;
 
-    getDoc(doc(this.db, 'campaigns', campaignId.toString())).then((campaignDoc) => {
-      if (isCancelled) return;
-      if (!campaignDoc.exists()) return;
-      const campaign = campaignDoc.data() as Campaign;
-      const isOwner = campaign.ownerId === this.userId;
-      const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'locations');
-      const q = isOwner 
+    const colRef = collection(this.db, 'campaigns', numCampaignId.toString(), 'locations');
+    const buildQuery = (isOwner: boolean) => {
+      return isOwner 
         ? query(colRef) 
         : query(
             colRef, 
@@ -993,12 +1027,20 @@ export class FirebaseDataService implements IDataService {
               where('assignedTo', 'array-contains', this.userId)
             )
           );
-      
+    };
+
+    const attachListener = (isOwner: boolean) => {
+      if (isCancelled) return;
+      if (unsubLocations) {
+        unsubLocations();
+        unsubLocations = null;
+      }
+      const q = buildQuery(isOwner);
       unsubLocations = onSnapshot(q, (snapshot) => {
         const locs = snapshot.docs.map(doc => {
           const data = doc.data() as Location;
           const locId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
-          this.locationCampaignMap.set(locId, campaignId);
+          this.locationCampaignMap.set(locId, numCampaignId);
           return { ...data, assignedTo: data.assignedTo || [], id: locId };
         });
         callback(locs);
@@ -1006,10 +1048,30 @@ export class FirebaseDataService implements IDataService {
         console.error('[FirebaseDataService] subscribeLocations error:', error);
         if (onError) onError(error);
       });
-    }).catch((error) => {
-      console.error('[FirebaseDataService] Failed to fetch campaign for locations subscription:', error);
-      if (onError) onError(error);
-    });
+    };
+
+    const cached = this.campaignsCache.get(numCampaignId);
+    if (cached) {
+      attachListener(cached.ownerId === this.userId);
+    } else {
+      attachListener(false);
+      getDoc(doc(this.db, 'campaigns', numCampaignId.toString())).then((campaignDoc) => {
+        if (isCancelled) return;
+        if (!campaignDoc.exists()) return;
+        const campaign = campaignDoc.data() as Campaign;
+        const camp: Campaign = {
+          ...campaign,
+          id: campaign.id !== undefined && campaign.id !== null ? Number(campaign.id) : Number(campaignDoc.id)
+        };
+        this.campaignsCache.set(numCampaignId, camp);
+        if (camp.ownerId === this.userId) {
+          attachListener(true);
+        }
+      }).catch((error) => {
+        console.warn('[FirebaseDataService] Failed to fetch campaign for locations subscription:', error);
+        if (onError) onError(error);
+      });
+    }
 
     return () => {
       isCancelled = true;
@@ -1023,16 +1085,13 @@ export class FirebaseDataService implements IDataService {
     if (!auth || !auth.currentUser) {
       return () => {};
     }
+    const numCampaignId = Number(campaignId);
     let unsubEntries: (() => void) | null = null;
     let isCancelled = false;
 
-    getDoc(doc(this.db, 'campaigns', campaignId.toString())).then((campaignDoc) => {
-      if (isCancelled) return;
-      if (!campaignDoc.exists()) return;
-      const campaign = campaignDoc.data() as Campaign;
-      const isOwner = campaign.ownerId === this.userId;
-      const colRef = collection(this.db, 'campaigns', campaignId.toString(), 'entries');
-      const q = isOwner 
+    const colRef = collection(this.db, 'campaigns', numCampaignId.toString(), 'entries');
+    const buildQuery = (isOwner: boolean) => {
+      return isOwner 
         ? query(colRef) 
         : query(
             colRef, 
@@ -1042,12 +1101,20 @@ export class FirebaseDataService implements IDataService {
               where('assignedTo', 'array-contains', this.userId)
             )
           );
-      
+    };
+
+    const attachListener = (isOwner: boolean) => {
+      if (isCancelled) return;
+      if (unsubEntries) {
+        unsubEntries();
+        unsubEntries = null;
+      }
+      const q = buildQuery(isOwner);
       unsubEntries = onSnapshot(q, (snapshot) => {
         const entries = snapshot.docs.map(doc => {
           const data = doc.data() as Entry;
           const entryId = data.id !== undefined && data.id !== null ? Number(data.id) : Number(doc.id);
-          this.entryCampaignMap.set(entryId, campaignId);
+          this.entryCampaignMap.set(entryId, numCampaignId);
           return { ...data, assignedTo: data.assignedTo || [], id: entryId };
         });
         entries.sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
@@ -1056,10 +1123,30 @@ export class FirebaseDataService implements IDataService {
         console.error('[FirebaseDataService] subscribeEntries error:', error);
         if (onError) onError(error);
       });
-    }).catch((error) => {
-      console.error('[FirebaseDataService] Failed to fetch campaign for entries subscription:', error);
-      if (onError) onError(error);
-    });
+    };
+
+    const cached = this.campaignsCache.get(numCampaignId);
+    if (cached) {
+      attachListener(cached.ownerId === this.userId);
+    } else {
+      attachListener(false);
+      getDoc(doc(this.db, 'campaigns', numCampaignId.toString())).then((campaignDoc) => {
+        if (isCancelled) return;
+        if (!campaignDoc.exists()) return;
+        const campaign = campaignDoc.data() as Campaign;
+        const camp: Campaign = {
+          ...campaign,
+          id: campaign.id !== undefined && campaign.id !== null ? Number(campaign.id) : Number(campaignDoc.id)
+        };
+        this.campaignsCache.set(numCampaignId, camp);
+        if (camp.ownerId === this.userId) {
+          attachListener(true);
+        }
+      }).catch((error) => {
+        console.warn('[FirebaseDataService] Failed to fetch campaign for entries subscription:', error);
+        if (onError) onError(error);
+      });
+    }
 
     return () => {
       isCancelled = true;

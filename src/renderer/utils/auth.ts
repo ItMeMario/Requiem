@@ -1,5 +1,6 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut, User } from 'firebase/auth';
+import { initializeFirestore, getFirestore, Firestore } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { GoogleSignIn } from '@capawesome/capacitor-google-sign-in';
 
@@ -27,6 +28,7 @@ export function getFirebaseEnvInfo() {
 
 let app;
 let auth: ReturnType<typeof getAuth> | null = null;
+let db: Firestore | null = null;
 
 if (isFirebaseConfigured) {
   try {
@@ -41,6 +43,13 @@ if (isFirebaseConfigured) {
     );
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
+    try {
+      db = initializeFirestore(app, {
+        experimentalAutoDetectLongPolling: true
+      });
+    } catch {
+      db = getFirestore(app);
+    }
   } catch (error) {
     console.error('[Requiem Auth] Failed to initialize Firebase:', error);
   }
@@ -54,7 +63,7 @@ if (isFirebaseConfigured) {
   );
 }
 
-export { auth };
+export { auth, db };
 
 let isGoogleSignInInitialized = false;
 

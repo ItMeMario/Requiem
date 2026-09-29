@@ -15,30 +15,52 @@ export const useEntities = (campaignId: number | null) => {
       return;
     }
 
+    const handleSyncError = (type: string, error: Error) => {
+      console.error(`[Requiem Sync] Error in ${type} real-time subscription:`, error);
+    };
+
     // Subscribe to Characters
     const unsubChars = service.subscribeCharacters
-      ? service.subscribeCharacters(campaignId, setCharacters)
+      ? service.subscribeCharacters(
+          campaignId, 
+          setCharacters, 
+          (err) => handleSyncError('Characters', err)
+        )
       : (() => {
           let active = true;
-          service.getCharacters(campaignId).then(data => { if (active) setCharacters(data); });
+          service.getCharacters(campaignId)
+            .then(data => { if (active) setCharacters(data); })
+            .catch(err => handleSyncError('Characters fallback', err));
           return () => { active = false; };
         })();
 
     // Subscribe to Locations
     const unsubLocs = service.subscribeLocations
-      ? service.subscribeLocations(campaignId, setLocations)
+      ? service.subscribeLocations(
+          campaignId, 
+          setLocations, 
+          (err) => handleSyncError('Locations', err)
+        )
       : (() => {
           let active = true;
-          service.getLocations(campaignId).then(data => { if (active) setLocations(data); });
+          service.getLocations(campaignId)
+            .then(data => { if (active) setLocations(data); })
+            .catch(err => handleSyncError('Locations fallback', err));
           return () => { active = false; };
         })();
 
     // Subscribe to Entries
     const unsubEntries = service.subscribeEntries
-      ? service.subscribeEntries(campaignId, setEntries)
+      ? service.subscribeEntries(
+          campaignId, 
+          setEntries, 
+          (err) => handleSyncError('Entries', err)
+        )
       : (() => {
           let active = true;
-          service.getEntries(campaignId).then(data => { if (active) setEntries(data); });
+          service.getEntries(campaignId)
+            .then(data => { if (active) setEntries(data); })
+            .catch(err => handleSyncError('Entries fallback', err));
           return () => { active = false; };
         })();
 
@@ -50,8 +72,19 @@ export const useEntities = (campaignId: number | null) => {
   }, [campaignId]);
 
   const loadEntities = useCallback(async (id: number) => {
-    // Sincronização em tempo real cuida disso de forma declarativa.
-  }, []);
+    try {
+      const [fetchedChars, fetchedLocs, fetchedEntries] = await Promise.all([
+        service.getCharacters(id),
+        service.getLocations(id),
+        service.getEntries(id)
+      ]);
+      setCharacters(fetchedChars);
+      setLocations(fetchedLocs);
+      setEntries(fetchedEntries);
+    } catch (err) {
+      console.warn('[Requiem Sync] Error during active loadEntities fetch:', err);
+    }
+  }, [service]);
 
   // CRUD Character
   const addCharacter = (char: any) => {
