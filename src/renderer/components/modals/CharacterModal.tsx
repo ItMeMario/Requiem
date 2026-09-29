@@ -138,7 +138,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                       shared: assigned.length > 0 ? true : newChar.shared
                     });
                   }}
-                  disabled={!canEditCore}
+                  disabled={!isOwner}
                 />
               </div>
             )}

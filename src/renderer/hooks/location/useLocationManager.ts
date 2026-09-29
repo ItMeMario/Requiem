@@ -52,7 +52,11 @@ export function useLocationManager({
     try {
       const data = { ...newLoc, campaign_id: selectedCampaign.id };
       if (editingLocId !== null) {
-        await getDataService().updateLocation(editingLocId, data);
+        const success = await getDataService().updateLocation(editingLocId, data);
+        if (!success) {
+          alert('Não foi possível salvar as alterações no local. Verifique suas permissões de edição.');
+          return;
+        }
         crud.editLocation(editingLocId, data);
       } else {
         const id = await getDataService().createLocation(data);
@@ -61,8 +65,9 @@ export function useLocationManager({
       handleCloseLocModal();
       setEditingLocId(null);
       setNewLoc(initLocState);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving location:', error);
+      alert(`Erro ao salvar local: ${error?.message || 'Falha de comunicação ou permissão negada.'}`);
     }
   };
 

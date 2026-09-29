@@ -240,8 +240,8 @@ export class FirebaseDataService implements IDataService {
     return results.sort((a, b) => new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime());
   }
 
-  async getEntry(id: number): Promise<Entry> {
-    const ref = await this.getEntryDocRef(id);
+  async getEntry(id: number, campaignId?: number): Promise<Entry> {
+    const ref = await this.getEntryDocRef(id, campaignId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error(`Entry with ID ${id} not found.`);
     const data = snap.data() as Entry;
@@ -288,8 +288,14 @@ export class FirebaseDataService implements IDataService {
 
     const updateData = { ...data };
     if (!isOwner) {
-      updateData.assignedTo = existing.assignedTo || [];
+      if (existing.assignedTo !== undefined) {
+        updateData.assignedTo = existing.assignedTo;
+      } else {
+        delete updateData.assignedTo;
+      }
+      updateData.authorId = existing.authorId;
     }
+    updateData.id = existing.id;
 
     await setDoc(ref, { ...existing, ...updateData });
     return true;
@@ -362,8 +368,8 @@ export class FirebaseDataService implements IDataService {
     });
   }
 
-  async getCharacter(id: number): Promise<Character> {
-    const ref = await this.getCharacterDocRef(id);
+  async getCharacter(id: number, campaignId?: number): Promise<Character> {
+    const ref = await this.getCharacterDocRef(id, campaignId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error(`Character with ID ${id} not found.`);
     const data = snap.data() as Character;
@@ -450,36 +456,30 @@ export class FirebaseDataService implements IDataService {
 
     // Check if the user is the author, owner, or assigned player before saving main character doc
     const campaignId = ref.parent?.parent?.id ? Number(ref.parent.parent.id) : (data.campaign_id || this.characterCampaignMap.get(id));
-    let canUpdateMainDoc = true;
-    let isOwner = false;
-    if (campaignId) {
-      try {
-        const campaignDoc = await getDoc(doc(this.db, 'campaigns', campaignId.toString()));
-        if (campaignDoc.exists()) {
-          const campaign = campaignDoc.data() as Campaign;
-          isOwner = campaign.ownerId === this.userId;
-          const isAuthor = existing.authorId === this.userId;
-          const isAssigned = (existing.assignedTo || []).includes(this.userId);
-          if (!isOwner && !isAuthor && !isAssigned) {
-            canUpdateMainDoc = false;
-          }
-        }
-      } catch (err) {
-        console.warn('[FirebaseDataService] Failed to verify character write permissions:', err);
-      }
+    const campaign = await this.getCampaignForEntity(campaignId);
+    const isOwner = campaign ? campaign.ownerId === this.userId : false;
+    const isAuthor = existing.authorId === this.userId;
+    const isAssigned = (existing.assignedTo || []).includes(this.userId);
+
+    if (!isOwner && !isAuthor && !isAssigned) {
+      console.warn('[FirebaseDataService] Cannot update character: user is neither owner, author, nor assigned.');
+      return false;
     }
 
-    if (canUpdateMainDoc) {
-      if (!isOwner) {
-        charData.assignedTo = existing.assignedTo || [];
+    if (!isOwner) {
+      if (existing.assignedTo !== undefined) {
+        charData.assignedTo = existing.assignedTo;
+      } else {
+        delete charData.assignedTo;
       }
-      // Remove personal_notes from the existing doc if it is stored there
-      const existingClean = { ...existing };
-      delete existingClean.personal_notes;
-      await setDoc(ref, { ...existingClean, ...charData });
-    } else {
-      console.log('[FirebaseDataService] Skipping main character update (insufficient permissions), only saved personal notes.');
+      charData.authorId = existing.authorId;
     }
+    charData.id = existing.id;
+
+    // Remove personal_notes from the existing doc if it is stored there
+    const existingClean = { ...existing };
+    delete existingClean.personal_notes;
+    await setDoc(ref, { ...existingClean, ...charData });
 
     return true;
   }
@@ -548,8 +548,8 @@ export class FirebaseDataService implements IDataService {
     });
   }
 
-  async getLocation(id: number): Promise<Location> {
-    const ref = await this.getLocationDocRef(id);
+  async getLocation(id: number, campaignId?: number): Promise<Location> {
+    const ref = await this.getLocationDocRef(id, campaignId);
     const snap = await getDoc(ref);
     if (!snap.exists()) throw new Error(`Location with ID ${id} not found.`);
     const data = snap.data() as Location;
@@ -596,8 +596,14 @@ export class FirebaseDataService implements IDataService {
 
     const updateData = { ...data };
     if (!isOwner) {
-      updateData.assignedTo = existing.assignedTo || [];
+      if (existing.assignedTo !== undefined) {
+        updateData.assignedTo = existing.assignedTo;
+      } else {
+        delete updateData.assignedTo;
+      }
+      updateData.authorId = existing.authorId;
     }
+    updateData.id = existing.id;
 
     await setDoc(ref, { ...existing, ...updateData });
     return true;

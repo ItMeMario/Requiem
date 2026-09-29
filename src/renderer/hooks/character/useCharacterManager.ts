@@ -53,7 +53,7 @@ export function useCharacterManager({
       let data = { ...newChar, campaign_id: selectedCampaign.id };
       if (editingCharId !== null) {
         try {
-          const originalChar = await getDataService().getCharacter(editingCharId);
+          const originalChar = await getDataService().getCharacter(editingCharId, selectedCampaign.id);
           if (originalChar && originalChar.image_url && originalChar.image_url !== newChar.image_url) {
             const dateStr = new Date().toLocaleString('pt-BR').replace(/[\/\:]/g, '-');
             const oldAttachment = {
@@ -68,7 +68,11 @@ export function useCharacterManager({
         } catch (err) {
           console.error('Error archiving previous character portrait:', err);
         }
-        await getDataService().updateCharacter(editingCharId, data);
+        const success = await getDataService().updateCharacter(editingCharId, data);
+        if (!success) {
+          alert('Não foi possível salvar as alterações no personagem. Verifique suas permissões de edição.');
+          return;
+        }
         crud.editCharacter(editingCharId, data);
       } else {
         const id = await getDataService().createCharacter(data);
@@ -77,8 +81,9 @@ export function useCharacterManager({
       handleCloseCharModal();
       setEditingCharId(null);
       setNewChar(initCharState);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving character:', error);
+      alert(`Erro ao salvar personagem: ${error?.message || 'Falha de comunicação ou permissão negada.'}`);
     }
   };
 

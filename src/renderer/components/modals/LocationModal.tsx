@@ -102,7 +102,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                       shared: assigned.length > 0 ? true : newLoc.shared
                     });
                   }}
-                  disabled={!canEditCore}
+                  disabled={!isOwner}
                 />
               </div>
             )}

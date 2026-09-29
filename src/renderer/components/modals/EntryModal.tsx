@@ -226,6 +226,7 @@ export const EntryModal: React.FC<EntryModalProps> = ({
                           shared: assigned.length > 0 ? true : newEntry.shared
                         });
                       }}
+                      disabled={!isOwner}
                     />
                   </div>
                 )}

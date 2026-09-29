@@ -9,7 +9,7 @@ Este documento reúne os bugs identificados na versão atual do Requiem para tri
 | ID | Título | Ambiente | Severidade | Status |
 |---|---|---|---|---|
 | **BUG-01** | Sincronização de dados em campanhas compartilhadas | Mobile | Alta | ✅ Corrigido (Etapas 1 a 4 Concluídas) |
-| **BUG-02** | Jogador atribuído não consegue editar/salvar entidades | Mobile e Desktop | Alta | 🔍 Identificado / Em análise |
+| **BUG-02** | Jogador atribuído não consegue editar/salvar entidades | Mobile e Desktop | Alta | ✅ Corrigido (Etapas 1 a 4 Concluídas) |
 
 ---
 
@@ -81,13 +81,12 @@ Quando o Mestre atribui uma entidade (NPC ou Lugar) a um jogador específico par
 
 ---
 
-## 🎯 Próximos Passos Sugeridos
-
-1. **Atacar o BUG-01 (Sincronização Mobile):**
-   - Revisar o comportamento de `resetCampaignItemsSharing` ao adicionar colaboradores.
-   - Garantir que o `auth.currentUser` esteja pronto antes de instanciar o serviço de dados no Mobile.
-   - Adicionar tratamento de erro e logs visíveis no hook `useEntities`.
-2. **Atacar o BUG-02 (Permissão de Edição para Jogador Atribuído):**
-   - Ajustar `firestore.rules` usando `diff().affectedKeys()` para garantir que jogadores atribuídos possam salvar alterações de conteúdo sem falsos bloqueios.
-   - Bloquear a edição de `assignedTo` na UI para não-mestres (`disabled={!isOwner}`).
-   - Garantir que `campaign_id` seja sempre passado em `updateCharacter` e `updateLocation` para evitar chamadas a `collectionGroup`.
+## 🎯 Status e Próximos Passos
+- **BUG-01:** ✅ **Concluído e Validado.**
+- **BUG-02:** ✅ **Concluído e Validado.**
+  - Consulte o plano de ação detalhado em: [plano_acao_bug02.md](file:///C:/Users/nigtm/.gemini/antigravity-ide/brain/f1108afc-aac0-42d2-af85-afbb6a8c22de/plano_acao_bug02.md)
+  - Etapas:
+    1. Correção e Blindagem das Regras do Firestore (`firestore.rules`) ✅
+    2. Normalização do Payload de Update no Serviço de Dados (`firebaseDataService.ts`) ✅
+    3. Tratamento de Retorno e Feedback na Camada de UI (`useCharacterManager`, `useLocationManager`, `useEntryManager`, modais) ✅
+    4. Validação, Testes e Guia de Deploy das Regras ✅

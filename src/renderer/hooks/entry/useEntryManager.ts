@@ -55,7 +55,11 @@ export function useEntryManager({
       };
 
       if (isEditing) {
-        await getDataService().updateEntry(editingEntryId, data);
+        const success = await getDataService().updateEntry(editingEntryId, data);
+        if (!success) {
+          alert('Não foi possível salvar as alterações na anotação. Verifique suas permissões de edição.');
+          return;
+        }
         crud.editEntry(editingEntryId, data);
       } else {
         const id = await getDataService().createEntry(data);
@@ -64,8 +68,9 @@ export function useEntryManager({
       setShowEntryModal(false);
       setEditingEntryId(null);
       setNewEntry(initEntryState);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving entry:', error);
+      alert(`Erro ao salvar anotação: ${error?.message || 'Falha de comunicação ou permissão negada.'}`);
     }
   };
 

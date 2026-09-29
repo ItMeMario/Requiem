@@ -14,14 +14,16 @@ service cloud.firestore {
     
     // Helper: Verifica se o usuário é o dono da campanha (Mestre)
     function isCampaignOwner(campaignId) {
-      return isAuthenticated() && getCampaignData(campaignId).ownerId == request.auth.uid;
+      let camp = getCampaignData(campaignId);
+      return isAuthenticated() && ('ownerId' in camp) && camp.ownerId == request.auth.uid;
     }
     
     // Helper: Verifica se o usuário é membro da campanha (Mestre ou Colaborador)
     function isCampaignMember(campaignId) {
+      let camp = getCampaignData(campaignId);
       return isAuthenticated() && (
-        getCampaignData(campaignId).ownerId == request.auth.uid || 
-        request.auth.uid in getCampaignData(campaignId).collaborators
+        (('ownerId' in camp) && camp.ownerId == request.auth.uid) || 
+        (('collaborators' in camp) && (camp.collaborators is list) && (request.auth.uid in camp.collaborators))
       );
     }
 
@@ -35,11 +37,7 @@ service cloud.firestore {
 
     // Helper: Verifica se o campo assignedTo não foi modificado
     function assignedToNotModified() {
-      return (
-        (!('assignedTo' in request.resource.data) && !('assignedTo' in resource.data)) ||
-        (('assignedTo' in request.resource.data) && ('assignedTo' in resource.data) && request.resource.data.assignedTo == resource.data.assignedTo) ||
-        (!('assignedTo' in resource.data) && ('assignedTo' in request.resource.data) && request.resource.data.assignedTo == [])
-      );
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['assignedTo']);
     }
 
     // Helper: Valida criação de entidade (apenas o Mestre pode pré-atribuir jogadores)
@@ -69,8 +67,8 @@ service cloud.firestore {
     match /campaigns/{campaignId} {
       // Leitura permitida para Mestre ou Jogadores da campanha
       allow read: if isAuthenticated() && (
-        resource.data.ownerId == request.auth.uid || 
-        request.auth.uid in resource.data.collaborators
+        (('ownerId' in resource.data) && resource.data.ownerId == request.auth.uid) || 
+        (('collaborators' in resource.data) && (resource.data.collaborators is list) && (request.auth.uid in resource.data.collaborators))
       );
       
       // Criação permitida para qualquer usuário autenticado
