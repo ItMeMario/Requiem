@@ -166,11 +166,9 @@ export class FirebaseDataService implements IDataService {
     const numericId = Number(id);
     this.campaignsCache.delete(numericId);
 
-    // 1. Delete campaign document directly
-    const docRef = doc(this.db, 'campaigns', numericId.toString());
-    await deleteDoc(docRef);
-
-    // 2. Clean up related subcollection documents (entries, characters, locations)
+    // 1. Clean up related subcollection documents (entries, characters, locations)
+    // MUST be done BEFORE deleting the parent campaign document, because security rules
+    // (isCampaignMember, isCampaignOwner) require the parent campaign document to exist to authorize reads & deletes.
     const cleanup = async (subcol: string) => {
       try {
         const colRef = collection(this.db, 'campaigns', numericId.toString(), subcol);
@@ -187,6 +185,10 @@ export class FirebaseDataService implements IDataService {
       cleanup('characters'),
       cleanup('locations')
     ]);
+
+    // 2. Delete campaign document directly
+    const docRef = doc(this.db, 'campaigns', numericId.toString());
+    await deleteDoc(docRef);
 
     // 3. Delete from the local database
     try {
@@ -913,16 +915,6 @@ export class FirebaseDataService implements IDataService {
     }
 
     const numCampaignId = Number(campaignId);
-    // [DEBUG] Diagnostic logging for permissions investigation
-    console.log(`[DEBUG subscribeCharacters] campaignId=${campaignId}, numCampaignId=${numCampaignId}, path=campaigns/${numCampaignId.toString()}/characters, userId=${this.userId}, cached=${this.campaignsCache.has(numCampaignId)}`);
-    getDoc(doc(this.db, 'campaigns', numCampaignId.toString())).then(snap => {
-      if (snap.exists()) {
-        const d = snap.data();
-        console.log(`[DEBUG subscribeCharacters] Campaign doc EXISTS. ownerId=${d.ownerId}, collaborators=${JSON.stringify(d.collaborators)}, isOwner=${d.ownerId === this.userId}, isCollaborator=${(d.collaborators || []).includes(this.userId)}`);
-      } else {
-        console.error(`[DEBUG subscribeCharacters] Campaign doc DOES NOT EXIST at campaigns/${numCampaignId.toString()}!`);
-      }
-    }).catch(e => console.error('[DEBUG subscribeCharacters] Failed to read campaign:', e));
 
     let unsubNotes: (() => void) | null = null;
     let unsubChars: (() => void) | null = null;
@@ -1029,8 +1021,6 @@ export class FirebaseDataService implements IDataService {
       return () => {};
     }
     const numCampaignId = Number(campaignId);
-    // [DEBUG] Diagnostic logging for permissions investigation
-    console.log(`[DEBUG subscribeLocations] campaignId=${campaignId}, numCampaignId=${numCampaignId}, path=campaigns/${numCampaignId.toString()}/locations, userId=${this.userId}, cached=${this.campaignsCache.has(numCampaignId)}`);
     let unsubLocations: (() => void) | null = null;
     let isCancelled = false;
 
@@ -1105,8 +1095,6 @@ export class FirebaseDataService implements IDataService {
       return () => {};
     }
     const numCampaignId = Number(campaignId);
-    // [DEBUG] Diagnostic logging for permissions investigation
-    console.log(`[DEBUG subscribeEntries] campaignId=${campaignId}, numCampaignId=${numCampaignId}, path=campaigns/${numCampaignId.toString()}/entries, userId=${this.userId}, cached=${this.campaignsCache.has(numCampaignId)}`);
     let unsubEntries: (() => void) | null = null;
     let isCancelled = false;
 
