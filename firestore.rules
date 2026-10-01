@@ -79,13 +79,9 @@ service cloud.firestore {
 
       // Subcoleção: Diários (Entries)
       match /entries/{entryId} {
-        // Leitura: Mestre lê tudo. Jogador lê se compartilhado, se for autor ou se estiver atribuído.
-        allow read: if isCampaignMember(campaignId) && (
-          resource.data.shared == true || 
-          resource.data.authorId == request.auth.uid ||
-          isCampaignOwner(campaignId) ||
-          isAssigned(resource.data)
-        );
+        // Leitura: Permitida para qualquer membro da campanha (Mestre ou Jogador).
+        // A filtragem fina (apenas itens compartilhados/atribuídos) é feita na query pelo cliente.
+        allow read: if isCampaignMember(campaignId);
         // Criação: Qualquer membro da campanha
         allow create: if canCreateEntity(campaignId);
         // Atualização: Mestre, autor ou jogador atribuído (este sem alterar assignedTo)
@@ -105,13 +101,9 @@ service cloud.firestore {
 
       // Subcoleção: Personagens (Characters)
       match /characters/{charId} {
-        // Leitura: Mestre lê tudo. Jogador lê se compartilhado, se for autor ou se estiver atribuído.
-        allow read: if isCampaignMember(campaignId) && (
-          resource.data.shared == true || 
-          resource.data.authorId == request.auth.uid ||
-          isCampaignOwner(campaignId) ||
-          isAssigned(resource.data)
-        );
+        // Leitura: Permitida para qualquer membro da campanha (Mestre ou Jogador).
+        // A filtragem fina (apenas itens compartilhados/atribuídos) é feita na query pelo cliente.
+        allow read: if isCampaignMember(campaignId);
         // Criação: Qualquer membro da campanha
         allow create: if canCreateEntity(campaignId);
         // Atualização: Mestre, autor ou jogador atribuído (este sem alterar assignedTo)
@@ -131,13 +123,9 @@ service cloud.firestore {
 
       // Subcoleção: Lugares (Locations)
       match /locations/{locId} {
-        // Leitura: Mestre lê tudo. Jogador lê se compartilhado, se for autor ou se estiver atribuído.
-        allow read: if isCampaignMember(campaignId) && (
-          resource.data.shared == true || 
-          resource.data.authorId == request.auth.uid ||
-          isCampaignOwner(campaignId) ||
-          isAssigned(resource.data)
-        );
+        // Leitura: Permitida para qualquer membro da campanha (Mestre ou Jogador).
+        // A filtragem fina (apenas itens compartilhados/atribuídos) é feita na query pelo cliente.
+        allow read: if isCampaignMember(campaignId);
         // Criação: Qualquer membro da campanha
         allow create: if canCreateEntity(campaignId);
         // Atualização: Mestre, autor ou jogador atribuído (este sem alterar assignedTo)

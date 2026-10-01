@@ -913,6 +913,17 @@ export class FirebaseDataService implements IDataService {
     }
 
     const numCampaignId = Number(campaignId);
+    // [DEBUG] Diagnostic logging for permissions investigation
+    console.log(`[DEBUG subscribeCharacters] campaignId=${campaignId}, numCampaignId=${numCampaignId}, path=campaigns/${numCampaignId.toString()}/characters, userId=${this.userId}, cached=${this.campaignsCache.has(numCampaignId)}`);
+    getDoc(doc(this.db, 'campaigns', numCampaignId.toString())).then(snap => {
+      if (snap.exists()) {
+        const d = snap.data();
+        console.log(`[DEBUG subscribeCharacters] Campaign doc EXISTS. ownerId=${d.ownerId}, collaborators=${JSON.stringify(d.collaborators)}, isOwner=${d.ownerId === this.userId}, isCollaborator=${(d.collaborators || []).includes(this.userId)}`);
+      } else {
+        console.error(`[DEBUG subscribeCharacters] Campaign doc DOES NOT EXIST at campaigns/${numCampaignId.toString()}!`);
+      }
+    }).catch(e => console.error('[DEBUG subscribeCharacters] Failed to read campaign:', e));
+
     let unsubNotes: (() => void) | null = null;
     let unsubChars: (() => void) | null = null;
     let isCancelled = false;
@@ -1018,6 +1029,8 @@ export class FirebaseDataService implements IDataService {
       return () => {};
     }
     const numCampaignId = Number(campaignId);
+    // [DEBUG] Diagnostic logging for permissions investigation
+    console.log(`[DEBUG subscribeLocations] campaignId=${campaignId}, numCampaignId=${numCampaignId}, path=campaigns/${numCampaignId.toString()}/locations, userId=${this.userId}, cached=${this.campaignsCache.has(numCampaignId)}`);
     let unsubLocations: (() => void) | null = null;
     let isCancelled = false;
 
@@ -1092,6 +1105,8 @@ export class FirebaseDataService implements IDataService {
       return () => {};
     }
     const numCampaignId = Number(campaignId);
+    // [DEBUG] Diagnostic logging for permissions investigation
+    console.log(`[DEBUG subscribeEntries] campaignId=${campaignId}, numCampaignId=${numCampaignId}, path=campaigns/${numCampaignId.toString()}/entries, userId=${this.userId}, cached=${this.campaignsCache.has(numCampaignId)}`);
     let unsubEntries: (() => void) | null = null;
     let isCancelled = false;
 
