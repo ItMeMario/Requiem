@@ -124,8 +124,15 @@ export const EntryModal: React.FC<EntryModalProps> = ({
   return createPortal(
     <div className="fixed inset-0 bg-surface-overlay backdrop-blur-sm flex items-center justify-center z-[9999] p-0 sm:p-4">
       <div className="bg-surface-card border-y sm:border border-border-default sm:rounded-xl w-full max-w-full lg:max-w-6xl shadow-2xl relative h-full sm:h-[90vh] flex flex-col overflow-hidden">
-        <button onClick={() => setShowEntryModal(false)} className="absolute top-4 right-4 text-muted hover:text-heading z-20"><X size={20} /></button>
-        <div className="p-4 sm:p-6 border-b border-border-default flex-shrink-0 flex items-center justify-between pr-12">
+        <button 
+          onClick={() => setShowEntryModal(false)} 
+          className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 p-1.5 text-muted hover:text-heading hover:bg-surface-hover rounded-lg transition-colors z-20"
+          title="Close"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+        <div className="p-4 pr-16 sm:py-5 sm:pl-6 sm:pr-24 border-b border-border-default flex-shrink-0 flex items-center justify-between">
           <h3 className="text-lg sm:text-xl font-bold text-heading flex items-center gap-2 truncate">
             <Book className="text-accent-text hidden sm:block"/> 
             {isViewingEntry ? 'View Journal Entry' : (editingEntryId ? 'Edit Journal Entry' : 'New Journal Entry')}
