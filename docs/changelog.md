@@ -1,3 +1,35 @@
+📌 Patch Notes - Version 1.1.1
+
+🛠️ Improvements
+
+- **Firestore Subcollection Security Rules & Query Simplification**:
+  - Simplified subcollection read rules on `entries`, `characters`, and `locations` to verify campaign membership (`isCampaignMember(campaignId)`), resolving Firestore query evaluation rejections caused by complex rule-level expressions.
+  - Hardened campaign security rules with existence and type validations for the `collaborators` list.
+
+🐛 Bug Fixes
+
+- **Shared Campaign Real-Time Synchronization on Mobile**:
+  - Resolved an issue on mobile (Android/Capacitor WebView) where collaborators could not view existing campaign content upon joining.
+  - Enabled Firestore auto-detect long polling during auth initialization for stable WebView connectivity.
+  - Introduced an in-memory `campaignsCache` in `FirebaseDataService` to resolve campaign ownership synchronously, eliminating race conditions.
+  - Attached `onSnapshot` listeners immediately and implemented active entity preloading in `loadEntities`.
+  - Removed `resetCampaignItemsSharing` to ensure items marked as shared remain visible to new collaborators.
+- **Player Assignment Update Authorization & Payload Normalization**:
+  - Refactored `assignedToNotModified` in `firestore.rules` using `diff().affectedKeys()` to prevent false rejections from strict array comparisons when assigned players edit entities.
+  - Normalized client update payloads in `FirebaseDataService` for characters, locations, and entries to preserve `assignedTo` and `authorId` without triggering modified-field detections.
+  - Added direct document reference resolution via `campaignId` across `getCharacter`, `getLocation`, and `getEntry` to bypass unauthorized collection group fallback queries.
+  - Added UI save failure validation and informative alerts in `useCharacterManager`, `useLocationManager`, and `useEntryManager` to keep modals open if a save operation fails.
+  - Explicitly disabled `AssignPlayersSelect` for non-owners in entity modals.
+- **Campaign Deletion Subcollection Cascade Cleanup**:
+  - Reordered operations in `deleteCampaign` so subcollections (`entries`, `characters`, `locations`) are batch-fetched and deleted prior to deleting the parent campaign document.
+  - Resolved Firestore `Missing or insufficient permissions` error during campaign cleanup caused by rules requiring parent campaign existence, preventing orphaned subcollection documents.
+- **Journal Entry Modal Close Button Layout**:
+  - Repositioned the modal close button in `EntryModal` and adjusted header padding (`pr-16 sm:pr-24`) to eliminate visual overlap and crowding with the Delete action button.
+
+📅 Release Date: 10/28/2026
+
+---
+
 📌 Patch Notes - Version 1.1.0
 
 ✨ New Features
@@ -24,38 +56,18 @@
 - **Database Schema & Backup Routines**:
   - Added automated SQLite migrations in `database.ts` and `webDataService.ts` for the `assignedTo` and `bestiarySource` columns.
   - Updated cloud and local backup export/import routines in `backupHandlersIpc.ts` to preserve player assignment metadata across backups.
-- **Firestore Subcollection Security Rules & Query Simplification**:
-  - Simplified subcollection read rules on `entries`, `characters`, and `locations` to verify campaign membership (`isCampaignMember(campaignId)`), resolving Firestore query evaluation rejections caused by complex rule-level expressions.
-  - Hardened campaign security rules with existence and type validations for the `collaborators` list.
 
 🐛 Bug Fixes
 
-- **Shared Campaign Real-Time Synchronization on Mobile**:
-  - Resolved an issue on mobile (Android/Capacitor WebView) where collaborators could not view existing campaign content upon joining.
-  - Enabled Firestore auto-detect long polling during auth initialization for stable WebView connectivity.
-  - Introduced an in-memory `campaignsCache` in `FirebaseDataService` to resolve campaign ownership synchronously, eliminating race conditions.
-  - Attached `onSnapshot` listeners immediately and implemented active entity preloading in `loadEntities`.
-  - Removed `resetCampaignItemsSharing` to ensure items marked as shared remain visible to new collaborators.
-- **Player Assignment Update Authorization & Payload Normalization**:
-  - Refactored `assignedToNotModified` in `firestore.rules` using `diff().affectedKeys()` to prevent false rejections from strict array comparisons when assigned players edit entities.
-  - Normalized client update payloads in `FirebaseDataService` for characters, locations, and entries to preserve `assignedTo` and `authorId` without triggering modified-field detections.
-  - Added direct document reference resolution via `campaignId` across `getCharacter`, `getLocation`, and `getEntry` to bypass unauthorized collection group fallback queries.
-  - Added UI save failure validation and informative alerts in `useCharacterManager`, `useLocationManager`, and `useEntryManager` to keep modals open if a save operation fails.
-  - Explicitly disabled `AssignPlayersSelect` for non-owners in entity modals.
 - **Entity Modification & Deletion Segregation**:
   - Separated edit and delete actions on list cards so assigned non-authors can edit assigned entities without exposing destructive deletion options.
   - Enforced delete protection in Firestore rules and frontend handlers, preventing non-author collaborators from deleting shared campaign items.
-- **Campaign Deletion Subcollection Cascade Cleanup**:
-  - Reordered operations in `deleteCampaign` so subcollections (`entries`, `characters`, `locations`) are batch-fetched and deleted prior to deleting the parent campaign document.
-  - Resolved Firestore `Missing or insufficient permissions` error during campaign cleanup caused by rules requiring parent campaign existence, preventing orphaned subcollection documents.
 - **Personal Notes Privacy for Assigned Entities**:
   - Ensured that assigning entities to players preserves strict personal notes isolation in private subcollections, preventing notes from being shared or overwritten.
-- **Journal Entry Modal Close Button Layout**:
-  - Repositioned the modal close button in `EntryModal` and adjusted header padding (`pr-16 sm:pr-24`) to eliminate visual overlap and crowding with the Delete action button.
 - **Content Security Policy for External Images**:
   - Updated Content Security Policy (CSP) in `index.html` to allow loading official SW5e illustration assets from remote domains.
 
-📅 Release Date: 10/27/2026
+📅 Release Date: 09/28/2026
 
 ---
 
